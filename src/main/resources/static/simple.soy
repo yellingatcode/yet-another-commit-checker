@@ -1,0 +1,64 @@
+{namespace com.atlassian.stash.repository.hook.ref}
+/**
+ * @param config
+ * @param errors
+ */
+{template .formContents}
+	{call aui.form.checkboxField}
+		{param legendContent: 'Require Matching Author Email' /}
+		{param fields: [[
+			'id' : 'requireMatchingAuthorEmail',
+			'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
+			'isChecked' : $config['requireMatchingAuthorEmail']
+		]] /}
+		{param descriptionText: 'Require that the commit author\'s email matches the Stash user\'s email.' /}
+	{/call}
+
+	{call aui.form.checkboxField}
+		{param legendContent: 'Require Matching Author Name' /}
+		{param fields: [[
+			'id' : 'requireMatchingAuthorName',
+			'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
+			'isChecked' : $config['requireMatchingAuthorName']
+		]] /}
+		{param descriptionText: 'Require that the commit author\'s name matches the Stash user\'s name.' /}
+	{/call}
+
+	{call aui.form.textField}
+		{param id: 'commitMessageRegex' /}
+		{param labelContent: 'Commit Message Regex' /}
+		{param value: $config['commitMessageRegex'] /}
+		{param descriptionText: 'Require that commit messages match this regular expression.' /}
+		{param errorTexts: $errors ? $errors['commitMessageRegex'] : null /}
+	{/call}
+
+
+	{call aui.form.checkboxField}
+		{param legendContent: 'Require Valid JIRA Issue(s)' /}
+		{param fields: [[
+			'id' : 'requireJiraIssue',
+			'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
+			'isChecked' : $config['requireJiraIssue']
+		]] /}
+		{param descriptionText: 'Require that the commit message contains valid JIRA issue(s). Note, by default, all items that match [a-zA-Z0-9-]+-[0-9]+ will be treated as JIRA issues. If a commit message regex is configured and a regex group exists, then only this group will be checked for JIRA issues.' /}
+        {param errorTexts: $errors ? $errors['requireJiraIssue'] : null /}
+	{/call}
+
+    {call aui.form.checkboxField}
+		{param legendContent: 'Exclude Merge Commits' /}
+		{param fields: [[
+			'id' : 'excludeMergeCommits',
+			'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
+			'isChecked' : $config['excludeMergeCommits']
+		]] /}
+		{param descriptionText: 'If require valid JIRA issues(s) is enabled, this will exclude merge commits when checking for JIRA issues.' /}
+	{/call}
+
+	{call aui.form.textField}
+		{param id: 'issueJqlMatcher' /}
+		{param labelContent: 'Issue Jql Matcher' /}
+		{param value: $config['issueJqlMatcher'] /}
+		{param descriptionText: 'Issue Jql Matcher Description' /}
+	{/call}
+
+{/template}
