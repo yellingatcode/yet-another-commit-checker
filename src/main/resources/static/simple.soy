@@ -58,7 +58,8 @@
 		{param id: 'issueJqlMatcher' /}
 		{param labelContent: 'Issue Jql Matcher' /}
 		{param value: $config['issueJqlMatcher'] /}
-		{param descriptionText: 'Issue Jql Matcher Description' /}
+		{param descriptionText: 'If present, JIRA issues must match this JQL query.' /}
+		{param errorTexts: $errors ? $errors['issueJqlMatcher'] : null /}
 	{/call}
 
 {/template}

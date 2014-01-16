@@ -1,5 +1,18 @@
 # Yet Another Commit Checker
 
+- [About](#about)
+- [Quick Start](#quickstart)
+    - [Configuration Settings](#configurationsettings)
+- [Troubleshooting](#troubleshooting)
+- [Future Work](#futurework)
+    - [Known Issues](#knownissues)
+    - [TODO](#todo)
+- [Development](#development)
+    - [Enable Logging](#enablelogging)
+    - [Original Atlassian README](#originalatlassianreadme)
+
+## About
+
 This is an Atlassian Stash plugin that enforces commit message requirements. If a commit violates the
 configured policies, the push to the repository will be rejected.
 
@@ -20,10 +33,9 @@ Author: [Sean Ford](https://github.com/sford)
 
 ## Quick Start
 
-1. Download [Atlassian SDK](https://developer.atlassian.com)
-2. Run `atlas-package` in the YACC directory to build the plugin
-3. Install the YACC jar from `target/` into Stash (go to the plugin management page in Stash admin)
-4. Go to hook settings for a repository to enable and configure YACC
+1. Install YACC plugin into Stash
+2. If you want to require valid JIRA issues, configure a JIRA Application Link in Stash
+4. Configure YACC in the Hook Settings for a repository
 
 #### Configuration Settings
 
@@ -83,14 +95,26 @@ will require that JIRA issues be assigned, in progess, and from project PROJ.
 See [JIRA Advanced Searching](https://confluence.atlassian.com/display/JIRA/Advanced+Searching) for documentation regarding writing and testing
 JQL queries.
 
+## Troubleshooting
+
+#### I am getting a JIRA authentication failed message when attempting to push my code or when trying to configure an issue JQL matcher.
+
+This can occur if Stash is configured to use OAuth to authenticate with JIRA and the currently logged in Stash user has
+not yet gone through the OAuth authorization process to allow Stash access to JIRA.
+
+To initialize the OAuth tokens, go into the Stash UI and do something that requires access to JIRA. For example, view
+the commits for a repository and click on an linked JIRA issue for an existing commit. See the [Stash JIRA Integration](https://confluence.atlassian.com/display/STASH/JIRA+integration#JIRAintegration-SeetheJIRAissuesrelatedtocommitsandpullrequests)
+for an example of this.
+
+There might be a better way to do this, but this what has worked for me :-)
+
 ## Future Work
 
 #### Known Issues
 
-1. Issue JQL Matcher: JQL query not validated after saving. Test in JIRA first!
-2. Issue JQL Matcher: Paging through search results not yet implemented. If query returns more than 50 issues, YACC
+1. Issue JQL Matcher: Paging through search results not yet implemented. If query returns more than 50 issues, YACC
 may not find the issue.
-3. Commit Message Regex: If regex is set, Git revert commits might be rejected because Git sets the commit message of the
+2. Commit Message Regex: If regex is set, Git revert commits might be rejected because Git sets the commit message of the
 revert by default.
 
 #### TODO

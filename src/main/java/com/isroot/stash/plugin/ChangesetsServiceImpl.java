@@ -31,6 +31,9 @@ public class ChangesetsServiceImpl implements ChangesetsService
         this.applicationPropertiesService = applicationPropertiesService;
     }
 
+	/**
+	 * {@inheritDoc}
+	 */
     @Override
     public Set<Changeset> getNewChangesets(Repository repository, RefChange refChange)
     {

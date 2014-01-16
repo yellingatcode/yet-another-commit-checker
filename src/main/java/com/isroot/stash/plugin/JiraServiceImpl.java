@@ -4,10 +4,12 @@ import com.atlassian.applinks.api.ApplicationLink;
 import com.atlassian.applinks.api.ApplicationLinkRequest;
 import com.atlassian.applinks.api.ApplicationLinkResponseHandler;
 import com.atlassian.applinks.api.ApplicationLinkService;
+import com.atlassian.applinks.api.CredentialsRequiredException;
 import com.atlassian.applinks.api.application.jira.JiraApplicationType;
 import com.atlassian.sal.api.net.Request;
 import com.atlassian.sal.api.net.Response;
 import com.atlassian.sal.api.net.ResponseException;
+import com.atlassian.sal.api.net.ResponseStatusException;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -40,85 +42,77 @@ public class JiraServiceImpl implements JiraService
 
     private ApplicationLink getJiraApplicationLink()
     {
-        return applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class);
+        ApplicationLink applicationLink = applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class);
+
+		if(applicationLink == null)
+		{
+			throw new IllegalStateException("Primary JIRA application link does not exist!");
+		}
+
+		return applicationLink;
     }
 
     @Override
     public boolean doesJiraApplicationLinkExist()
     {
-        return getJiraApplicationLink() != null;
+		return applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class) != null;
     }
 
-
     @Override
-    public boolean doesIssueExist(String issueId)
+    public boolean doesIssueExist(String issueId) throws CredentialsRequiredException, ResponseException
     {
         checkNotNull(issueId, "issueId is null");
-        checkNotNull(getJiraApplicationLink(), "applicationLink is null");
 
-        try
-        {
-            ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.GET, "/rest/api/2/issue/"+issueId);
+		ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.GET, "/rest/api/2/issue/"+issueId);
 
-            return req.execute(new ApplicationLinkResponseHandler<Boolean>()
-            {
-                @Override
-                public Boolean credentialsRequired(Response response) throws ResponseException
-                {
-                    return false;
-                }
+		return req.execute(new ApplicationLinkResponseHandler<Boolean>()
+		{
+			@Override
+			public Boolean credentialsRequired(Response response) throws ResponseException
+			{
+				return false;
+			}
 
-                @Override
-                public Boolean handle(Response response) throws ResponseException
-                {
-                    if(response.isSuccessful())
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-            });
-        }
-        catch(Exception ex)
-        {
-            log.error("exception while communicating with JIRA", ex);
-
-            return false;
-        }
+			@Override
+			public Boolean handle(Response response) throws ResponseException
+			{
+				return response.isSuccessful();
+			}
+		});
     }
 
     @Override
-    public boolean doesIssueMatchJqlQuery(String jqlQuery, String issueId)
+    public boolean doesIssueMatchJqlQuery(String jqlQuery, String issueId) throws CredentialsRequiredException, ResponseException
     {
         checkNotNull(jqlQuery, "jqlQuery is null");
         checkNotNull(issueId, "issueId is null");
-        checkNotNull(getJiraApplicationLink(), "applicationLink is null");
 
-        try
-        {
-            ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.POST, "/rest/api/2/search");
-            req.setHeader("Content-Type", "application/json");
+        ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.POST, "/rest/api/2/search");
+		req.setHeader("Content-Type", "application/json");
 
-            Map<String, String> request = Maps.newHashMap();
-            request.put("jql", jqlQuery);
-            req.setEntity(new Gson().toJson(request));
-            String jsonResponse = req.execute();
+		Map<String, String> request = Maps.newHashMap();
+		request.put("jql", jqlQuery);
+		req.setEntity(new Gson().toJson(request));
 
-            Set<String> foundIssues = extractIssueIdsFromJqlSearch(jsonResponse);
+		String jsonResponse = null;
 
-            log.debug("issues found for JQL Query \"{}\": {}", jqlQuery, foundIssues);
+		try
+		{
+			jsonResponse = req.execute();
+		}
+		catch(ResponseStatusException e)
+		{
+			if(e.getResponse().getStatusCode() == 400)
+			{
+				throw new IllegalArgumentException("JQL query is invalid");
+			}
+		}
 
-            return foundIssues.contains(issueId);
-        }
-        catch(Exception ex)
-        {
-            log.error("exception while communicating with JIRA", ex);
+		Set<String> foundIssues = extractIssueIdsFromJqlSearch(jsonResponse);
 
-            return false;
-        }
+		log.debug("issues found for JQL Query \"{}\": {}", jqlQuery, foundIssues);
+
+		return foundIssues.contains(issueId);
     }
 
     private Set<String> extractIssueIdsFromJqlSearch(String json)
