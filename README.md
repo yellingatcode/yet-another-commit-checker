@@ -1,15 +1,15 @@
 # Yet Another Commit Checker
 
 - [About](#about)
-- [Quick Start](#quickstart)
-    - [Configuration Settings](#configurationsettings)
+- [Quick Start](#quick-start)
+    - [Configuration Settings](#configuration-settings)
 - [Troubleshooting](#troubleshooting)
-- [Future Work](#futurework)
-    - [Known Issues](#knownissues)
+- [Future Work](#future-work)
+    - [Known Issues](#known-issues)
     - [TODO](#todo)
 - [Development](#development)
-    - [Enable Logging](#enablelogging)
-    - [Original Atlassian README](#originalatlassianreadme)
+    - [Enable Logging](#enable-logging)
+    - [Original Atlassian README](#original-atlassian-readme)
 
 ## About
 
