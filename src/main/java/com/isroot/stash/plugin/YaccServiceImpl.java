@@ -126,7 +126,7 @@ public class YaccServiceImpl implements YaccService
 			}
 		}
 
-		Pattern singleIssuePattern = Pattern.compile("[a-zA-Z]+-[0-9]+");
+		Pattern singleIssuePattern = Pattern.compile("[A-Z][A-Z_0-9]+-[0-9]+");
 		Matcher matcher = singleIssuePattern.matcher(message);
 		while (matcher.find())
 		{
