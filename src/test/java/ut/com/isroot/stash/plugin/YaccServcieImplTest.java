@@ -132,7 +132,7 @@ public class YaccServcieImplTest
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
 
         Changeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("this commit message has no jira issues");
+        when(changeset.getMessage()).thenReturn("this commit message has no jira issues. abc-123 is not a valid issue because it is lowercase.");
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
 		List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
@@ -165,7 +165,7 @@ public class YaccServcieImplTest
 		when(jiraService.doesIssueExist(anyString())).thenThrow(CredentialsRequiredException.class);
 
 		Changeset changeset = mockChangeset();
-		when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id");
+		when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id, ABC_D-123: is also a valid issue id");
 		when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
 
