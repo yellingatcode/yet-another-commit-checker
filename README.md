@@ -62,7 +62,7 @@ will require commit message to be in the form of:
 **Require Valid JIRA Issue(s)**
 
 If enabled, commit messages must contain valid JIRA issue ids. JIRA issue ids are defined as any item that matches
-the regex `[a-zA-Z0-9-]+-[0-9]+`.
+the regex `[A-Z][A-Z_0-9]+-[0-9]+`.
 
 This check requires JIRA to be first linked with Stash using an Application Link. See https://confluence.atlassian.com/display/STASH/Linking+Stash+with+JIRA.
 

@@ -155,24 +155,40 @@ public class YaccServiceImplTest
 		assertThat(errors).isEmpty();
         verify(jiraService).doesJiraApplicationLinkExist();
         verify(jiraService).doesIssueExist("ABC-123");
-    }
-	
-	@Test
-	public void testCheckRefChange_requireJiraIssue_errorReturnedIfJiraAuthenticationFails() throws Exception
-	{
-		when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
-		when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
-		when(jiraService.doesIssueExist(anyString())).thenThrow(CredentialsRequiredException.class);
-
-		Changeset changeset = mockChangeset();
-		when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id, ABC_D-123: is also a valid issue id");
-		when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
-
-
-		List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-		assertThat(errors).contains("refs/heads/master: deadbeef: ABC-123: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.");
-		verify(jiraService).doesIssueExist("ABC-123");
 	}
+
+    @Test
+    public void testCheckRefChange_requireJiraIssue_jiraIssueIdsAreExtractedFromCommitMessage() throws Exception
+    {
+        when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
+        when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
+
+        Changeset changeset = mockChangeset();
+        when(changeset.getMessage()).thenReturn("these issue ids should be extracted: ABC-123, ABC_D-123, ABC2-123");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+        yaccService.checkRefChange(null, settings, mockRefChange());
+        verify(jiraService).doesIssueExist("ABC-123");
+        verify(jiraService).doesIssueExist("ABC_D-123");
+        verify(jiraService).doesIssueExist("ABC2-123");
+    }
+
+    @Test
+    public void testCheckRefChange_requireJiraIssue_errorReturnedIfJiraAuthenticationFails() throws Exception
+    {
+        when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
+        when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
+        when(jiraService.doesIssueExist(anyString())).thenThrow(CredentialsRequiredException.class);
+
+        Changeset changeset = mockChangeset();
+        when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).contains("refs/heads/master: deadbeef: ABC-123: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.");
+        verify(jiraService).doesIssueExist("ABC-123");
+    }
 
     private Changeset mockChangeset()
     {
