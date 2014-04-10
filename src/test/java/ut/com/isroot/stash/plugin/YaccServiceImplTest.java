@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
  * @author Sean Ford
  * @since 2013-10-26
  */
-public class YaccServcieImplTest
+public class YaccServiceImplTest
 {
     @Mock private StashAuthenticationContext stashAuthenticationContext;
     @Mock private ChangesetsService changesetsService;
