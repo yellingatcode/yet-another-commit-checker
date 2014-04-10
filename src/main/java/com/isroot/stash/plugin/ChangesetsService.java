@@ -15,7 +15,7 @@ import java.util.Set;
 public interface ChangesetsService
 {
 	/**
-	 * Get new {@link Changeset}s not already present in the repository for the given {@link RefChange}.
+	 * Get new {@link YaccChangeset}s not already present in the repository for the given {@link RefChange}.
 	 */
-    public Set<Changeset> getNewChangesets(Repository repository, RefChange refChange);
+    public Set<YaccChangeset> getNewChangesets(Repository repository, RefChange refChange);
 }

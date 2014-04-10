@@ -9,10 +9,7 @@ import com.atlassian.stash.setting.Settings;
 import com.atlassian.stash.user.StashAuthenticationContext;
 import com.atlassian.stash.user.StashUser;
 import com.google.common.collect.Sets;
-import com.isroot.stash.plugin.ChangesetsService;
-import com.isroot.stash.plugin.JiraService;
-import com.isroot.stash.plugin.YaccService;
-import com.isroot.stash.plugin.YaccServiceImpl;
+import com.isroot.stash.plugin.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -62,8 +59,8 @@ public class YaccServiceImplTest
         when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
         when(stashUser.getDisplayName()).thenReturn("John Smith");
 
-        Changeset changeset = mockChangeset();
-        when(changeset.getAuthor().getName()).thenReturn("Incorrect Name");
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getCommitter().getName()).thenReturn("Incorrect Name");
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
         List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
@@ -76,8 +73,8 @@ public class YaccServiceImplTest
         when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
         when(stashUser.getDisplayName()).thenReturn("John Smith");
 
-        Changeset changeset = mockChangeset();
-        when(changeset.getAuthor().getName()).thenReturn("John Smith");
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getCommitter().getName()).thenReturn("John Smith");
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
 		List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
@@ -90,8 +87,8 @@ public class YaccServiceImplTest
         when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);
         when(stashUser.getEmailAddress()).thenReturn("correct@email.com");
 
-        Changeset changeset = mockChangeset();
-        when(changeset.getAuthor().getEmailAddress()).thenReturn("wrong@email.com");
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getCommitter().getEmailAddress()).thenReturn("wrong@email.com");
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
 		List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
@@ -104,8 +101,8 @@ public class YaccServiceImplTest
         when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);
         when(stashUser.getEmailAddress()).thenReturn("correct@email.com");
 
-        Changeset changeset = mockChangeset();
-        when(changeset.getAuthor().getEmailAddress()).thenReturn("correct@email.com");
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getCommitter().getEmailAddress()).thenReturn("correct@email.com");
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
 		List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
@@ -118,7 +115,7 @@ public class YaccServiceImplTest
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(false);
 
-        Set<Changeset> changesets = Sets.newHashSet(mockChangeset());
+        Set<YaccChangeset> changesets = Sets.newHashSet(mockChangeset());
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(changesets);
 
 		List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
@@ -131,7 +128,7 @@ public class YaccServiceImplTest
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
 
-        Changeset changeset = mockChangeset();
+        YaccChangeset changeset = mockChangeset();
         when(changeset.getMessage()).thenReturn("this commit message has no jira issues. abc-123 is not a valid issue because it is lowercase.");
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
@@ -146,7 +143,7 @@ public class YaccServiceImplTest
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
         when(jiraService.doesIssueExist(anyString())).thenReturn(true);
 
-        Changeset changeset = mockChangeset();
+        YaccChangeset changeset = mockChangeset();
         when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id");
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
@@ -163,7 +160,7 @@ public class YaccServiceImplTest
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
 
-        Changeset changeset = mockChangeset();
+        YaccChangeset changeset = mockChangeset();
         when(changeset.getMessage()).thenReturn("these issue ids should be extracted: ABC-123, ABC_D-123, ABC2-123");
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
@@ -180,7 +177,7 @@ public class YaccServiceImplTest
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
         when(jiraService.doesIssueExist(anyString())).thenThrow(CredentialsRequiredException.class);
 
-        Changeset changeset = mockChangeset();
+        YaccChangeset changeset = mockChangeset();
         when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id");
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
@@ -190,11 +187,11 @@ public class YaccServiceImplTest
         verify(jiraService).doesIssueExist("ABC-123");
     }
 
-    private Changeset mockChangeset()
+    private YaccChangeset mockChangeset()
     {
-        Changeset changeset = mock(Changeset.class, RETURNS_DEEP_STUBS);
-        when(changeset.getAuthor().getName()).thenReturn("John Smith");
-        when(changeset.getAuthor().getEmailAddress()).thenReturn("jsmith@example.com");
+        YaccChangeset changeset = mock(YaccChangeset.class, RETURNS_DEEP_STUBS);
+        when(changeset.getCommitter().getName()).thenReturn("John Smith");
+        when(changeset.getCommitter().getEmailAddress()).thenReturn("jsmith@example.com");
 		when(changeset.getId()).thenReturn("deadbeef");
         return changeset;
     }
