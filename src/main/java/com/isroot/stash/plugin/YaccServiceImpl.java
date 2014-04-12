@@ -48,11 +48,11 @@ public class YaccServiceImpl implements YaccService
 
 		List<String> errors = Lists.newArrayList();
 
-		Set<Changeset> changesets = changesetsService.getNewChangesets(repository, refChange);
+		Set<YaccChangeset> changesets = changesetsService.getNewChangesets(repository, refChange);
 
-		for (Changeset changeset : changesets)
+		for (YaccChangeset changeset : changesets)
 		{
-			if(settings.getBoolean("excludeMergeCommits", false) && changeset.getParents().size() > 1)
+			if(settings.getBoolean("excludeMergeCommits", false) && changeset.getParentCount() > 1)
 			{
 				log.debug("skipping commit {} because it is a merge commit", changeset.getId());
 
@@ -68,10 +68,10 @@ public class YaccServiceImpl implements YaccService
 		return errors;
 	}
 
-	private List<String> checkChangeset(Settings settings, Changeset changeset)
+	private List<String> checkChangeset(Settings settings, YaccChangeset changeset)
 	{
 		log.debug("checking commit id={} name={} email={} message={}", changeset.getId(),
-				changeset.getAuthor().getName(), changeset.getAuthor().getEmailAddress(),
+				changeset.getCommitter().getName(), changeset.getCommitter().getEmailAddress(),
 				changeset.getMessage());
 
 		List<String> errors = Lists.newArrayList();
@@ -89,7 +89,7 @@ public class YaccServiceImpl implements YaccService
 		return errors;
 	}
 
-	private List<String> checkCommitMessageRegex(Settings settings, Changeset changeset)
+	private List<String> checkCommitMessageRegex(Settings settings, YaccChangeset changeset)
 	{
 		List<String> errors = Lists.newArrayList();
 
@@ -107,7 +107,7 @@ public class YaccServiceImpl implements YaccService
 		return errors;
 	}
 
-	private List<String> extractJiraIssuesFromCommitMessage(Settings settings, Changeset changeset)
+	private List<String> extractJiraIssuesFromCommitMessage(Settings settings, YaccChangeset changeset)
 	{
 		List<String> issues = Lists.newArrayList();
 
@@ -138,7 +138,7 @@ public class YaccServiceImpl implements YaccService
 		return issues;
 	}
 
-	private List<String> checkJiraIssues(Settings settings, Changeset changeset)
+	private List<String> checkJiraIssues(Settings settings, YaccChangeset changeset)
 	{
 		if (!settings.getBoolean("requireJiraIssue", false))
 		{
@@ -203,39 +203,39 @@ public class YaccServiceImpl implements YaccService
 		return errors;
 	}
 
-	private List<String> checkAuthorEmail(Settings settings, Changeset changeset)
+	private List<String> checkAuthorEmail(Settings settings, YaccChangeset changeset)
 	{
 		StashUser stashUser = stashAuthenticationContext.getCurrentUser();
 		final boolean requireMatchingAuthorEmail = settings.getBoolean("requireMatchingAuthorEmail", false);
 
 		List<String> errors = Lists.newArrayList();
 
-		log.debug("requireMatchingAuthorEmail={} authorName={} stashName={}", requireMatchingAuthorEmail, changeset.getAuthor().getEmailAddress(),
+		log.debug("requireMatchingAuthorEmail={} authorName={} stashName={}", requireMatchingAuthorEmail, changeset.getCommitter().getEmailAddress(),
 				stashUser.getEmailAddress());
 
-		if (requireMatchingAuthorEmail && !changeset.getAuthor().getEmailAddress().equals(stashUser.getEmailAddress()))
+		if (requireMatchingAuthorEmail && !changeset.getCommitter().getEmailAddress().equals(stashUser.getEmailAddress()))
 		{
 			errors.add(String.format("expected author email '%s' but found '%s'", stashUser.getEmailAddress(),
-					changeset.getAuthor().getEmailAddress()));
+					changeset.getCommitter().getEmailAddress()));
 		}
 
 		return errors;
 	}
 
-	private List<String> checkAuthorName(Settings settings, Changeset changeset)
+	private List<String> checkAuthorName(Settings settings, YaccChangeset changeset)
 	{
 		StashUser stashUser = stashAuthenticationContext.getCurrentUser();
 		final boolean requireMatchingAuthorName = settings.getBoolean("requireMatchingAuthorName", false);
 
 		List<String> errors = Lists.newArrayList();
 
-		log.debug("requireMatchingAuthorName={} authorName={} stashName={}", requireMatchingAuthorName, changeset.getAuthor().getName(),
+		log.debug("requireMatchingAuthorName={} authorName={} stashName={}", requireMatchingAuthorName, changeset.getCommitter().getName(),
 				stashUser.getDisplayName());
 
-		if (requireMatchingAuthorName && !changeset.getAuthor().getName().equals(stashUser.getDisplayName()))
+		if (requireMatchingAuthorName && !changeset.getCommitter().getName().equals(stashUser.getDisplayName()))
 		{
 			errors.add(String.format("expected author name '%s' but found '%s'", stashUser.getDisplayName(),
-					changeset.getAuthor().getName()));
+					changeset.getCommitter().getName()));
 		}
 
 		return errors;
