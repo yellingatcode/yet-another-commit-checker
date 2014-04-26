@@ -1,7 +1,6 @@
 package com.isroot.stash.plugin;
 
 import com.google.common.collect.Lists;
-import org.omg.CORBA.DynAnyPackage.Invalid;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -118,30 +117,6 @@ public class IssueKey
 
     /** JIRA project-relative issue identifier */
     private final String issueId;
-
-    /**
-     * Thrown when a JIRA issue key can not be parsed.
-     */
-    public static class InvalidIssueKeyException extends Exception {
-        /**
-         * Construct a new invalid issue key exception.
-         *
-         * @param issueKey The invalid issue key value.
-         * @param cause The cause.
-         */
-        public InvalidIssueKeyException(String issueKey, Throwable cause) {
-            super("Invalid issue key format '" + issueKey + "'", cause);
-        }
-
-        /**
-         * Construct a new invalid issue key exception.
-         *
-         * @param issueKey The invalid issue key value.
-         */
-        public InvalidIssueKeyException(String issueKey) {
-            this(issueKey, null);
-        }
-    }
 
     /**
      * A regex pattern that matches on JIRA issue keys. The individual components of a valid match

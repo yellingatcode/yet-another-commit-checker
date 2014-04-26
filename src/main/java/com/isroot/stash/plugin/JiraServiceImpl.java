@@ -129,7 +129,7 @@ public class JiraServiceImpl implements JiraService
             {
                 s.add(new IssueKey(element.getAsJsonObject().get("key").getAsString()));
             }
-            catch (IssueKey.InvalidIssueKeyException ex)
+            catch (InvalidIssueKeyException ex)
             {
                 log.error("unexpected exception while trying to parse JIRA issue key from jql response", ex);
                 throw new ResponseException("Could not parse JIRA issue key", ex);

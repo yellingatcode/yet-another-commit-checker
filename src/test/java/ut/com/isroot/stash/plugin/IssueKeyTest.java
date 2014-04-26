@@ -2,7 +2,7 @@ package ut.com.isroot.stash.plugin;
 
 import com.google.common.collect.Lists;
 import com.isroot.stash.plugin.IssueKey;
-import com.isroot.stash.plugin.IssueKey.InvalidIssueKeyException;
+import com.isroot.stash.plugin.InvalidIssueKeyException;
 import java.util.List;
 
 import org.junit.Test;
