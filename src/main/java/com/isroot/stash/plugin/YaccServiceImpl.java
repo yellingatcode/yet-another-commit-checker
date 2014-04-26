@@ -194,6 +194,7 @@ public class YaccServiceImpl implements YaccService
 		}
 		catch(ResponseException e)
 		{
+			log.error("unexpected exception while trying to validate JIRA issue", e);
 			errors.add(String.format("%s: Unable to validate JIRA issue due to an unexpected exception. Please see stack trace in logs.", issueKey.getFullyQualifiedIssueKey()));
 		}
 
