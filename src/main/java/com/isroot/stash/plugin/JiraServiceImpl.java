@@ -88,9 +88,23 @@ public class JiraServiceImpl implements JiraService
 
         ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.GET, "/rest/api/2/project/"+projectKey);
 
-        String jsonResponse = req.execute();
-        JsonObject response = new JsonParser().parse(jsonResponse).getAsJsonObject();
-        return (projectKey.equals(response.get("key").getAsString()));
+        try {
+            String jsonResponse = req.execute();
+            JsonObject response = new JsonParser().parse(jsonResponse).getAsJsonObject();
+            return (projectKey.equals(response.get("key").getAsString()));
+        }
+        catch(ResponseStatusException e)
+        {
+            if(e.getResponse().getStatusCode() == 404)
+            {
+                /* Project is unknown */
+                return false;
+            }
+            else
+            {
+                throw new ResponseException("Request failed", e);
+            }
+        }
     }
 
     @Override
