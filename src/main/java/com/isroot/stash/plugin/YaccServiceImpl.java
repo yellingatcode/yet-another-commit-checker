@@ -167,7 +167,12 @@ public class YaccServiceImpl implements YaccService
 
 		try
 		{
-			if (!jiraService.doesIssueExist(issueKey))
+			/* Skip validation of issues that contain non-existent project keys */
+			if (settings.getBoolean("ignoreUnknownIssueProjectKeys", false) && !jiraService.doesProjectExist(issueKey.getProjectKey()))
+			{
+				/* Nothing to do */
+			}
+			else if (!jiraService.doesIssueExist(issueKey))
 			{
 				errors.add(String.format("%s: JIRA Issue does not exist", issueKey.getFullyQualifiedIssueKey()));
 			}

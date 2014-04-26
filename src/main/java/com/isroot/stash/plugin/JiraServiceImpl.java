@@ -82,6 +82,18 @@ public class JiraServiceImpl implements JiraService
     }
 
     @Override
+    public boolean doesProjectExist(String projectKey) throws CredentialsRequiredException, ResponseException
+    {
+        checkNotNull(projectKey, "projectKey is null");
+
+        ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.GET, "/rest/api/2/project/"+projectKey);
+
+        String jsonResponse = req.execute();
+        JsonObject response = new JsonParser().parse(jsonResponse).getAsJsonObject();
+        return (projectKey.equals(response.get("key").getAsString()));
+    }
+
+    @Override
     public boolean doesIssueMatchJqlQuery(String jqlQuery, IssueKey issueKey) throws CredentialsRequiredException, ResponseException
     {
         checkNotNull(jqlQuery, "jqlQuery is null");

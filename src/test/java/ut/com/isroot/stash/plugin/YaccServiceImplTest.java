@@ -20,6 +20,7 @@ import java.util.Set;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
@@ -134,6 +135,29 @@ public class YaccServiceImplTest
 
 		List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
 		assertThat(errors).contains("refs/heads/master: deadbeef: No JIRA Issue found in commit message.");
+    }
+
+    @Test
+    public void testCheckRefChange_requireJiraIssue_ignoreUnknownJiraProjectKeys() throws Exception
+    {
+        when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
+        when(settings.getBoolean("ignoreUnknownIssueProjectKeys", false)).thenReturn(true);
+
+        when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
+        when(jiraService.doesIssueExist(new IssueKey("ABC-123"))).thenReturn(true);
+        when(jiraService.doesIssueExist(new IssueKey("UTF-123"))).thenReturn(false);
+        when(jiraService.doesProjectExist("ABC")).thenReturn(true);
+        when(jiraService.doesProjectExist("UTF")).thenReturn(false);
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id and an invalid issue id of UTF-8");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).isEmpty();
+        verify(jiraService).doesJiraApplicationLinkExist();
+        verify(jiraService).doesIssueExist(new IssueKey("ABC-123"));
     }
 
     @Test
