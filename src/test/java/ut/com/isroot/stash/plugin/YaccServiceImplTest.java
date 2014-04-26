@@ -145,7 +145,6 @@ public class YaccServiceImplTest
 
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
         when(jiraService.doesIssueExist(new IssueKey("ABC-123"))).thenReturn(true);
-        when(jiraService.doesIssueExist(new IssueKey("UTF-123"))).thenReturn(false);
         when(jiraService.doesProjectExist("ABC")).thenReturn(true);
         when(jiraService.doesProjectExist("UTF")).thenReturn(false);
 
@@ -158,6 +157,22 @@ public class YaccServiceImplTest
         assertThat(errors).isEmpty();
         verify(jiraService).doesJiraApplicationLinkExist();
         verify(jiraService).doesIssueExist(new IssueKey("ABC-123"));
+    }
+
+    @Test
+    public void testCheckRefChange_requireJiraIssue_rejectIfNoJiraIssuesWithAValidProjectAreFound() throws Exception
+    {
+        when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
+        when(settings.getBoolean("ignoreUnknownIssueProjectKeys", false)).thenReturn(true);
+        when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
+        when(jiraService.doesProjectExist("UTF")).thenReturn(false);
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getMessage()).thenReturn("this commit message has no jira issues. UTF-8 is not a valid issue because it has an invalid project key.");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).contains("refs/heads/master: deadbeef: No JIRA Issue found in commit message.");
     }
 
     @Test

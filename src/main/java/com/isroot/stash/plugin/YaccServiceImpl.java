@@ -9,6 +9,7 @@ import com.atlassian.stash.setting.Settings;
 import com.atlassian.stash.user.StashAuthenticationContext;
 import com.atlassian.stash.user.StashUser;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,7 +146,38 @@ public class YaccServiceImpl implements YaccService
 			return errors;
 		}
 
-		List<IssueKey> issues = extractJiraIssuesFromCommitMessage(settings, changeset);
+		final List<IssueKey> issues;
+		try {
+			final List<IssueKey> extractedKeys = extractJiraIssuesFromCommitMessage(settings, changeset);
+			if (settings.getBoolean("ignoreUnknownIssueProjectKeys", false))
+			{
+				/* Remove issues that contain non-existent project keys */
+				issues = Lists.newArrayList();
+				for (IssueKey issueKey : extractedKeys) {
+					if (jiraService.doesProjectExist(issueKey.getProjectKey()))
+					{
+						issues.add(issueKey);
+					}
+				}
+			}
+			else
+			{
+				issues = extractedKeys;
+			}
+		}
+		catch(CredentialsRequiredException e)
+		{
+			log.error("communication error while validating issues", e);
+			errors.add(String.format("Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA."));
+			return errors;
+		}
+		catch(ResponseException e)
+		{
+			log.error("unexpected exception while trying to validate JIRA issues", e);
+			errors.add(String.format("Unable to validate JIRA issues due to an unexpected exception. Please see stack trace in logs."));
+			return errors;
+		}
+
 		if(issues.isEmpty() == false)
 		{
 			for(IssueKey issueKey : issues)
@@ -167,12 +199,7 @@ public class YaccServiceImpl implements YaccService
 
 		try
 		{
-			/* Skip validation of issues that contain non-existent project keys */
-			if (settings.getBoolean("ignoreUnknownIssueProjectKeys", false) && !jiraService.doesProjectExist(issueKey.getProjectKey()))
-			{
-				/* Nothing to do */
-			}
-			else if (!jiraService.doesIssueExist(issueKey))
+			if (!jiraService.doesIssueExist(issueKey))
 			{
 				errors.add(String.format("%s: JIRA Issue does not exist", issueKey.getFullyQualifiedIssueKey()));
 			}
