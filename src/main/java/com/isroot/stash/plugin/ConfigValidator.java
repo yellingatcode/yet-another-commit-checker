@@ -60,7 +60,7 @@ public class ConfigValidator implements RepositorySettingsValidator
 		{
 			try
 			{
-				jiraService.doesIssueMatchJqlQuery(jqlMatcher, "ABC-123");
+				jiraService.doesIssueMatchJqlQuery(jqlMatcher, new IssueKey("ABC", "123"));
 			}
 			catch(ResponseException ex)
 			{

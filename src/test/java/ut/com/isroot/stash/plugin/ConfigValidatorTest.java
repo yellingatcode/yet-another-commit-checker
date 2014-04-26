@@ -5,12 +5,14 @@ import com.atlassian.stash.repository.Repository;
 import com.atlassian.stash.setting.Settings;
 import com.atlassian.stash.setting.SettingsValidationErrors;
 import com.isroot.stash.plugin.ConfigValidator;
+import com.isroot.stash.plugin.IssueKey;
 import com.isroot.stash.plugin.JiraService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -53,12 +55,12 @@ public class ConfigValidatorTest
 	public void testValidate_authenticationErrorWhenValidatingQueryReturnsError() throws Exception
 	{
 		when(settings.getString("issueJqlMatcher")).thenReturn("assignee is not empty");
-		when(jiraService.doesIssueMatchJqlQuery(anyString(), anyString())).thenThrow(CredentialsRequiredException.class);
+		when(jiraService.doesIssueMatchJqlQuery(anyString(), any(IssueKey.class))).thenThrow(CredentialsRequiredException.class);
 
 		configValidator.validate(settings, settingsValidationErrors, repository);
 
 		verify(settings).getString("issueJqlMatcher");
-		verify(jiraService).doesIssueMatchJqlQuery("assignee is not empty", "ABC-123");
+		verify(jiraService).doesIssueMatchJqlQuery("assignee is not empty", new IssueKey("ABC-123"));
 		verify(settingsValidationErrors).addFieldError("issueJqlMatcher", "Unable to validate JQL query with JIRA. Authentication failure when communicating with JIRA.");
 	}
 
@@ -66,12 +68,12 @@ public class ConfigValidatorTest
 	public void testValidate_invalidJqlQueryAddsValidationError() throws Exception
 	{
 		when(settings.getString("issueJqlMatcher")).thenReturn("this jql query is invalid");
-		when(jiraService.doesIssueMatchJqlQuery(anyString(), anyString())).thenThrow(IllegalArgumentException.class);
+		when(jiraService.doesIssueMatchJqlQuery(anyString(), any(IssueKey.class))).thenThrow(IllegalArgumentException.class);
 
 		configValidator.validate(settings, settingsValidationErrors, repository);
 
 		verify(settings).getString("issueJqlMatcher");
-		verify(jiraService).doesIssueMatchJqlQuery("this jql query is invalid", "ABC-123");
+		verify(jiraService).doesIssueMatchJqlQuery("this jql query is invalid", new IssueKey("ABC-123"));
 		verify(settingsValidationErrors).addFieldError("issueJqlMatcher", "The JQL query syntax is invalid.");
 	}
 
@@ -83,7 +85,7 @@ public class ConfigValidatorTest
 		configValidator.validate(settings, settingsValidationErrors, repository);
 
 		verify(settings).getString("issueJqlMatcher");
-		verify(jiraService).doesIssueMatchJqlQuery("assignee is not empty", "ABC-123");
+		verify(jiraService).doesIssueMatchJqlQuery("assignee is not empty", new IssueKey("ABC-123"));
 		verifyZeroInteractions(settingsValidationErrors);
 	}
 }
