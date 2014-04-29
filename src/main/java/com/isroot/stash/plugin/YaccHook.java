@@ -74,6 +74,8 @@ public final class YaccHook implements PreReceiveRepositoryHook
                 hookResponse.err().println(error);
             }
 
+            hookResponse.err().println();
+
             log.debug("push rejected");
 
             return false;
