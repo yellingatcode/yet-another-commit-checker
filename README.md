@@ -19,7 +19,7 @@ configured policies, the push to the repository will be rejected.
 Features:
 
 * Fully configurable!
-* Require commit author name and email to match Stash user
+* Require commit committer name and email to match Stash user
 * Require commit messages to match regex
 * Require commit message to contain valid JIRA issue ids
 * Issue JQL matcher to validate JIRA issue against. Require issues to be assigned, not closed, in a certain project, etc.
@@ -39,13 +39,13 @@ Author: [Sean Ford](https://github.com/sford)
 
 #### Configuration Settings
 
-**Require Matching Author Email**
+**Require Matching Committer Email**
 
-If enabled, commit author email doesn't match the email of the Stash user.
+If enabled, committer email must match the email of the Stash user.
 
-**Require Matching Author Name**
+**Require Matching Committer Name**
 
-If enabled, commit author name doesn't match the name of the Stash user.
+If enabled, committer name must match the name of the Stash user.
 
 **Commit Message Regex**
 

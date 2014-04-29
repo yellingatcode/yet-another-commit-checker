@@ -2,14 +2,12 @@ package com.isroot.stash.plugin;
 
 import com.atlassian.applinks.api.CredentialsRequiredException;
 import com.atlassian.sal.api.net.ResponseException;
-import com.atlassian.stash.content.Changeset;
 import com.atlassian.stash.repository.RefChange;
 import com.atlassian.stash.repository.Repository;
 import com.atlassian.stash.setting.Settings;
 import com.atlassian.stash.user.StashAuthenticationContext;
 import com.atlassian.stash.user.StashUser;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,8 +75,8 @@ public class YaccServiceImpl implements YaccService
 
 		List<String> errors = Lists.newArrayList();
 
-		errors.addAll(checkAuthorEmail(settings, changeset));
-		errors.addAll(checkAuthorName(settings, changeset));
+		errors.addAll(checkCommitterEmail(settings, changeset));
+		errors.addAll(checkCommitterName(settings, changeset));
 		errors.addAll(checkCommitMessageRegex(settings, changeset));
 
 		// Checking JIRA issues might be dependent on the commit message regex, so only proceed if there are no errors.
@@ -228,7 +226,7 @@ public class YaccServiceImpl implements YaccService
 		return errors;
 	}
 
-	private List<String> checkAuthorEmail(Settings settings, YaccChangeset changeset)
+	private List<String> checkCommitterEmail(Settings settings, YaccChangeset changeset)
 	{
 		StashUser stashUser = stashAuthenticationContext.getCurrentUser();
 		final boolean requireMatchingAuthorEmail = settings.getBoolean("requireMatchingAuthorEmail", false);
@@ -247,7 +245,7 @@ public class YaccServiceImpl implements YaccService
 		return errors;
 	}
 
-	private List<String> checkAuthorName(Settings settings, YaccChangeset changeset)
+	private List<String> checkCommitterName(Settings settings, YaccChangeset changeset)
 	{
 		StashUser stashUser = stashAuthenticationContext.getCurrentUser();
 		final boolean requireMatchingAuthorName = settings.getBoolean("requireMatchingAuthorName", false);
