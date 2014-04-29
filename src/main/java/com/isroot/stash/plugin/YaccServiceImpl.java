@@ -9,6 +9,7 @@ import com.atlassian.stash.setting.Settings;
 import com.atlassian.stash.user.StashAuthenticationContext;
 import com.atlassian.stash.user.StashUser;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,10 +108,8 @@ public class YaccServiceImpl implements YaccService
 		return errors;
 	}
 
-	private List<String> extractJiraIssuesFromCommitMessage(Settings settings, YaccChangeset changeset)
+	private List<IssueKey> extractJiraIssuesFromCommitMessage(Settings settings, YaccChangeset changeset)
 	{
-		List<String> issues = Lists.newArrayList();
-
 		String message = changeset.getMessage();
 
 		// If a commit message regex is present, see if it contains a group 1 that can be used to located JIRA issues.
@@ -126,16 +125,10 @@ public class YaccServiceImpl implements YaccService
 			}
 		}
 
-		Pattern singleIssuePattern = Pattern.compile("[A-Z][A-Z_0-9]+-[0-9]+");
-		Matcher matcher = singleIssuePattern.matcher(message);
-		while (matcher.find())
-		{
-			issues.add(matcher.group());
-		}
+        final List<IssueKey> issueKeys = IssueKey.parseIssueKeys(message);
+		log.debug("found jira issues {} from commit message: {}", issueKeys, message);
 
-		log.debug("found jira issues {} from commit message: {}", issues, message);
-
-		return issues;
+		return issueKeys;
 	}
 
 	private List<String> checkJiraIssues(Settings settings, YaccChangeset changeset)
@@ -153,12 +146,43 @@ public class YaccServiceImpl implements YaccService
 			return errors;
 		}
 
-		List<String> issues = extractJiraIssuesFromCommitMessage(settings, changeset);
+		final List<IssueKey> issues;
+		try {
+			final List<IssueKey> extractedKeys = extractJiraIssuesFromCommitMessage(settings, changeset);
+			if (settings.getBoolean("ignoreUnknownIssueProjectKeys", false))
+			{
+				/* Remove issues that contain non-existent project keys */
+				issues = Lists.newArrayList();
+				for (IssueKey issueKey : extractedKeys) {
+					if (jiraService.doesProjectExist(issueKey.getProjectKey()))
+					{
+						issues.add(issueKey);
+					}
+				}
+			}
+			else
+			{
+				issues = extractedKeys;
+			}
+		}
+		catch(CredentialsRequiredException e)
+		{
+			log.error("communication error while validating issues", e);
+			errors.add(String.format("Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA."));
+			return errors;
+		}
+		catch(ResponseException e)
+		{
+			log.error("unexpected exception while trying to validate JIRA issues", e);
+			errors.add(String.format("Unable to validate JIRA issues due to an unexpected exception. Please see stack trace in logs."));
+			return errors;
+		}
+
 		if(issues.isEmpty() == false)
 		{
-			for(String issueId : issues)
+			for(IssueKey issueKey : issues)
 			{
-				errors.addAll(checkJiraIssue(settings, issueId));
+				errors.addAll(checkJiraIssue(settings, issueKey));
 			}
 		}
 		else
@@ -169,35 +193,36 @@ public class YaccServiceImpl implements YaccService
 		return errors;
 	}
 
-	private List<String> checkJiraIssue(Settings settings, String issueId)
+	private List<String> checkJiraIssue(Settings settings, IssueKey issueKey)
 	{
 		List<String> errors = Lists.newArrayList();
 
 		try
 		{
-			if (!jiraService.doesIssueExist(issueId))
+			if (!jiraService.doesIssueExist(issueKey))
 			{
-				errors.add(String.format("%s: JIRA Issue does not exist", issueId));
+				errors.add(String.format("%s: JIRA Issue does not exist", issueKey.getFullyQualifiedIssueKey()));
 			}
 			else
 			{
 				String jqlQuery = settings.getString("issueJqlMatcher");
 				if (jqlQuery != null && !jqlQuery.isEmpty())
 				{
-					if (!jiraService.doesIssueMatchJqlQuery(jqlQuery, issueId))
+					if (!jiraService.doesIssueMatchJqlQuery(jqlQuery, issueKey))
 					{
-						errors.add(String.format("%s: JIRA Issue does not match JQL Query: %s", issueId, jqlQuery));
+						errors.add(String.format("%s: JIRA Issue does not match JQL Query: %s", issueKey, jqlQuery));
 					}
 				}
 			}
 		}
 		catch(CredentialsRequiredException e)
 		{
-			errors.add(String.format("%s: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.", issueId));
+			errors.add(String.format("%s: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.", issueKey.getFullyQualifiedIssueKey()));
 		}
 		catch(ResponseException e)
 		{
-			errors.add(String.format("%s: Unable to validate JIRA issue due to an unexpected exception. Please see stack trace in logs.", issueId));
+			log.error("unexpected exception while trying to validate JIRA issue", e);
+			errors.add(String.format("%s: Unable to validate JIRA issue due to an unexpected exception. Please see stack trace in logs.", issueKey.getFullyQualifiedIssueKey()));
 		}
 
 		return errors;

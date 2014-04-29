@@ -44,6 +44,17 @@
         {param errorTexts: $errors ? $errors['requireJiraIssue'] : null /}
 	{/call}
 
+	{call aui.form.checkboxField}
+		{param legendContent: 'Ignore Unknown JIRA Project Keys' /}
+		{param fields: [[
+			'id' : 'ignoreUnknownIssueProjectKeys',
+			'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
+			'isChecked' : $config['ignoreUnknownIssueProjectKeys']
+		]] /}
+		{param descriptionText: 'If this option is enabled, any issue-like items in the commit message that do not contain a valid JIRA project key (such as "UTF-8") will be ignored.' /}
+        {param errorTexts: $errors ? $errors['ignoreUnknownIssueProjectKeys'] : null /}
+	{/call}
+
     {call aui.form.checkboxField}
 		{param legendContent: 'Exclude Merge Commits' /}
 		{param fields: [[

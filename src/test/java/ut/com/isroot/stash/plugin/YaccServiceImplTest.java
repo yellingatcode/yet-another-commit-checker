@@ -20,6 +20,7 @@ import java.util.Set;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
@@ -137,11 +138,49 @@ public class YaccServiceImplTest
     }
 
     @Test
+    public void testCheckRefChange_requireJiraIssue_ignoreUnknownJiraProjectKeys() throws Exception
+    {
+        when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
+        when(settings.getBoolean("ignoreUnknownIssueProjectKeys", false)).thenReturn(true);
+
+        when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
+        when(jiraService.doesIssueExist(new IssueKey("ABC-123"))).thenReturn(true);
+        when(jiraService.doesProjectExist("ABC")).thenReturn(true);
+        when(jiraService.doesProjectExist("UTF")).thenReturn(false);
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id and an invalid issue id of UTF-8");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).isEmpty();
+        verify(jiraService).doesJiraApplicationLinkExist();
+        verify(jiraService).doesIssueExist(new IssueKey("ABC-123"));
+    }
+
+    @Test
+    public void testCheckRefChange_requireJiraIssue_rejectIfNoJiraIssuesWithAValidProjectAreFound() throws Exception
+    {
+        when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
+        when(settings.getBoolean("ignoreUnknownIssueProjectKeys", false)).thenReturn(true);
+        when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
+        when(jiraService.doesProjectExist("UTF")).thenReturn(false);
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getMessage()).thenReturn("this commit message has no jira issues. UTF-8 is not a valid issue because it has an invalid project key.");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).contains("refs/heads/master: deadbeef: No JIRA Issue found in commit message.");
+    }
+
+    @Test
     public void testCheckRefChange_requireJiraIssue_allowedIfValidJiraIssueIsFound() throws Exception
     {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
-        when(jiraService.doesIssueExist(anyString())).thenReturn(true);
+        when(jiraService.doesIssueExist(any(IssueKey.class))).thenReturn(true);
 
         YaccChangeset changeset = mockChangeset();
         when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id");
@@ -151,7 +190,7 @@ public class YaccServiceImplTest
 		List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
 		assertThat(errors).isEmpty();
         verify(jiraService).doesJiraApplicationLinkExist();
-        verify(jiraService).doesIssueExist("ABC-123");
+        verify(jiraService).doesIssueExist(new IssueKey("ABC-123"));
 	}
 
     @Test
@@ -165,9 +204,9 @@ public class YaccServiceImplTest
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
         yaccService.checkRefChange(null, settings, mockRefChange());
-        verify(jiraService).doesIssueExist("ABC-123");
-        verify(jiraService).doesIssueExist("ABC_D-123");
-        verify(jiraService).doesIssueExist("ABC2-123");
+        verify(jiraService).doesIssueExist(new IssueKey("ABC-123"));
+        verify(jiraService).doesIssueExist(new IssueKey("ABC_D-123"));
+        verify(jiraService).doesIssueExist(new IssueKey("ABC2-123"));
     }
 
     @Test
@@ -175,7 +214,7 @@ public class YaccServiceImplTest
     {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
-        when(jiraService.doesIssueExist(anyString())).thenThrow(CredentialsRequiredException.class);
+        when(jiraService.doesIssueExist(any(IssueKey.class))).thenThrow(CredentialsRequiredException.class);
 
         YaccChangeset changeset = mockChangeset();
         when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id");
@@ -184,7 +223,7 @@ public class YaccServiceImplTest
 
         List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).contains("refs/heads/master: deadbeef: ABC-123: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.");
-        verify(jiraService).doesIssueExist("ABC-123");
+        verify(jiraService).doesIssueExist(new IssueKey("ABC-123"));
     }
 
     private YaccChangeset mockChangeset()

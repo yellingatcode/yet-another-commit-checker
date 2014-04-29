@@ -59,11 +59,11 @@ public class JiraServiceImpl implements JiraService
     }
 
     @Override
-    public boolean doesIssueExist(String issueId) throws CredentialsRequiredException, ResponseException
+    public boolean doesIssueExist(IssueKey issueKey) throws CredentialsRequiredException, ResponseException
     {
-        checkNotNull(issueId, "issueId is null");
+        checkNotNull(issueKey, "issueKey is null");
 
-		ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.GET, "/rest/api/2/issue/"+issueId);
+		ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.GET, "/rest/api/2/issue/"+issueKey.getFullyQualifiedIssueKey());
 
 		return req.execute(new ApplicationLinkResponseHandler<Boolean>()
 		{
@@ -82,10 +82,36 @@ public class JiraServiceImpl implements JiraService
     }
 
     @Override
-    public boolean doesIssueMatchJqlQuery(String jqlQuery, String issueId) throws CredentialsRequiredException, ResponseException
+    public boolean doesProjectExist(String projectKey) throws CredentialsRequiredException, ResponseException
+    {
+        checkNotNull(projectKey, "projectKey is null");
+
+        ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.GET, "/rest/api/2/project/"+projectKey);
+
+        try {
+            String jsonResponse = req.execute();
+            JsonObject response = new JsonParser().parse(jsonResponse).getAsJsonObject();
+            return (projectKey.equals(response.get("key").getAsString()));
+        }
+        catch(ResponseStatusException e)
+        {
+            if(e.getResponse().getStatusCode() == 404)
+            {
+                /* Project is unknown */
+                return false;
+            }
+            else
+            {
+                throw new ResponseException("Request failed", e);
+            }
+        }
+    }
+
+    @Override
+    public boolean doesIssueMatchJqlQuery(String jqlQuery, IssueKey issueKey) throws CredentialsRequiredException, ResponseException
     {
         checkNotNull(jqlQuery, "jqlQuery is null");
-        checkNotNull(issueId, "issueId is null");
+        checkNotNull(issueKey, "issueKey is null");
 
         ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.POST, "/rest/api/2/search");
 		req.setHeader("Content-Type", "application/json");
@@ -108,24 +134,32 @@ public class JiraServiceImpl implements JiraService
 			}
 		}
 
-		Set<String> foundIssues = extractIssueIdsFromJqlSearch(jsonResponse);
+		Set<IssueKey> foundIssues = extractIssueIdsFromJqlSearch(jsonResponse);
 
 		log.debug("issues found for JQL Query \"{}\": {}", jqlQuery, foundIssues);
 
-		return foundIssues.contains(issueId);
+		return foundIssues.contains(issueKey);
     }
 
-    private Set<String> extractIssueIdsFromJqlSearch(String json)
-    {
+    private Set<IssueKey> extractIssueIdsFromJqlSearch(String json) throws ResponseException {
+
         JsonObject response = new JsonParser().parse(json).getAsJsonObject();
 
         JsonArray issues = response.get("issues").getAsJsonArray();
 
-        Set<String> s = Sets.newHashSet();
+        Set<IssueKey> s = Sets.newHashSet();
 
         for (JsonElement element : issues)
         {
-            s.add(element.getAsJsonObject().get("key").getAsString());
+            try
+            {
+                s.add(new IssueKey(element.getAsJsonObject().get("key").getAsString()));
+            }
+            catch (InvalidIssueKeyException ex)
+            {
+                log.error("unexpected exception while trying to parse JIRA issue key from jql response", ex);
+                throw new ResponseException("Could not parse JIRA issue key", ex);
+            }
         }
 
         return s;
