@@ -1,23 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.isroot.stash.plugin</groupId>
     <artifactId>yacc</artifactId>
-    <version>1.0</version>
-
+    <version>1.1-SNAPSHOT</version>
     <organization>
         <name>Sean Ford</name>
         <url>http://seandford.com</url>
     </organization>
-
     <name>Yet Another Commit Checker</name>
     <description>This is the Yet Another Commit Checker plugin for Atlassian Stash. See https://github.com/sford/yet-another-commit-checker for documentation and source code.</description>
     <packaging>atlassian-plugin</packaging>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -29,7 +23,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>com.atlassian.stash</groupId>
@@ -46,7 +39,7 @@
             <artifactId>stash-page-objects</artifactId>
             <scope>provided</scope>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>com.atlassian.applinks</groupId>
             <artifactId>applinks-api</artifactId>
             <scope>provided</scope>
@@ -83,35 +76,30 @@
             <artifactId>org.eclipse.jgit</artifactId>
             <version>3.0.0.201306101825-r</version>
         </dependency>
-
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>1.9.5</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert-core</artifactId>
             <version>2.0M10</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.5</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.5</version>
             <scope>test</scope>
         </dependency>
-
         <!-- WIRED TEST RUNNER DEPENDENCIES -->
         <dependency>
             <groupId>com.atlassian.plugins</groupId>
@@ -131,7 +119,6 @@
             <version>2.2.2-atlassian-1</version>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -152,7 +139,7 @@
                             <instanceId>stash</instanceId>
                             <version>${stash.version}</version>
                             <dataVersion>${stash.data.version}</dataVersion>
-                        </product>  
+                        </product>
                     </products>
                 </configuration>
             </plugin>
@@ -165,12 +152,10 @@
             </plugin>
         </plugins>
     </build>
-    
     <properties>
         <stash.version>2.8.2</stash.version>
         <stash.data.version>2.8.2</stash.data.version>
-        <amps.version>4.2.12</amps.version>
+        <amps.version>4.2.20</amps.version>
         <plugin.testrunner.version>1.1.2</plugin.testrunner.version>
     </properties>
-    
 </project>
