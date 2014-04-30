@@ -40,7 +40,7 @@
 			'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
 			'isChecked' : $config['requireJiraIssue']
 		]] /}
-		{param descriptionText: 'Require that the commit message contains valid JIRA issue(s). Note, by default, all items that match [a-zA-Z0-9-]+-[0-9]+ will be treated as JIRA issues. If a commit message regex is configured and a regex group exists, then only this group will be checked for JIRA issues.' /}
+		{param descriptionText: 'Require that the commit message contains valid JIRA issue(s). Note, by default, all items that match [A-Z][A-Z_0-9]+-[0-9]+ will be treated as JIRA issues. If a commit message regex is configured and a regex group exists, then only this group will be checked for JIRA issues.' /}
         {param errorTexts: $errors ? $errors['requireJiraIssue'] : null /}
 	{/call}
 
@@ -55,16 +55,6 @@
         {param errorTexts: $errors ? $errors['ignoreUnknownIssueProjectKeys'] : null /}
 	{/call}
 
-    {call aui.form.checkboxField}
-		{param legendContent: 'Exclude Merge Commits' /}
-		{param fields: [[
-			'id' : 'excludeMergeCommits',
-			'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
-			'isChecked' : $config['excludeMergeCommits']
-		]] /}
-		{param descriptionText: 'If require valid JIRA issues(s) is enabled, this will exclude merge commits when checking for JIRA issues.' /}
-	{/call}
-
 	{call aui.form.textField}
 		{param id: 'issueJqlMatcher' /}
 		{param labelContent: 'Issue Jql Matcher' /}
@@ -72,5 +62,15 @@
 		{param descriptionText: 'If present, JIRA issues must match this JQL query.' /}
 		{param errorTexts: $errors ? $errors['issueJqlMatcher'] : null /}
 	{/call}
+
+  {call aui.form.checkboxField}
+    {param legendContent: 'Exclude Merge Commits' /}
+      {param fields: [[
+        'id' : 'excludeMergeCommits',
+        'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
+        'isChecked' : $config['excludeMergeCommits']
+      ]] /}
+    {param descriptionText: 'Exclude merge commits from commit requirements.' /}
+  {/call}
 
 {/template}

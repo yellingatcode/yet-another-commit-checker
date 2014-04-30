@@ -1,20 +1,24 @@
 package ut.com.isroot.stash.plugin;
 
 import com.google.common.collect.Lists;
-import com.isroot.stash.plugin.IssueKey;
 import com.isroot.stash.plugin.InvalidIssueKeyException;
+import com.isroot.stash.plugin.IssueKey;
+import org.junit.Test;
+
 import java.util.List;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class IssueKeyTest
 {
     @Test
     public void testParseIssueKeys() {
-        final List<IssueKey> issueKeys = IssueKey.parseIssueKeys("Issue: ABC-123, CBA-321;");
-        assertEquals(issueKeys, Lists.newArrayList(new IssueKey("ABC", "123"), new IssueKey("CBA", "321")));
+        final List<IssueKey> issueKeys = IssueKey.parseIssueKeys("Issue: ABC-123, CBA-321, UNDER_SCORE-123;");
+        assertEquals(issueKeys, Lists.newArrayList(new IssueKey("ABC", "123"),
+                new IssueKey("CBA", "321"), new IssueKey("UNDER_SCORE", "123")));
     }
 
     @Test
