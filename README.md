@@ -37,17 +37,17 @@ Author: [Sean Ford](https://github.com/sford)
 2. If you want to require valid JIRA issues, configure a JIRA Application Link in Stash
 4. Configure YACC in the Hook Settings for a repository
 
-#### Configuration Settings
+### Configuration Settings
 
-**Require Matching Committer Email**
+####**Require Matching Committer Email**
 
 If enabled, committer email must match the email of the Stash user.
 
-**Require Matching Committer Name**
+####**Require Matching Committer Name**
 
 If enabled, committer name must match the name of the Stash user.
 
-**Commit Message Regex**
+####**Commit Message Regex**
 
 If a regex is present, commit message must match regex.
 
@@ -59,30 +59,30 @@ will require commit message to be in the form of:
 
     PROJ-123: added new feature xyz
 
-**Require Valid JIRA Issue(s)**
+####**Require Valid JIRA Issue(s)**
 
 If enabled, commit messages must contain valid JIRA issue ids. JIRA issue ids are defined as any item that matches
 the regex `[A-Z][A-Z_0-9]+-[0-9]+`.
 
 This check requires JIRA to be first linked with Stash using an Application Link. See https://confluence.atlassian.com/display/STASH/Linking+Stash+with+JIRA.
 
-*Note:* This may have false positives if the commit message contains strings that look like JIRA issue, for example, `UTF-8`.
-This can be avoided by including a regex group in the `Commit Message Regex`. If a group is present, JIRA issues will only be extracted
-from the group.
+*Note:* This may result in false positives if commit messages contains strings that look like JIRA issue, for example, "UTF-8". Enable `Ignore Unknown JIRA Project Keys` to tell YACC to ignore items that don't contain a valid JIRA Project key.
 
-For example,
+#####Locating Issues Using a Regex Group 
 
-    ([A-Z0-9\-]+): .*
+If a regex group is present in the `Commit Message Regex`, only text contained within this group will be examined when extracting JIRA issues.
 
-will only check to see if `PROJ-123` is a valid JIRA issue in the following commit message
+For example, a `([A-Z0-9\-]+): .*` commit message regex will mean only `PROJ-123` will be checked against JIRA in the following commit message:
 
     PROJ-123: fixed bug involving UTF-8 support. I deserve a HIGH-5 for this fix!
 
-**Exclude Merge Commits**
+UTF-8 and HIGH-5 will be ignored because they are not contained within the regex group. Using a regex group can be used as an alternative to `Ignore Unknown JIRA Project Keys` to deal with issue false positives, especially when you want to detect project key typos.
 
-If enabled, merge commits will be excluded from commit requirements.
+####**Ignore Unknown JIRA Project Keys**
 
-**Issue JQL Matcher**
+If enabled, any issue-like items in commit messages that do not contain a valid JIRA project key (such as "UTF-8") will be ignored.
+
+####**Issue JQL Matcher**
 
 If JQL query is present, detected JIRA issues must match this query.
 
@@ -94,6 +94,10 @@ will require that JIRA issues be assigned, in progess, and from project PROJ.
 
 See [JIRA Advanced Searching](https://confluence.atlassian.com/display/JIRA/Advanced+Searching) for documentation regarding writing and testing
 JQL queries.
+
+####**Exclude Merge Commits**
+
+If enabled, merge commits will be excluded from commit requirements.
 
 ## Troubleshooting
 
@@ -110,14 +114,14 @@ There might be a better way to do this, but this what has worked for me :-)
 
 ## Future Work
 
-#### Known Issues
+### Known Issues
 
 1. Issue JQL Matcher: Paging through search results not yet implemented. If query returns more than 50 issues, YACC
 may not find the issue.
 2. Commit Message Regex: If regex is set, Git revert commits might be rejected because Git sets the commit message of the
 revert by default.
 
-#### TODO
+### TODO
 
 1. More unit tests!
 2. Fix known issues
@@ -129,13 +133,13 @@ Interested in contributing? [Fork me!](https://github.com/sford/yet-another-comm
 
 Some useful development information:
 
-#### Enable Logging
+### Enable Logging
 
 Enabling YACC logging can be done using the Stash REST API. For example, see the following `curl` command which enables logging in the `atlas-run` development environment:
 
     curl -u admin -v -X PUT -d "" -H "Content-Type: application/json" http://localhost:7990/stash/rest/api/latest/logs/logger/com.isroot/debug
 
-#### Original Atlassian README
+### Original Atlassian README
 
 This is the original Atlassian README with instructions on how to run it in the Atlassian SDK
 
