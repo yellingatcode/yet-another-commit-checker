@@ -15,8 +15,24 @@ public class YaccChangeset {
     public YaccChangeset (String id, YaccPerson committer, String message, int parentCount) {
         this.id = id;
         this.committer = committer;
-        this.message = message;
+        this.message = removeTrailingNewLine(message);
         this.parentCount = parentCount;
+    }
+
+    /**
+     * sford: Removing the trailing newline is necessary after changing to JGit to get commit information to fix the
+     * stash author name linking bug (see commit 3b5e8e0). The commit message returned by JGit has a trailing newline
+     * which wasn't present when using the Stash API to get the message. This broke the commit message regex, so, this
+     * was added to maintain the previous behavior.
+     */
+    private String removeTrailingNewLine(String str)
+    {
+        if(str.endsWith("\n"))
+        {
+            str = str.substring(0, str.length() - 1);
+        }
+
+        return str;
     }
 
     /**

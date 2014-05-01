@@ -1,7 +1,6 @@
 package ut.com.isroot.stash.plugin;
 
 import com.atlassian.applinks.api.CredentialsRequiredException;
-import com.atlassian.stash.content.Changeset;
 import com.atlassian.stash.repository.RefChange;
 import com.atlassian.stash.repository.RefChangeType;
 import com.atlassian.stash.repository.Repository;
@@ -9,7 +8,12 @@ import com.atlassian.stash.setting.Settings;
 import com.atlassian.stash.user.StashAuthenticationContext;
 import com.atlassian.stash.user.StashUser;
 import com.google.common.collect.Sets;
-import com.isroot.stash.plugin.*;
+import com.isroot.stash.plugin.ChangesetsService;
+import com.isroot.stash.plugin.IssueKey;
+import com.isroot.stash.plugin.JiraService;
+import com.isroot.stash.plugin.YaccChangeset;
+import com.isroot.stash.plugin.YaccService;
+import com.isroot.stash.plugin.YaccServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -20,9 +24,7 @@ import java.util.Set;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -224,6 +226,34 @@ public class YaccServiceImplTest
         List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).contains("refs/heads/master: deadbeef: ABC-123: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.");
         verify(jiraService).doesIssueExist(new IssueKey("ABC-123"));
+    }
+
+    @Test
+    public void testCheckRefChange_commitMessageRegex_commitMessageMatchesRegex() throws Exception
+    {
+        when(settings.getString("commitMessageRegex")).thenReturn("[a-z ]+");
+        when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getMessage()).thenReturn("matches regex");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    public void testCheckRefChange_commitMessageRegex_rejectIfCommitMessageDoesNotMatchRegex() throws Exception
+    {
+        when(settings.getString("commitMessageRegex")).thenReturn("[a-z ]+");
+        when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getMessage()).thenReturn("123 does not match regex because it contains numbers");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).contains("refs/heads/master: deadbeef: commit message doesn't match regex: [a-z ]+");
     }
 
     private YaccChangeset mockChangeset()
