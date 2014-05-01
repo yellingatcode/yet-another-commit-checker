@@ -123,7 +123,7 @@ public class IssueKey
      * should be extracted using the {@link #getMatchedProjectKey(java.util.regex.Matcher)} and {@link #getMatchedProjectKey(java.util.regex.Matcher)}
      * methods.
      */
-    private static Pattern ISSUE_PATTERN = Pattern.compile("(?<pkey>[A-Z][A-Z_0-9]+)-(?<id>[0-9]+)");
+    private static Pattern ISSUE_PATTERN = Pattern.compile("([A-Z][A-Z_0-9]+)-([0-9]+)");
 
     /**
      * Return the project key matched by {@link #ISSUE_PATTERN}.
@@ -132,7 +132,7 @@ public class IssueKey
      * @return The matched project key.
      */
     private static String getMatchedProjectKey(Matcher matcher) {
-        return matcher.group("pkey");
+        return matcher.group(1);
     }
 
     /**
@@ -142,6 +142,6 @@ public class IssueKey
      * @return The matched issue identifier.
      */
     private static String getMatchedIssueId(Matcher matcher) {
-        return matcher.group("id");
+        return matcher.group(2);
     }
 }

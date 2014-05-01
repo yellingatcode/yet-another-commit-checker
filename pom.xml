@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.isroot.stash.plugin</groupId>
     <artifactId>yacc</artifactId>
@@ -10,7 +11,9 @@
         <url>http://seandford.com</url>
     </organization>
     <name>Yet Another Commit Checker</name>
-    <description>This is the Yet Another Commit Checker plugin for Atlassian Stash. See https://github.com/sford/yet-another-commit-checker for documentation and source code.</description>
+    <description>This is the Yet Another Commit Checker plugin for Atlassian Stash. See
+        https://github.com/sford/yet-another-commit-checker for documentation and source code.
+    </description>
     <packaging>atlassian-plugin</packaging>
     <dependencyManagement>
         <dependencies>
@@ -149,6 +152,30 @@
                     <source>1.6</source>
                     <target>1.6</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>animal-sniffer-maven-plugin</artifactId>
+                <version>1.7</version>
+                <configuration>
+                    <signature>
+                        <groupId>org.codehaus.mojo.signature</groupId>
+                        <artifactId>java16-sun</artifactId>
+                        <version>1.0</version>
+                    </signature>
+                    <ignores>
+                        <ignore>com.jcraft.jzlib.ZStream</ignore>
+                    </ignores>	
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>check-java16-sun</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
