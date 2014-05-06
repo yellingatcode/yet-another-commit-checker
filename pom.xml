@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.isroot.stash.plugin</groupId>
     <artifactId>yacc</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
     <organization>
         <name>Sean Ford</name>
         <url>http://seandford.com</url>
