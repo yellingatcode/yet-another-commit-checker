@@ -236,7 +236,7 @@ public class YaccServiceImpl implements YaccService
 		log.debug("requireMatchingAuthorEmail={} authorName={} stashName={}", requireMatchingAuthorEmail, changeset.getCommitter().getEmailAddress(),
 				stashUser.getEmailAddress());
 
-		if (requireMatchingAuthorEmail && !changeset.getCommitter().getEmailAddress().equals(stashUser.getEmailAddress()))
+		if (requireMatchingAuthorEmail && !changeset.getCommitter().getEmailAddress().toLowerCase().equals(stashUser.getEmailAddress().toLowerCase()))
 		{
 			errors.add(String.format("expected author email '%s' but found '%s'", stashUser.getEmailAddress(),
 					changeset.getCommitter().getEmailAddress()));
