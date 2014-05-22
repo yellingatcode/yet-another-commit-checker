@@ -1,8 +1,8 @@
 package com.isroot.stash.plugin;
 
+import com.atlassian.stash.commit.CommitService;
 import com.atlassian.stash.content.Changeset;
 import com.atlassian.stash.content.ChangesetsBetweenRequest;
-import com.atlassian.stash.history.HistoryService;
 import com.atlassian.stash.repository.RefChange;
 import com.atlassian.stash.repository.Repository;
 import com.atlassian.stash.server.ApplicationPropertiesService;
@@ -26,12 +26,12 @@ import java.util.Set;
  */
 public class ChangesetsServiceImpl implements ChangesetsService
 {
-    private final HistoryService historyService;
+    private final CommitService commitService;
     private final ApplicationPropertiesService applicationPropertiesService;
 
-    public ChangesetsServiceImpl(HistoryService historyService, ApplicationPropertiesService applicationPropertiesService)
+    public ChangesetsServiceImpl(CommitService commitService, ApplicationPropertiesService applicationPropertiesService)
     {
-        this.historyService = historyService;
+        this.commitService = commitService;
         this.applicationPropertiesService = applicationPropertiesService;
     }
 
@@ -50,7 +50,7 @@ public class ChangesetsServiceImpl implements ChangesetsService
                     .include(refChange.getToHash())
                     .build();
 
-            Page<Changeset> page = historyService.getChangesetsBetween(request, new PageRequestImpl(0, PageRequest.MAX_PAGE_LIMIT));
+            Page<Changeset> page = commitService.getChangesetsBetween(request, new PageRequestImpl(0, PageRequest.MAX_PAGE_LIMIT));
 
             Set<YaccChangeset> changesets = Sets.newHashSet();
             for (Changeset changeset : page.getValues())

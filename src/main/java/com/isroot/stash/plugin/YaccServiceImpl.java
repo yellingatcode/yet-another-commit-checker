@@ -238,7 +238,7 @@ public class YaccServiceImpl implements YaccService
 
 		if (requireMatchingAuthorEmail && !changeset.getCommitter().getEmailAddress().toLowerCase().equals(stashUser.getEmailAddress().toLowerCase()))
 		{
-			errors.add(String.format("expected author email '%s' but found '%s'", stashUser.getEmailAddress(),
+			errors.add(String.format("expected committer email '%s' but found '%s'", stashUser.getEmailAddress(),
 					changeset.getCommitter().getEmailAddress()));
 		}
 
@@ -257,7 +257,7 @@ public class YaccServiceImpl implements YaccService
 
 		if (requireMatchingAuthorName && !changeset.getCommitter().getName().equals(stashUser.getDisplayName()))
 		{
-			errors.add(String.format("expected author name '%s' but found '%s'", stashUser.getDisplayName(),
+			errors.add(String.format("expected committer name '%s' but found '%s'", stashUser.getDisplayName(),
 					changeset.getCommitter().getName()));
 		}
 

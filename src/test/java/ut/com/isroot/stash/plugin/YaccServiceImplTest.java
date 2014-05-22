@@ -67,7 +67,7 @@ public class YaccServiceImplTest
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
         List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-       	assertThat(errors).contains("refs/heads/master: deadbeef: expected author name 'John Smith' but found 'Incorrect Name'");
+       	assertThat(errors).contains("refs/heads/master: deadbeef: expected committer name 'John Smith' but found 'Incorrect Name'");
     }
 
     @Test
@@ -95,7 +95,7 @@ public class YaccServiceImplTest
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
 		List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-		assertThat(errors).contains("refs/heads/master: deadbeef: expected author email 'correct@email.com' but found 'wrong@email.com'");
+		assertThat(errors).contains("refs/heads/master: deadbeef: expected committer email 'correct@email.com' but found 'wrong@email.com'");
     }
 
     @Test
