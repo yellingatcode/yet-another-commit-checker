@@ -221,8 +221,14 @@ public class YaccServiceImpl implements YaccService
 		}
 		catch(ResponseException e)
 		{
-			log.error("unexpected exception while trying to validate JIRA issue", e);
-			errors.add(String.format("%s: Unable to validate JIRA issue due to an unexpected exception. Please see stack trace in logs.", issueKey.getFullyQualifiedIssueKey()));
+			if (e.getCause() instanceof CredentialsRequiredException) {
+				CredentialsRequiredException cred = (CredentialsRequiredException)e.getCause();
+				errors.add(String.format("%s: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.", issueKey.getFullyQualifiedIssueKey()));
+				errors.add(String.format("To authenticate, visit %s in a web browser.", cred.getAuthorisationURI().toASCIIString()));
+			} else {
+				log.error("unexpected exception while trying to validate JIRA issue", e);
+				errors.add(String.format("%s: Unable to validate JIRA issue due to an unexpected exception. Please see stack trace in logs.", issueKey.getFullyQualifiedIssueKey()));
+			}
 		}
 
 		return errors;

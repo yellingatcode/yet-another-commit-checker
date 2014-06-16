@@ -2,6 +2,7 @@ package com.isroot.stash.plugin;
 
 import com.atlassian.applinks.api.ApplicationLink;
 import com.atlassian.applinks.api.ApplicationLinkRequest;
+import com.atlassian.applinks.api.ApplicationLinkRequestFactory;
 import com.atlassian.applinks.api.ApplicationLinkResponseHandler;
 import com.atlassian.applinks.api.ApplicationLinkService;
 import com.atlassian.applinks.api.CredentialsRequiredException;
@@ -63,14 +64,16 @@ public class JiraServiceImpl implements JiraService
     {
         checkNotNull(issueKey, "issueKey is null");
 
-		ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.GET, "/rest/api/2/issue/"+issueKey.getFullyQualifiedIssueKey());
+		final ApplicationLinkRequestFactory fac = getJiraApplicationLink().createAuthenticatedRequestFactory();
+
+		ApplicationLinkRequest req = fac.createRequest(Request.MethodType.GET, "/rest/api/2/issue/"+issueKey.getFullyQualifiedIssueKey());
 
 		return req.execute(new ApplicationLinkResponseHandler<Boolean>()
 		{
 			@Override
 			public Boolean credentialsRequired(Response response) throws ResponseException
 			{
-				return false;
+				throw new ResponseException(new CredentialsRequiredException(fac, "Token is invalid"));
 			}
 
 			@Override
