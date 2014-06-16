@@ -167,6 +167,7 @@ public class YaccServiceImpl implements YaccService
 		{
 			log.error("communication error while validating issues", e);
 			errors.add(String.format("Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA."));
+			errors.add(String.format("To authenticate, visit %s in a web browser.", e.getAuthorisationURI().toASCIIString()));
 			return errors;
 		}
 		catch(ResponseException e)
@@ -216,6 +217,7 @@ public class YaccServiceImpl implements YaccService
 		catch(CredentialsRequiredException e)
 		{
 			errors.add(String.format("%s: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.", issueKey.getFullyQualifiedIssueKey()));
+			errors.add(String.format("To authenticate, visit %s in a web browser.", e.getAuthorisationURI().toASCIIString()));
 		}
 		catch(ResponseException e)
 		{
