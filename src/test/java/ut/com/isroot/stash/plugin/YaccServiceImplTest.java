@@ -1,6 +1,7 @@
 package ut.com.isroot.stash.plugin;
 
 import com.atlassian.applinks.api.CredentialsRequiredException;
+import com.atlassian.sal.api.net.ResponseException;
 import com.atlassian.stash.repository.RefChange;
 import com.atlassian.stash.repository.RefChangeType;
 import com.atlassian.stash.repository.Repository;
@@ -14,11 +15,13 @@ import com.isroot.stash.plugin.JiraService;
 import com.isroot.stash.plugin.YaccChangeset;
 import com.isroot.stash.plugin.YaccService;
 import com.isroot.stash.plugin.YaccServiceImpl;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
@@ -38,7 +41,8 @@ public class YaccServiceImplTest
     @Mock private StashAuthenticationContext stashAuthenticationContext;
     @Mock private ChangesetsService changesetsService;
     @Mock private JiraService jiraService;
-
+    @Mock private ResponseException responseException;
+    @Mock private CredentialsRequiredException credRequired;
     @Mock private Settings settings;
     @Mock private StashUser stashUser;
 
@@ -226,11 +230,12 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_requireJiraIssue_errorReturnedIfJiraAuthenticationFails() throws Exception
+    public void testCheckRefChange_requireJiraIssue_errorReturnedIfNoJiraAuth() throws Exception
     {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
-        when(jiraService.doesIssueExist(any(IssueKey.class))).thenThrow(CredentialsRequiredException.class);
+        when(jiraService.doesIssueExist(any(IssueKey.class))).thenThrow(credRequired);
+        when(credRequired.getAuthorisationURI()).thenReturn(new URI("http://localhost/link"));
 
         YaccChangeset changeset = mockChangeset();
         when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id");
@@ -239,6 +244,27 @@ public class YaccServiceImplTest
 
         List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).contains("refs/heads/master: deadbeef: ABC-123: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.");
+        assertThat(errors).contains("refs/heads/master: deadbeef: To authenticate, visit http://localhost/link in a web browser.");
+        verify(jiraService).doesIssueExist(new IssueKey("ABC-123"));
+    }
+
+    @Test
+    public void testCheckRefChange_requireJiraIssue_errorReturnedIfJiraAuthenticationFails() throws Exception
+    {
+        when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
+        when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
+        when(jiraService.doesIssueExist(any(IssueKey.class))).thenThrow(responseException);
+        when(responseException.getCause()).thenReturn(credRequired);
+        when(credRequired.getAuthorisationURI()).thenReturn(new URI("http://localhost/link"));
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).contains("refs/heads/master: deadbeef: ABC-123: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.");
+        assertThat(errors).contains("refs/heads/master: deadbeef: To authenticate, visit http://localhost/link in a web browser.");
         verify(jiraService).doesIssueExist(new IssueKey("ABC-123"));
     }
 
