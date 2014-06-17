@@ -11,18 +11,15 @@ import com.atlassian.sal.api.net.Request;
 import com.atlassian.sal.api.net.Response;
 import com.atlassian.sal.api.net.ResponseException;
 import com.atlassian.sal.api.net.ResponseStatusException;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -45,18 +42,18 @@ public class JiraServiceImpl implements JiraService
     {
         ApplicationLink applicationLink = applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class);
 
-		if(applicationLink == null)
-		{
-			throw new IllegalStateException("Primary JIRA application link does not exist!");
-		}
+        if (applicationLink == null)
+        {
+            throw new IllegalStateException("Primary JIRA application link does not exist!");
+        }
 
-		return applicationLink;
+        return applicationLink;
     }
 
     @Override
     public boolean doesJiraApplicationLinkExist()
     {
-		return applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class) != null;
+        return applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class) != null;
     }
 
     @Override
@@ -89,16 +86,17 @@ public class JiraServiceImpl implements JiraService
     {
         checkNotNull(projectKey, "projectKey is null");
 
-        ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.GET, "/rest/api/2/project/"+projectKey);
+        ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.GET, "/rest/api/2/project/" + projectKey);
 
-        try {
+        try
+        {
             String jsonResponse = req.execute();
             JsonObject response = new JsonParser().parse(jsonResponse).getAsJsonObject();
             return (projectKey.equals(response.get("key").getAsString()));
         }
-        catch(ResponseStatusException e)
+        catch (ResponseStatusException e)
         {
-            if(e.getResponse().getStatusCode() == 404)
+            if (e.getResponse().getStatusCode() == 404)
             {
                 /* Project is unknown */
                 return false;
@@ -111,61 +109,68 @@ public class JiraServiceImpl implements JiraService
     }
 
     @Override
-    public boolean doesIssueMatchJqlQuery(String jqlQuery, IssueKey issueKey) throws CredentialsRequiredException, ResponseException
+    public boolean doesIssueMatchJqlQuery(String jqlQuery, IssueKey issueKey) throws CredentialsRequiredException,
+            ResponseException
     {
         checkNotNull(jqlQuery, "jqlQuery is null");
         checkNotNull(issueKey, "issueKey is null");
 
-        ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.POST, "/rest/api/2/search");
-		req.setHeader("Content-Type", "application/json");
+        // Combine the user's jql query with issueKey=<issueKey> to avoid paging. If a single result is returned,
+        // then the issue key matches the jql query
+        String jqlQueryWithIssueExpression = String.format("issueKey=%s and (%s)", issueKey.getFullyQualifiedIssueKey(),
+                jqlQuery);
 
-		Map<String, String> request = Maps.newHashMap();
-		request.put("jql", jqlQuery);
-		req.setEntity(new Gson().toJson(request));
+        String jsonResponse = executeJqlQuery(jqlQueryWithIssueExpression);
 
-		String jsonResponse = null;
-
-		try
-		{
-			jsonResponse = req.execute();
-		}
-		catch(ResponseStatusException e)
-		{
-			if(e.getResponse().getStatusCode() == 400)
-			{
-				throw new IllegalArgumentException("JQL query is invalid");
-			}
-		}
-
-		Set<IssueKey> foundIssues = extractIssueIdsFromJqlSearch(jsonResponse);
-
-		log.debug("issues found for JQL Query \"{}\": {}", jqlQuery, foundIssues);
-
-		return foundIssues.contains(issueKey);
-    }
-
-    private Set<IssueKey> extractIssueIdsFromJqlSearch(String json) throws ResponseException {
-
-        JsonObject response = new JsonParser().parse(json).getAsJsonObject();
-
+        JsonObject response = new JsonParser().parse(jsonResponse).getAsJsonObject();
         JsonArray issues = response.get("issues").getAsJsonArray();
 
-        Set<IssueKey> s = Sets.newHashSet();
-
-        for (JsonElement element : issues)
-        {
-            try
-            {
-                s.add(new IssueKey(element.getAsJsonObject().get("key").getAsString()));
-            }
-            catch (InvalidIssueKeyException ex)
-            {
-                log.error("unexpected exception while trying to parse JIRA issue key from jql response", ex);
-                throw new ResponseException("Could not parse JIRA issue key", ex);
-            }
-        }
-
-        return s;
+        return issues.size() == 1;
     }
 
+    @Override
+    public boolean isJqlQueryValid(String jqlQuery) throws CredentialsRequiredException, ResponseException
+    {
+        try
+        {
+            // This will throw an exception if the jql query is invalid.
+            executeJqlQuery(jqlQuery);
+            return true;
+        }
+        catch(ResponseStatusException e)
+        {
+            // if the jql query is invalid, a 400 error is returned
+            if(e.getResponse().getStatusCode() == 400)
+            {
+                return false;
+            }
+            else
+            {
+                // Not a 400 response... just re-throw it to avoid hiding potential problems
+                throw e;
+            }
+
+        }
+    }
+
+    private String executeJqlQuery(String jqlQuery) throws CredentialsRequiredException, ResponseException
+    {
+        checkNotNull(jqlQuery, "jqlQuery is null");
+
+        ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory()
+                .createRequest(Request.MethodType.POST, "/rest/api/2/search");
+        req.setHeader("Content-Type", "application/json");
+
+        log.debug("using jql: {}", jqlQuery);
+
+        Map<String, String> request = new HashMap<String, String>();
+        request.put("jql", jqlQuery);
+        req.setEntity(new Gson().toJson(request));
+
+        String response = req.execute();
+
+        log.debug("json response: {}", response);
+
+        return response;
+    }
 }

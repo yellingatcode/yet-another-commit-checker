@@ -21,7 +21,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  */
 public class ConfigValidator implements RepositorySettingsValidator
 {
-	private static final Logger log = LoggerFactory.getLogger(ConfigValidator.class);
+    private static final Logger log = LoggerFactory.getLogger(ConfigValidator.class);
 
     private final JiraService jiraService;
 
@@ -55,27 +55,26 @@ public class ConfigValidator implements RepositorySettingsValidator
             }
         }
 
-		String jqlMatcher = settings.getString("issueJqlMatcher");
-		if(!isNullOrEmpty(jqlMatcher))
-		{
-			try
-			{
-				jiraService.doesIssueMatchJqlQuery(jqlMatcher, new IssueKey("ABC", "123"));
-			}
-			catch(ResponseException ex)
-			{
-				log.error("unexpected exception while trying to validate jql query", ex);
-				settingsValidationErrors.addFieldError("issueJqlMatcher", "Unable to validate JQL query with JIRA because there was an unexpected exception. Please see Stash logs.");
-			}
-			catch(CredentialsRequiredException ex)
-			{
-				log.error("authentication error while trying to validate jql query", ex);
-				settingsValidationErrors.addFieldError("issueJqlMatcher", "Unable to validate JQL query with JIRA. Authentication failure when communicating with JIRA.");
-			}
-			catch(IllegalArgumentException ex)
-			{
-				settingsValidationErrors.addFieldError("issueJqlMatcher", "The JQL query syntax is invalid.");
-			}
-		}
+        String jqlMatcher = settings.getString("issueJqlMatcher");
+        if(!isNullOrEmpty(jqlMatcher))
+        {
+            try
+            {
+                if(!jiraService.isJqlQueryValid(jqlMatcher))
+                {
+                    settingsValidationErrors.addFieldError("issueJqlMatcher", "The JQL query syntax is invalid.");
+                }
+            }
+            catch(ResponseException ex)
+            {
+                log.error("unexpected exception while trying to validate jql query", ex);
+                settingsValidationErrors.addFieldError("issueJqlMatcher", "Unable to validate JQL query with JIRA because there was an unexpected exception. Please see Stash logs.");
+            }
+            catch(CredentialsRequiredException ex)
+            {
+                log.error("authentication error while trying to validate jql query", ex);
+                settingsValidationErrors.addFieldError("issueJqlMatcher", "Unable to validate JQL query with JIRA. Authentication failure when communicating with JIRA.");
+            }
+        }
     }
 }

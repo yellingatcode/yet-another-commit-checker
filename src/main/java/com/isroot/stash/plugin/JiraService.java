@@ -15,4 +15,5 @@ public interface JiraService
     public boolean doesIssueMatchJqlQuery(String jqlQuery, IssueKey issueKey) throws CredentialsRequiredException, ResponseException;
     public boolean doesIssueExist(IssueKey issueKey) throws CredentialsRequiredException, ResponseException;
     public boolean doesProjectExist(String projectKey) throws CredentialsRequiredException, ResponseException;
+    public boolean isJqlQueryValid(String jqlQuery) throws CredentialsRequiredException, ResponseException;
 }

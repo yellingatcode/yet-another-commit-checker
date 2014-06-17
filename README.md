@@ -116,9 +116,7 @@ There might be a better way to do this, but this what has worked for me :-)
 
 ### Known Issues
 
-1. Issue JQL Matcher: Paging through search results not yet implemented. If query returns more than 50 issues, YACC
-may not find the issue.
-2. Commit Message Regex: If regex is set, Git revert commits might be rejected because Git sets the commit message of the
+1. Commit Message Regex: If regex is set, Git revert commits might be rejected because Git sets the commit message of the
 revert by default.
 
 ### TODO
