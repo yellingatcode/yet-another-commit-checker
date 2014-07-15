@@ -4,6 +4,7 @@ import com.atlassian.applinks.api.CredentialsRequiredException;
 import com.atlassian.sal.api.net.ResponseException;
 import com.atlassian.stash.repository.RefChange;
 import com.atlassian.stash.repository.Repository;
+import com.atlassian.stash.scm.git.GitRefPattern;
 import com.atlassian.stash.setting.Settings;
 import com.atlassian.stash.user.StashAuthenticationContext;
 import com.atlassian.stash.user.StashUser;
@@ -42,6 +43,8 @@ public class YaccServiceImpl implements YaccService
     @Override
     public List<String> checkRefChange(Repository repository, Settings settings, RefChange refChange)
     {
+        boolean isTag = refChange.getRefId().startsWith(GitRefPattern.TAGS.getPath());
+
         log.debug("checking ref change refId={} fromHash={} toHash={} type={}", refChange.getRefId(), refChange.getFromHash(),
                 refChange.getToHash(), refChange.getType().toString());
 
@@ -51,7 +54,7 @@ public class YaccServiceImpl implements YaccService
 
         for (YaccChangeset changeset : changesets)
         {
-            for(String e : checkChangeset(settings, changeset))
+            for(String e : checkChangeset(settings, changeset, !isTag))
             {
                 errors.add(String.format("%s: %s: %s", refChange.getRefId(), changeset.getId(), e));
             }
@@ -60,7 +63,7 @@ public class YaccServiceImpl implements YaccService
         return errors;
     }
 
-    private List<String> checkChangeset(Settings settings, YaccChangeset changeset)
+    private List<String> checkChangeset(Settings settings, YaccChangeset changeset, boolean checkMessages)
     {
         log.debug("checking commit id={} name={} email={} message={}", changeset.getId(),
                 changeset.getCommitter().getName(), changeset.getCommitter().getEmailAddress(),
@@ -71,7 +74,7 @@ public class YaccServiceImpl implements YaccService
         errors.addAll(checkCommitterEmail(settings, changeset));
         errors.addAll(checkCommitterName(settings, changeset));
 
-        if(!isCommitExcluded(settings, changeset))
+        if(checkMessages && !isCommitExcluded(settings, changeset))
         {
             errors.addAll(checkCommitMessageRegex(settings, changeset));
 
