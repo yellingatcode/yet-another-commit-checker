@@ -9,8 +9,9 @@ import com.atlassian.stash.repository.Repository;
 import com.atlassian.stash.scm.git.GitRefPattern;
 import com.atlassian.stash.server.ApplicationPropertiesService;
 import com.atlassian.stash.util.Page;
+import com.atlassian.stash.util.PageProvider;
 import com.atlassian.stash.util.PageRequest;
-import com.atlassian.stash.util.PageRequestImpl;
+import com.atlassian.stash.util.PagedIterable;
 import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.IOException;
@@ -94,9 +95,17 @@ public class ChangesetsServiceImpl implements ChangesetsService
                         .include(refChange.getToHash())
                         .build();
 
-                Page<Changeset> page = commitService.getChangesetsBetween(request, new PageRequestImpl(0, PageRequest.MAX_PAGE_LIMIT));
+                // Make sure to get all of the changes
+                Iterable<Changeset> changes = new PagedIterable<Changeset>(new PageProvider<Changeset>()
+                {
+                    @Override
+                    public Page<Changeset> get(PageRequest pr)
+                    {
+                        return commitService.getChangesetsBetween(request, pr);
+                    }
+                }, 100);
 
-                for (Changeset changeset : page.getValues())
+                for (Changeset changeset : changes)
                 {
                     final RevCommit commit = walk.parseCommit(ObjectId.fromString(changeset.getId()));
 
