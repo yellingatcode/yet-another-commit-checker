@@ -31,27 +31,17 @@ public class ConfigValidator implements RepositorySettingsValidator
     }
 
     @Override
-    public void validate(@Nonnull Settings settings, @Nonnull SettingsValidationErrors settingsValidationErrors,
+    public void validate(@Nonnull Settings settings, @Nonnull SettingsValidationErrors errors,
                          @Nonnull Repository repository)
     {
-        String commitMessageRegex = settings.getString("commitMessageRegex");
-        if(!isNullOrEmpty(commitMessageRegex))
-        {
-            try
-            {
-                Pattern.compile(commitMessageRegex);
-            }
-            catch(PatternSyntaxException ex)
-            {
-                settingsValidationErrors.addFieldError("commitMessageRegex", "Invalid Regex: " + ex.getMessage());
-            }
-        }
+        validationRegex(settings, errors, "commitMessageRegex");
+        validationRegex(settings, errors, "excludeByRegex");
 
         if(settings.getBoolean("requireJiraIssue", false))
         {
             if(!jiraService.doesJiraApplicationLinkExist())
             {
-                settingsValidationErrors.addFieldError("requireJiraIssue", "Can't be enabled because a JIRA application link does not exist.");
+                errors.addFieldError("requireJiraIssue", "Can't be enabled because a JIRA application link does not exist.");
             }
         }
 
@@ -62,19 +52,38 @@ public class ConfigValidator implements RepositorySettingsValidator
             {
                 if(!jiraService.isJqlQueryValid(jqlMatcher))
                 {
-                    settingsValidationErrors.addFieldError("issueJqlMatcher", "The JQL query syntax is invalid.");
+                    errors.addFieldError("issueJqlMatcher", "The JQL query syntax is invalid.");
                 }
             }
             catch(ResponseException ex)
             {
                 log.error("unexpected exception while trying to validate jql query", ex);
-                settingsValidationErrors.addFieldError("issueJqlMatcher", "Unable to validate JQL query with JIRA because there was an unexpected exception. Please see Stash logs.");
+                errors.addFieldError("issueJqlMatcher", "Unable to validate JQL query with JIRA because there was an unexpected exception. Please see Stash logs.");
             }
             catch(CredentialsRequiredException ex)
             {
                 log.error("authentication error while trying to validate jql query", ex);
-                settingsValidationErrors.addFieldError("issueJqlMatcher", "Unable to validate JQL query with JIRA. Authentication failure when communicating with JIRA.");
+                errors.addFieldError("issueJqlMatcher", "Unable to validate JQL query with JIRA. Authentication failure when communicating with JIRA.");
             }
         }
+    }
+
+    private void validationRegex(Settings settings,
+                                 SettingsValidationErrors errors,
+                                 String setting)
+    {
+        String regex = settings.getString(setting);
+        if (regex != null && !regex.isEmpty())
+        {
+            try
+            {
+                Pattern.compile(regex);
+            }
+            catch (PatternSyntaxException ex)
+            {
+                errors.addFieldError(setting, "Invalid Regex: " + ex.getMessage());
+            }
+        }
+
     }
 }

@@ -51,13 +51,6 @@ public class YaccServiceImpl implements YaccService
 
 		for (YaccChangeset changeset : changesets)
 		{
-			if(settings.getBoolean("excludeMergeCommits", false) && changeset.getParentCount() > 1)
-			{
-				log.debug("skipping commit {} because it is a merge commit", changeset.getId());
-
-				continue;
-			}
-
 			for(String e : checkChangeset(settings, changeset))
 			{
 				errors.add(String.format("%s: %s: %s", refChange.getRefId(), changeset.getId(), e));
@@ -77,15 +70,45 @@ public class YaccServiceImpl implements YaccService
 
 		errors.addAll(checkCommitterEmail(settings, changeset));
 		errors.addAll(checkCommitterName(settings, changeset));
-		errors.addAll(checkCommitMessageRegex(settings, changeset));
 
-		// Checking JIRA issues might be dependent on the commit message regex, so only proceed if there are no errors.
-		if(errors.isEmpty())
+		if(!isCommitExcluded(settings, changeset))
 		{
-			errors.addAll(checkJiraIssues(settings, changeset));
+			errors.addAll(checkCommitMessageRegex(settings, changeset));
+
+			// Checking JIRA issues might be dependent on the commit message regex, so only proceed if there are no errors.
+			if (errors.isEmpty())
+			{
+				errors.addAll(checkJiraIssues(settings, changeset));
+			}
 		}
 
 		return errors;
+	}
+
+	private boolean isCommitExcluded(Settings settings, YaccChangeset changeset)
+	{
+		// Exclude Merge Commit setting
+		if(settings.getBoolean("excludeMergeCommits", false) && changeset.getParentCount() > 1)
+		{
+			log.debug("skipping commit {} because it is a merge commit", changeset.getId());
+
+			return true;
+		}
+
+		// Exclude by Regex setting
+		String excludeRegex = settings.getString("excludeByRegex");
+
+		if(excludeRegex != null && !excludeRegex.isEmpty())
+		{
+			Pattern pattern = Pattern.compile(excludeRegex);
+			Matcher matcher = pattern.matcher(changeset.getMessage());
+			if(matcher.find())
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private List<String> checkCommitMessageRegex(Settings settings, YaccChangeset changeset)

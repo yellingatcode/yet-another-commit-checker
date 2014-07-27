@@ -2,14 +2,9 @@
 
 - [About](#about)
 - [Quick Start](#quick-start)
-    - [Configuration Settings](#configuration-settings)
+- [Configuration](#configuration)
 - [Troubleshooting](#troubleshooting)
-- [Future Work](#future-work)
-    - [Known Issues](#known-issues)
-    - [TODO](#todo)
 - [Development](#development)
-    - [Enable Logging](#enable-logging)
-    - [Original Atlassian README](#original-atlassian-readme)
 
 ## About
 
@@ -37,17 +32,17 @@ Author: [Sean Ford](https://github.com/sford)
 2. If you want to require valid JIRA issues, configure a JIRA Application Link in Stash
 4. Configure YACC in the Hook Settings for a repository
 
-### Configuration Settings
+## Configuration
 
-####**Require Matching Committer Email**
+####Require Matching Committer Email
 
 If enabled, committer email must match the email of the Stash user.
 
-####**Require Matching Committer Name**
+####Require Matching Committer Name
 
 If enabled, committer name must match the name of the Stash user.
 
-####**Commit Message Regex**
+####Commit Message Regex
 
 If a regex is present, commit message must match regex.
 
@@ -59,7 +54,7 @@ will require commit message to be in the form of:
 
     PROJ-123: added new feature xyz
 
-####**Require Valid JIRA Issue(s)**
+####Require Valid JIRA Issue(s)
 
 If enabled, commit messages must contain valid JIRA issue ids. JIRA issue ids are defined as any item that matches
 the regex `[A-Z][A-Z_0-9]+-[0-9]+`.
@@ -68,7 +63,7 @@ This check requires JIRA to be first linked with Stash using an Application Link
 
 *Note:* This may result in false positives if commit messages contains strings that look like JIRA issue, for example, "UTF-8". Enable `Ignore Unknown JIRA Project Keys` to tell YACC to ignore items that don't contain a valid JIRA Project key.
 
-#####Locating Issues Using a Regex Group 
+#####Locating Issues Using a Regex Group
 
 If a regex group is present in the `Commit Message Regex`, only text contained within this group will be examined when extracting JIRA issues.
 
@@ -78,11 +73,11 @@ For example, a `([A-Z0-9\-]+): .*` commit message regex will mean only `PROJ-123
 
 UTF-8 and HIGH-5 will be ignored because they are not contained within the regex group. Using a regex group can be used as an alternative to `Ignore Unknown JIRA Project Keys` to deal with issue false positives, especially when you want to detect project key typos.
 
-####**Ignore Unknown JIRA Project Keys**
+####Ignore Unknown JIRA Project Keys
 
 If enabled, any issue-like items in commit messages that do not contain a valid JIRA project key (such as "UTF-8") will be ignored.
 
-####**Issue JQL Matcher**
+####Issue JQL Matcher
 
 If JQL query is present, detected JIRA issues must match this query.
 
@@ -95,9 +90,15 @@ will require that JIRA issues be assigned, in progess, and from project PROJ.
 See [JIRA Advanced Searching](https://confluence.atlassian.com/display/JIRA/Advanced+Searching) for documentation regarding writing and testing
 JQL queries.
 
-####**Exclude Merge Commits**
+####Exclude Merge Commits
 
 If enabled, merge commits will be excluded from commit requirements.
+
+####Exclude by Regex
+
+If present, commits will be excluded from all requirements except matching committer email/name if part of the commit message matches this regex.
+
+*Example:* `^Revert \"|#skipchecks`
 
 ## Troubleshooting
 
@@ -112,19 +113,6 @@ for an example of this.
 
 There might be a better way to do this, but this what has worked for me :-)
 
-## Future Work
-
-### Known Issues
-
-1. Commit Message Regex: If regex is set, Git revert commits might be rejected because Git sets the commit message of the
-revert by default.
-
-### TODO
-
-1. More unit tests!
-2. Fix known issues
-3. Add more awesome features
-
 ## Development
 
 Interested in contributing? [Fork me!](https://github.com/sford/yet-another-commit-checker)
@@ -137,21 +125,7 @@ Enabling YACC logging can be done using the Stash REST API. For example, see the
 
     curl -u admin -v -X PUT -d "" -H "Content-Type: application/json" http://localhost:7990/stash/rest/api/latest/logs/logger/com.isroot/debug
 
-### Original Atlassian README
+### Atlassian SDK
 
-This is the original Atlassian README with instructions on how to run it in the Atlassian SDK
-
-    You have successfully created an Atlassian Plugin!
-
-    Here are the SDK commands you'll use immediately:
-
-    * atlas-run   -- installs this plugin into the product and starts it on localhost
-    * atlas-debug -- same as atlas-run, but allows a debugger to attach at port 5005
-    * atlas-cli   -- after atlas-run or atlas-debug, opens a Maven command line window:
-                     - 'pi' reinstalls the plugin into the running product instance
-    * atlas-help  -- prints description for all commands in the SDK
-
-    Full documentation is always available at:
-
-    https://developer.atlassian.com/display/DOCS/Introduction+to+the+Atlassian+Plugin+SDK
+See `README_ATLASSIAN.txt` for the original Atlassian SDK README that contains some useful SDK commands.
 

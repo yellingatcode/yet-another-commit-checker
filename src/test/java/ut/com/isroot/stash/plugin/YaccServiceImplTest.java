@@ -296,12 +296,60 @@ public class YaccServiceImplTest
         assertThat(errors).contains("refs/heads/master: deadbeef: commit message doesn't match regex: [a-z ]+");
     }
 
+    @Test
+    public void testCheckRefChange_excludeByRegex_commitAllowedIfRegexMatches()
+    {
+        when(settings.getString("commitMessageRegex")).thenReturn("foo");
+        when(settings.getString("excludeByRegex")).thenReturn("#skipcheck");
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getMessage()).thenReturn("this commit will be allowed #skipcheck");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).isEmpty();
+
+        verify(settings).getString("excludeByRegex");
+    }
+
+    @Test
+    public void testCheckRefChange_excludeByRegex_commitNotAllowedIfRegexDoesNotMatch()
+    {
+        when(settings.getString("commitMessageRegex")).thenReturn("foo");
+        when(settings.getString("excludeByRegex")).thenReturn("#skipcheck");
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getMessage()).thenReturn("this commit will be rejected");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).isNotEmpty();
+    }
+
+    @Test
+    public void testCheckRefChange_excludeMergeCommits()
+    {
+        when(settings.getString("commitMessageRegex")).thenReturn("foo");
+        when(settings.getBoolean("excludeMergeCommits",false)).thenReturn(true);
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getMessage()).thenReturn("This is a merge commit");
+        when(changeset.getParentCount()).thenReturn(2);
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).isEmpty();
+
+        verify(settings).getBoolean("excludeMergeCommits", false);
+    }
+
     private YaccChangeset mockChangeset()
     {
         YaccChangeset changeset = mock(YaccChangeset.class, RETURNS_DEEP_STUBS);
         when(changeset.getCommitter().getName()).thenReturn("John Smith");
         when(changeset.getCommitter().getEmailAddress()).thenReturn("jsmith@example.com");
 		when(changeset.getId()).thenReturn("deadbeef");
+		when(changeset.getParentCount()).thenReturn(1);
         return changeset;
     }
 

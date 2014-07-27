@@ -87,4 +87,72 @@ public class ConfigValidatorTest
         verify(jiraService).isJqlQueryValid("assignee is not empty");
         verifyZeroInteractions(settingsValidationErrors);
     }
+
+    @Test
+    public void testValidate_excludeByRegex_emptyStringAllowed()
+    {
+        when(settings.getString("excludeByRegex")).thenReturn("");
+
+        configValidator.validate(settings, settingsValidationErrors, repository);
+
+        verify(settings).getString("excludeByRegex");
+        verifyZeroInteractions(settingsValidationErrors);
+    }
+
+    @Test
+    public void testValidate_excludeByRegex_goodRegex()
+    {
+        when(settings.getString("excludeByRegex")).thenReturn("^Revert \"|#skipchecks");
+
+        configValidator.validate(settings, settingsValidationErrors, repository);
+
+        verify(settings).getString("excludeByRegex");
+        verifyZeroInteractions(settingsValidationErrors);
+    }
+    @Test
+    public void testValidate_excludeByRegex_badRegex()
+    {
+        when(settings.getString("excludeByRegex")).thenReturn("^(");
+
+        configValidator.validate(settings, settingsValidationErrors, repository);
+
+        verify(settings).getString("excludeByRegex");
+        verify(settingsValidationErrors).addFieldError("excludeByRegex", "Invalid Regex: Unclosed group near index 2\n" +
+                "^(\n" +
+                "  ^");
+    }
+
+    @Test
+    public void testValidate_commitMessageRegex_emptyStringAllowed()
+    {
+        when(settings.getString("commitMessageRegex")).thenReturn("");
+
+        configValidator.validate(settings, settingsValidationErrors, repository);
+
+        verify(settings).getString("commitMessageRegex");
+        verifyZeroInteractions(settingsValidationErrors);
+    }
+
+    @Test
+    public void testValidate_commitMessageRegex_goodRegex()
+    {
+        when(settings.getString("commitMessageRegex")).thenReturn(".{32,}");
+
+        configValidator.validate(settings, settingsValidationErrors, repository);
+
+        verify(settings).getString("commitMessageRegex");
+        verifyZeroInteractions(settingsValidationErrors);
+    }
+    @Test
+    public void testValidate_commitMessageRegex_badRegex()
+    {
+        when(settings.getString("commitMessageRegex")).thenReturn(")");
+
+        configValidator.validate(settings, settingsValidationErrors, repository);
+
+        verify(settings).getString("commitMessageRegex");
+        verify(settingsValidationErrors).addFieldError("commitMessageRegex", "Invalid Regex: Unmatched closing ')'\n" +
+                ")");
+    }
+
 }
