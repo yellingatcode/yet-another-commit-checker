@@ -61,24 +61,25 @@ public class JiraServiceImpl implements JiraService
     {
         checkNotNull(issueKey, "issueKey is null");
 
-		final ApplicationLinkRequestFactory fac = getJiraApplicationLink().createAuthenticatedRequestFactory();
 
-		ApplicationLinkRequest req = fac.createRequest(Request.MethodType.GET, "/rest/api/2/issue/"+issueKey.getFullyQualifiedIssueKey());
+        final ApplicationLinkRequestFactory fac = getJiraApplicationLink().createAuthenticatedRequestFactory();
 
-		return req.execute(new ApplicationLinkResponseHandler<Boolean>()
-		{
-			@Override
-			public Boolean credentialsRequired(Response response) throws ResponseException
-			{
-				throw new ResponseException(new CredentialsRequiredException(fac, "Token is invalid"));
-			}
+        ApplicationLinkRequest req = fac.createRequest(Request.MethodType.GET, "/rest/api/2/issue/"+issueKey.getFullyQualifiedIssueKey());
 
-			@Override
-			public Boolean handle(Response response) throws ResponseException
-			{
-				return response.isSuccessful();
-			}
-		});
+        return req.execute(new ApplicationLinkResponseHandler<Boolean>()
+        {
+            @Override
+            public Boolean credentialsRequired(Response response) throws ResponseException
+            {
+                throw new ResponseException(new CredentialsRequiredException(fac, "Token is invalid"));
+            }
+
+            @Override
+            public Boolean handle(Response response) throws ResponseException
+            {
+                return response.isSuccessful();
+            }
+        });
     }
 
     @Override

@@ -24,274 +24,274 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  */
 public class YaccServiceImpl implements YaccService
 {
-	private static final Logger log = LoggerFactory.getLogger(YaccServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(YaccServiceImpl.class);
 
 
-	private final StashAuthenticationContext stashAuthenticationContext;
-	private final ChangesetsService changesetsService;
-	private final JiraService jiraService;
+    private final StashAuthenticationContext stashAuthenticationContext;
+    private final ChangesetsService changesetsService;
+    private final JiraService jiraService;
 
-	public YaccServiceImpl(StashAuthenticationContext stashAuthenticationContext, ChangesetsService changesetsService,
-						   JiraService jiraService)
-	{
-		this.stashAuthenticationContext = stashAuthenticationContext;
-		this.changesetsService = changesetsService;
-		this.jiraService = jiraService;
-	}
+    public YaccServiceImpl(StashAuthenticationContext stashAuthenticationContext, ChangesetsService changesetsService,
+                           JiraService jiraService)
+    {
+        this.stashAuthenticationContext = stashAuthenticationContext;
+        this.changesetsService = changesetsService;
+        this.jiraService = jiraService;
+    }
 
-	@Override
-	public List<String> checkRefChange(Repository repository, Settings settings, RefChange refChange)
-	{
-		log.debug("checking ref change refId={} fromHash={} toHash={} type={}", refChange.getRefId(), refChange.getFromHash(),
-				refChange.getToHash(), refChange.getType().toString());
+    @Override
+    public List<String> checkRefChange(Repository repository, Settings settings, RefChange refChange)
+    {
+        log.debug("checking ref change refId={} fromHash={} toHash={} type={}", refChange.getRefId(), refChange.getFromHash(),
+                refChange.getToHash(), refChange.getType().toString());
 
-		List<String> errors = Lists.newArrayList();
+        List<String> errors = Lists.newArrayList();
 
-		Set<YaccChangeset> changesets = changesetsService.getNewChangesets(repository, refChange);
+        Set<YaccChangeset> changesets = changesetsService.getNewChangesets(repository, refChange);
 
-		for (YaccChangeset changeset : changesets)
-		{
-			for(String e : checkChangeset(settings, changeset))
-			{
-				errors.add(String.format("%s: %s: %s", refChange.getRefId(), changeset.getId(), e));
-			}
-		}
+        for (YaccChangeset changeset : changesets)
+        {
+            for(String e : checkChangeset(settings, changeset))
+            {
+                errors.add(String.format("%s: %s: %s", refChange.getRefId(), changeset.getId(), e));
+            }
+        }
 
-		return errors;
-	}
+        return errors;
+    }
 
-	private List<String> checkChangeset(Settings settings, YaccChangeset changeset)
-	{
-		log.debug("checking commit id={} name={} email={} message={}", changeset.getId(),
-				changeset.getCommitter().getName(), changeset.getCommitter().getEmailAddress(),
-				changeset.getMessage());
+    private List<String> checkChangeset(Settings settings, YaccChangeset changeset)
+    {
+        log.debug("checking commit id={} name={} email={} message={}", changeset.getId(),
+                changeset.getCommitter().getName(), changeset.getCommitter().getEmailAddress(),
+                changeset.getMessage());
 
-		List<String> errors = Lists.newArrayList();
+        List<String> errors = Lists.newArrayList();
 
-		errors.addAll(checkCommitterEmail(settings, changeset));
-		errors.addAll(checkCommitterName(settings, changeset));
+        errors.addAll(checkCommitterEmail(settings, changeset));
+        errors.addAll(checkCommitterName(settings, changeset));
 
-		if(!isCommitExcluded(settings, changeset))
-		{
-			errors.addAll(checkCommitMessageRegex(settings, changeset));
+        if(!isCommitExcluded(settings, changeset))
+        {
+            errors.addAll(checkCommitMessageRegex(settings, changeset));
 
-			// Checking JIRA issues might be dependent on the commit message regex, so only proceed if there are no errors.
-			if (errors.isEmpty())
-			{
-				errors.addAll(checkJiraIssues(settings, changeset));
-			}
-		}
+            // Checking JIRA issues might be dependent on the commit message regex, so only proceed if there are no errors.
+            if (errors.isEmpty())
+            {
+                errors.addAll(checkJiraIssues(settings, changeset));
+            }
+        }
 
-		return errors;
-	}
+        return errors;
+    }
 
-	private boolean isCommitExcluded(Settings settings, YaccChangeset changeset)
-	{
-		// Exclude Merge Commit setting
-		if(settings.getBoolean("excludeMergeCommits", false) && changeset.getParentCount() > 1)
-		{
-			log.debug("skipping commit {} because it is a merge commit", changeset.getId());
+    private boolean isCommitExcluded(Settings settings, YaccChangeset changeset)
+    {
+        // Exclude Merge Commit setting
+        if(settings.getBoolean("excludeMergeCommits", false) && changeset.getParentCount() > 1)
+        {
+            log.debug("skipping commit {} because it is a merge commit", changeset.getId());
 
-			return true;
-		}
+            return true;
+        }
 
-		// Exclude by Regex setting
-		String excludeRegex = settings.getString("excludeByRegex");
+        // Exclude by Regex setting
+        String excludeRegex = settings.getString("excludeByRegex");
 
-		if(excludeRegex != null && !excludeRegex.isEmpty())
-		{
-			Pattern pattern = Pattern.compile(excludeRegex);
-			Matcher matcher = pattern.matcher(changeset.getMessage());
-			if(matcher.find())
-			{
-				return true;
-			}
-		}
+        if(excludeRegex != null && !excludeRegex.isEmpty())
+        {
+            Pattern pattern = Pattern.compile(excludeRegex);
+            Matcher matcher = pattern.matcher(changeset.getMessage());
+            if(matcher.find())
+            {
+                return true;
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	private List<String> checkCommitMessageRegex(Settings settings, YaccChangeset changeset)
-	{
-		List<String> errors = Lists.newArrayList();
+    private List<String> checkCommitMessageRegex(Settings settings, YaccChangeset changeset)
+    {
+        List<String> errors = Lists.newArrayList();
 
-		String regex = settings.getString("commitMessageRegex");
-		if(isNullOrEmpty(regex) == false)
-		{
-			Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
-			Matcher matcher = pattern.matcher(changeset.getMessage());
-			if(matcher.matches() == false)
-			{
-				errors.add("commit message doesn't match regex: " + regex);
-			}
-		}
+        String regex = settings.getString("commitMessageRegex");
+        if(isNullOrEmpty(regex) == false)
+        {
+            Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+            Matcher matcher = pattern.matcher(changeset.getMessage());
+            if(matcher.matches() == false)
+            {
+                errors.add("commit message doesn't match regex: " + regex);
+            }
+        }
 
-		return errors;
-	}
+        return errors;
+    }
 
-	private List<IssueKey> extractJiraIssuesFromCommitMessage(Settings settings, YaccChangeset changeset)
-	{
-		String message = changeset.getMessage();
+    private List<IssueKey> extractJiraIssuesFromCommitMessage(Settings settings, YaccChangeset changeset)
+    {
+        String message = changeset.getMessage();
 
-		// If a commit message regex is present, see if it contains a group 1 that can be used to located JIRA issues.
-		// If not, just ignore it.
-		String regex = settings.getString("commitMessageRegex");
-		if(isNullOrEmpty(regex) == false)
-		{
-			Pattern pattern = Pattern.compile(regex);
-			Matcher matcher = pattern.matcher(message);
-			if(matcher.matches() && matcher.groupCount() > 0)
-			{
-				message = matcher.group(1);
-			}
-		}
+        // If a commit message regex is present, see if it contains a group 1 that can be used to located JIRA issues.
+        // If not, just ignore it.
+        String regex = settings.getString("commitMessageRegex");
+        if(isNullOrEmpty(regex) == false)
+        {
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(message);
+            if(matcher.matches() && matcher.groupCount() > 0)
+            {
+                message = matcher.group(1);
+            }
+        }
 
         final List<IssueKey> issueKeys = IssueKey.parseIssueKeys(message);
-		log.debug("found jira issues {} from commit message: {}", issueKeys, message);
+        log.debug("found jira issues {} from commit message: {}", issueKeys, message);
 
-		return issueKeys;
-	}
+        return issueKeys;
+    }
 
-	private List<String> checkJiraIssues(Settings settings, YaccChangeset changeset)
-	{
-		if (!settings.getBoolean("requireJiraIssue", false))
-		{
-			return Lists.newArrayList();
-		}
+    private List<String> checkJiraIssues(Settings settings, YaccChangeset changeset)
+    {
+        if (!settings.getBoolean("requireJiraIssue", false))
+        {
+            return Lists.newArrayList();
+        }
 
-		List<String> errors = Lists.newArrayList();
+        List<String> errors = Lists.newArrayList();
 
-		if (!jiraService.doesJiraApplicationLinkExist())
-		{
-			errors.add(String.format("Unable to verify JIRA issue because JIRA Application Link does not exist"));
-			return errors;
-		}
+        if (!jiraService.doesJiraApplicationLinkExist())
+        {
+            errors.add(String.format("Unable to verify JIRA issue because JIRA Application Link does not exist"));
+            return errors;
+        }
 
-		final List<IssueKey> issues;
-		try {
-			final List<IssueKey> extractedKeys = extractJiraIssuesFromCommitMessage(settings, changeset);
-			if (settings.getBoolean("ignoreUnknownIssueProjectKeys", false))
-			{
-				/* Remove issues that contain non-existent project keys */
-				issues = Lists.newArrayList();
-				for (IssueKey issueKey : extractedKeys) {
-					if (jiraService.doesProjectExist(issueKey.getProjectKey()))
-					{
-						issues.add(issueKey);
-					}
-				}
-			}
-			else
-			{
-				issues = extractedKeys;
-			}
-		}
-		catch(CredentialsRequiredException e)
-		{
-			log.error("communication error while validating issues", e);
-			errors.add(String.format("Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA."));
-			errors.add(String.format("To authenticate, visit %s in a web browser.", e.getAuthorisationURI().toASCIIString()));
-			return errors;
-		}
-		catch(ResponseException e)
-		{
-			log.error("unexpected exception while trying to validate JIRA issues", e);
-			errors.add(String.format("Unable to validate JIRA issues due to an unexpected exception. Please see stack trace in logs."));
-			return errors;
-		}
+        final List<IssueKey> issues;
+        try {
+            final List<IssueKey> extractedKeys = extractJiraIssuesFromCommitMessage(settings, changeset);
+            if (settings.getBoolean("ignoreUnknownIssueProjectKeys", false))
+            {
+                /* Remove issues that contain non-existent project keys */
+                issues = Lists.newArrayList();
+                for (IssueKey issueKey : extractedKeys) {
+                    if (jiraService.doesProjectExist(issueKey.getProjectKey()))
+                    {
+                        issues.add(issueKey);
+                    }
+                }
+            }
+            else
+            {
+                issues = extractedKeys;
+            }
+        }
+        catch(CredentialsRequiredException e)
+        {
+            log.error("communication error while validating issues", e);
+            errors.add(String.format("Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA."));
+            errors.add(String.format("To authenticate, visit %s in a web browser.", e.getAuthorisationURI().toASCIIString()));
+            return errors;
+        }
+        catch(ResponseException e)
+        {
+            log.error("unexpected exception while trying to validate JIRA issues", e);
+            errors.add(String.format("Unable to validate JIRA issues due to an unexpected exception. Please see stack trace in logs."));
+            return errors;
+        }
 
-		if(issues.isEmpty() == false)
-		{
-			for(IssueKey issueKey : issues)
-			{
-				errors.addAll(checkJiraIssue(settings, issueKey));
-			}
-		}
-		else
-		{
-			errors.add(String.format("No JIRA Issue found in commit message."));
-		}
+        if(issues.isEmpty() == false)
+        {
+            for(IssueKey issueKey : issues)
+            {
+                errors.addAll(checkJiraIssue(settings, issueKey));
+            }
+        }
+        else
+        {
+            errors.add(String.format("No JIRA Issue found in commit message."));
+        }
 
-		return errors;
-	}
+        return errors;
+    }
 
-	private List<String> checkJiraIssue(Settings settings, IssueKey issueKey)
-	{
-		List<String> errors = Lists.newArrayList();
+    private List<String> checkJiraIssue(Settings settings, IssueKey issueKey)
+    {
+        List<String> errors = Lists.newArrayList();
 
-		try
-		{
-			if (!jiraService.doesIssueExist(issueKey))
-			{
-				errors.add(String.format("%s: JIRA Issue does not exist", issueKey.getFullyQualifiedIssueKey()));
-			}
-			else
-			{
-				String jqlQuery = settings.getString("issueJqlMatcher");
-				if (jqlQuery != null && !jqlQuery.isEmpty())
-				{
-					if (!jiraService.doesIssueMatchJqlQuery(jqlQuery, issueKey))
-					{
-						errors.add(String.format("%s: JIRA Issue does not match JQL Query: %s", issueKey, jqlQuery));
-					}
-				}
-			}
-		}
-		catch(CredentialsRequiredException e)
-		{
-			errors.add(String.format("%s: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.", issueKey.getFullyQualifiedIssueKey()));
-			errors.add(String.format("To authenticate, visit %s in a web browser.", e.getAuthorisationURI().toASCIIString()));
-		}
-		catch(ResponseException e)
-		{
-			if (e.getCause() instanceof CredentialsRequiredException) {
-				CredentialsRequiredException cred = (CredentialsRequiredException)e.getCause();
-				errors.add(String.format("%s: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.", issueKey.getFullyQualifiedIssueKey()));
-				errors.add(String.format("To authenticate, visit %s in a web browser.", cred.getAuthorisationURI().toASCIIString()));
-			} else {
-				log.error("unexpected exception while trying to validate JIRA issue", e);
-				errors.add(String.format("%s: Unable to validate JIRA issue due to an unexpected exception. Please see stack trace in logs.", issueKey.getFullyQualifiedIssueKey()));
-			}
-		}
+        try
+        {
+            if (!jiraService.doesIssueExist(issueKey))
+            {
+                errors.add(String.format("%s: JIRA Issue does not exist", issueKey.getFullyQualifiedIssueKey()));
+            }
+            else
+            {
+                String jqlQuery = settings.getString("issueJqlMatcher");
+                if (jqlQuery != null && !jqlQuery.isEmpty())
+                {
+                    if (!jiraService.doesIssueMatchJqlQuery(jqlQuery, issueKey))
+                    {
+                        errors.add(String.format("%s: JIRA Issue does not match JQL Query: %s", issueKey, jqlQuery));
+                    }
+                }
+            }
+        }
+        catch(CredentialsRequiredException e)
+        {
+            errors.add(String.format("%s: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.", issueKey.getFullyQualifiedIssueKey()));
+            errors.add(String.format("To authenticate, visit %s in a web browser.", e.getAuthorisationURI().toASCIIString()));
+        }
+        catch(ResponseException e)
+        {
+            if (e.getCause() instanceof CredentialsRequiredException) {
+                CredentialsRequiredException cred = (CredentialsRequiredException)e.getCause();
+                errors.add(String.format("%s: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.", issueKey.getFullyQualifiedIssueKey()));
+                errors.add(String.format("To authenticate, visit %s in a web browser.", cred.getAuthorisationURI().toASCIIString()));
+            } else {
+                log.error("unexpected exception while trying to validate JIRA issue", e);
+                errors.add(String.format("%s: Unable to validate JIRA issue due to an unexpected exception. Please see stack trace in logs.", issueKey.getFullyQualifiedIssueKey()));
+            }
+        }
 
-		return errors;
-	}
+        return errors;
+    }
 
-	private List<String> checkCommitterEmail(Settings settings, YaccChangeset changeset)
-	{
-		StashUser stashUser = stashAuthenticationContext.getCurrentUser();
-		final boolean requireMatchingAuthorEmail = settings.getBoolean("requireMatchingAuthorEmail", false);
+    private List<String> checkCommitterEmail(Settings settings, YaccChangeset changeset)
+    {
+        StashUser stashUser = stashAuthenticationContext.getCurrentUser();
+        final boolean requireMatchingAuthorEmail = settings.getBoolean("requireMatchingAuthorEmail", false);
 
-		List<String> errors = Lists.newArrayList();
+        List<String> errors = Lists.newArrayList();
 
-		log.debug("requireMatchingAuthorEmail={} authorName={} stashName={}", requireMatchingAuthorEmail, changeset.getCommitter().getEmailAddress(),
-				stashUser.getEmailAddress());
+        log.debug("requireMatchingAuthorEmail={} authorName={} stashName={}", requireMatchingAuthorEmail, changeset.getCommitter().getEmailAddress(),
+                stashUser.getEmailAddress());
 
-		if (requireMatchingAuthorEmail && !changeset.getCommitter().getEmailAddress().toLowerCase().equals(stashUser.getEmailAddress().toLowerCase()))
-		{
-			errors.add(String.format("expected committer email '%s' but found '%s'", stashUser.getEmailAddress(),
-					changeset.getCommitter().getEmailAddress()));
-		}
+        if (requireMatchingAuthorEmail && !changeset.getCommitter().getEmailAddress().toLowerCase().equals(stashUser.getEmailAddress().toLowerCase()))
+        {
+            errors.add(String.format("expected committer email '%s' but found '%s'", stashUser.getEmailAddress(),
+                    changeset.getCommitter().getEmailAddress()));
+        }
 
-		return errors;
-	}
+        return errors;
+    }
 
-	private List<String> checkCommitterName(Settings settings, YaccChangeset changeset)
-	{
-		StashUser stashUser = stashAuthenticationContext.getCurrentUser();
-		final boolean requireMatchingAuthorName = settings.getBoolean("requireMatchingAuthorName", false);
+    private List<String> checkCommitterName(Settings settings, YaccChangeset changeset)
+    {
+        StashUser stashUser = stashAuthenticationContext.getCurrentUser();
+        final boolean requireMatchingAuthorName = settings.getBoolean("requireMatchingAuthorName", false);
 
-		List<String> errors = Lists.newArrayList();
+        List<String> errors = Lists.newArrayList();
 
-		log.debug("requireMatchingAuthorName={} authorName={} stashName={}", requireMatchingAuthorName, changeset.getCommitter().getName(),
-				stashUser.getDisplayName());
+        log.debug("requireMatchingAuthorName={} authorName={} stashName={}", requireMatchingAuthorName, changeset.getCommitter().getName(),
+                stashUser.getDisplayName());
 
-		if (requireMatchingAuthorName && !changeset.getCommitter().getName().equals(stashUser.getDisplayName()))
-		{
-			errors.add(String.format("expected committer name '%s' but found '%s'", stashUser.getDisplayName(),
-					changeset.getCommitter().getName()));
-		}
+        if (requireMatchingAuthorName && !changeset.getCommitter().getName().equals(stashUser.getDisplayName()))
+        {
+            errors.add(String.format("expected committer name '%s' but found '%s'", stashUser.getDisplayName(),
+                    changeset.getCommitter().getName()));
+        }
 
-		return errors;
-	}
+        return errors;
+    }
 }

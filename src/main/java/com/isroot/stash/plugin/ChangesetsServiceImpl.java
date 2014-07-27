@@ -35,9 +35,9 @@ public class ChangesetsServiceImpl implements ChangesetsService
         this.applicationPropertiesService = applicationPropertiesService;
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<YaccChangeset> getNewChangesets(Repository repository, RefChange refChange)
     {

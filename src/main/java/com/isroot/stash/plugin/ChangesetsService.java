@@ -1,6 +1,5 @@
 package com.isroot.stash.plugin;
 
-import com.atlassian.stash.content.Changeset;
 import com.atlassian.stash.repository.RefChange;
 import com.atlassian.stash.repository.Repository;
 
@@ -14,8 +13,8 @@ import java.util.Set;
  */
 public interface ChangesetsService
 {
-	/**
-	 * Get new {@link YaccChangeset}s not already present in the repository for the given {@link RefChange}.
-	 */
+    /**
+     * Get new {@link YaccChangeset}s not already present in the repository for the given {@link RefChange}.
+     */
     public Set<YaccChangeset> getNewChangesets(Repository repository, RefChange refChange);
 }

@@ -21,24 +21,24 @@ public final class YaccHook implements PreReceiveRepositoryHook
 {
     private static final Logger log = LoggerFactory.getLogger(YaccHook.class);
 
-	public static final String ERROR_BEARS = "\n" +
-			"  (c).-.(c)    (c).-.(c)    (c).-.(c)    (c).-.(c)    (c).-.(c) \n" +
-			"   / ._. \\      / ._. \\      / ._. \\      / ._. \\      / ._. \\ \n" +
-			" __\\( Y )/__  __\\( Y )/__  __\\( Y )/__  __\\( Y )/__  __\\( Y )/__\n" +
-			"(_.-/'-'\\-._)(_.-/'-'\\-._)(_.-/'-'\\-._)(_.-/'-'\\-._)(_.-/'-'\\-._)\n" +
-			"   || E ||      || R ||      || R ||      || O ||      || R ||\n" +
-			" _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '.\n" +
-			"(.-./`-'\\.-.)(.-./`-`\\.-.)(.-./`-`\\.-.)(.-./`-'\\.-.)(.-./`-`\\.-.)\n" +
-			" `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-' \n" +
-			"\n" +
-			"\n" +
-			"Push rejected.\n";
+    public static final String ERROR_BEARS = "\n" +
+            "  (c).-.(c)    (c).-.(c)    (c).-.(c)    (c).-.(c)    (c).-.(c) \n" +
+            "   / ._. \\      / ._. \\      / ._. \\      / ._. \\      / ._. \\ \n" +
+            " __\\( Y )/__  __\\( Y )/__  __\\( Y )/__  __\\( Y )/__  __\\( Y )/__\n" +
+            "(_.-/'-'\\-._)(_.-/'-'\\-._)(_.-/'-'\\-._)(_.-/'-'\\-._)(_.-/'-'\\-._)\n" +
+            "   || E ||      || R ||      || R ||      || O ||      || R ||\n" +
+            " _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '.\n" +
+            "(.-./`-'\\.-.)(.-./`-`\\.-.)(.-./`-`\\.-.)(.-./`-'\\.-.)(.-./`-`\\.-.)\n" +
+            " `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-' \n" +
+            "\n" +
+            "\n" +
+            "Push rejected.\n";
 
-	private final YaccService yaccService;
+    private final YaccService yaccService;
 
     public YaccHook(YaccService yaccService)
     {
-    	this.yaccService = yaccService;
+        this.yaccService = yaccService;
     }
 
     @Override
@@ -54,7 +54,7 @@ public final class YaccHook implements PreReceiveRepositoryHook
                 continue;
             }
 
-			errors.addAll(yaccService.checkRefChange(repositoryHookContext.getRepository(), repositoryHookContext.getSettings(), rf));
+            errors.addAll(yaccService.checkRefChange(repositoryHookContext.getRepository(), repositoryHookContext.getSettings(), rf));
         }
 
         if (errors.isEmpty())

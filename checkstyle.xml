@@ -6,4 +6,5 @@
     <module name="TreeWalker">
         <module name="Indentation"/>
     </module>
+    <module name="FileTabCharacter"/>
 </module>
