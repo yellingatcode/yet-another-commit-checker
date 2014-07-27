@@ -9,6 +9,4 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install atlassian-plugin-sdk
 install: atlas-mvn install -DskipTests=true
-script:
-  - atlas-unit-test
-  - atlas-mvn checkstyle:check
+script: atlas-unit-test
