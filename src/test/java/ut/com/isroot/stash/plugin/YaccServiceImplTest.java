@@ -89,6 +89,20 @@ public class YaccServiceImplTest
     }
 
     @Test
+    public void testCheckRefChange_requireMatchingAuthorName_notCaseSensitive() throws Exception
+    {
+        when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
+        when(stashUser.getDisplayName()).thenReturn("John SMITH");
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getCommitter().getName()).thenReturn("John Smith");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
     public void testCheckRefChange_requireMatchingAuthorEmail_rejectOnMismatch() throws Exception
     {
         when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);

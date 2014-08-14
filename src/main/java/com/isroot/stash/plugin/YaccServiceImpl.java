@@ -286,7 +286,7 @@ public class YaccServiceImpl implements YaccService
         log.debug("requireMatchingAuthorName={} authorName={} stashName={}", requireMatchingAuthorName, changeset.getCommitter().getName(),
                 stashUser.getDisplayName());
 
-        if (requireMatchingAuthorName && !changeset.getCommitter().getName().equals(stashUser.getDisplayName()))
+        if (requireMatchingAuthorName && !changeset.getCommitter().getName().toLowerCase().equals(stashUser.getDisplayName().toLowerCase()))
         {
             errors.add(String.format("expected committer name '%s' but found '%s'", stashUser.getDisplayName(),
                     changeset.getCommitter().getName()));
