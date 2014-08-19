@@ -15,22 +15,21 @@ import com.isroot.stash.plugin.JiraService;
 import com.isroot.stash.plugin.YaccChangeset;
 import com.isroot.stash.plugin.YaccService;
 import com.isroot.stash.plugin.YaccServiceImpl;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
 import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import org.junit.Before;
+import org.junit.Test;
 import static org.mockito.Matchers.any;
+import org.mockito.Mock;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import org.mockito.MockitoAnnotations;
 
 /**
  * @author Sean Ford
@@ -357,6 +356,56 @@ public class YaccServiceImplTest
         verify(settings).getBoolean("excludeMergeCommits", false);
     }
 
+    @Test
+    public void testCheckRefChange_tag_checksUser()
+    {
+        when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
+        when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);
+        when(stashUser.getDisplayName()).thenReturn("John Smith");
+        when(stashUser.getEmailAddress()).thenReturn("correct@email.com");
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getCommitter().getName()).thenReturn("Incorrect Name");
+        when(changeset.getCommitter().getEmailAddress()).thenReturn("wrong@email.com");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockTagChange());
+        assertThat(errors).contains("refs/tags/tag: deadbeef: expected committer name 'John Smith' but found 'Incorrect Name'");
+        assertThat(errors).contains("refs/tags/tag: deadbeef: expected committer email 'correct@email.com' but found 'wrong@email.com'");
+    }
+
+    @Test
+    public void testCheckRefChange_tag_doesntCheckRegex() throws Exception
+    {
+        when(settings.getString("commitMessageRegex")).thenReturn("REGEX");
+        when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getMessage()).thenReturn("a message");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockTagChange());
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    public void testCheckRefChange_tag_doesntCheckJira() throws Exception
+    {
+        when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
+        when(settings.getBoolean("ignoreUnknownIssueProjectKeys", false)).thenReturn(true);
+        when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
+        when(jiraService.doesProjectExist("UTF")).thenReturn(false);
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getMessage()).thenReturn("this commit message has no jira issues. UTF-8 is not a valid issue because it has an invalid project key.");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockTagChange());
+        assertThat(errors).isEmpty();
+
+        verifyNoMoreInteractions(jiraService);
+    }
+
     private YaccChangeset mockChangeset()
     {
         YaccChangeset changeset = mock(YaccChangeset.class, RETURNS_DEEP_STUBS);
@@ -374,6 +423,16 @@ public class YaccServiceImplTest
         when(refChange.getToHash()).thenReturn("35d938b060bb361503e021f228e43351f1a71551");
         when(refChange.getRefId()).thenReturn("refs/heads/master");
         when(refChange.getType()).thenReturn(RefChangeType.UPDATE);
+        return refChange;
+    }
+
+    private RefChange mockTagChange()
+    {
+        RefChange refChange = mock(RefChange.class);
+        when(refChange.getFromHash()).thenReturn("0000000000000000000000000000000000000000");
+        when(refChange.getToHash()).thenReturn("35d938b060bb361503e021f228e43351f1a71551");
+        when(refChange.getRefId()).thenReturn("refs/tags/tag");
+        when(refChange.getType()).thenReturn(RefChangeType.ADD);
         return refChange;
     }
 }
