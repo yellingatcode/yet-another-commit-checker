@@ -8,6 +8,7 @@ import com.atlassian.stash.repository.Repository;
 import com.atlassian.stash.setting.Settings;
 import com.atlassian.stash.user.StashAuthenticationContext;
 import com.atlassian.stash.user.StashUser;
+import com.atlassian.stash.user.UserType;
 import com.google.common.collect.Sets;
 import com.isroot.stash.plugin.ChangesetsService;
 import com.isroot.stash.plugin.IssueKey;
@@ -18,6 +19,7 @@ import com.isroot.stash.plugin.YaccServiceImpl;
 import java.net.URI;
 import java.util.List;
 import java.util.Set;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import org.junit.Before;
@@ -26,6 +28,8 @@ import static org.mockito.Matchers.any;
 import org.mockito.Mock;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -63,6 +67,7 @@ public class YaccServiceImplTest
     public void testCheckRefChange_requireMatchingAuthorName_rejectOnMismatch() throws Exception
     {
         when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
+        when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getDisplayName()).thenReturn("John Smith");
 
         YaccChangeset changeset = mockChangeset();
@@ -77,6 +82,7 @@ public class YaccServiceImplTest
     public void testCheckRefChange_requireMatchingAuthorName_allowOnMatch() throws Exception
     {
         when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
+        when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getDisplayName()).thenReturn("John Smith");
 
         YaccChangeset changeset = mockChangeset();
@@ -91,6 +97,7 @@ public class YaccServiceImplTest
     public void testCheckRefChange_requireMatchingAuthorName_notCaseSensitive() throws Exception
     {
         when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
+        when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getDisplayName()).thenReturn("John SMITH");
 
         YaccChangeset changeset = mockChangeset();
@@ -105,6 +112,7 @@ public class YaccServiceImplTest
     public void testCheckRefChange_requireMatchingAuthorEmail_rejectOnMismatch() throws Exception
     {
         when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);
+        when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getEmailAddress()).thenReturn("correct@email.com");
 
         YaccChangeset changeset = mockChangeset();
@@ -119,6 +127,7 @@ public class YaccServiceImplTest
     public void testCheckRefChange_requireMatchingAuthorEmail_allowOnMatch() throws Exception
     {
         when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);
+        when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getEmailAddress()).thenReturn("correct@email.com");
 
         YaccChangeset changeset = mockChangeset();
@@ -133,6 +142,7 @@ public class YaccServiceImplTest
     public void testCheckRefChange_requireMatchingAuthorEmail_notCaseSensitive() throws Exception
     {
         when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);
+        when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getEmailAddress()).thenReturn("correct@email.com");
 
         YaccChangeset changeset = mockChangeset();
@@ -141,6 +151,23 @@ public class YaccServiceImplTest
 
         List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isEmpty();
+    }
+    
+    @Test
+    public void testCheckRefChange_serviceUser_skipped()
+    {
+        when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
+        when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);
+        when(stashUser.getType()).thenReturn(UserType.SERVICE);
+        
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getCommitter().getEmailAddress()).thenReturn("CoRrect@EMAIL.com");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).isEmpty();
+        verify(stashUser, never()).getDisplayName();
+        verify(stashUser, never()).getEmailAddress();
     }
 
     @Test
@@ -361,6 +388,7 @@ public class YaccServiceImplTest
     {
         when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
         when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);
+        when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getDisplayName()).thenReturn("John Smith");
         when(stashUser.getEmailAddress()).thenReturn("correct@email.com");
 
