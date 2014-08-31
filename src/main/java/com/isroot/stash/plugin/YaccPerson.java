@@ -1,5 +1,7 @@
 package com.isroot.stash.plugin;
 
+import javax.annotation.Nonnull;
+
 /**
  * A git person identity.
  */
@@ -10,7 +12,7 @@ public class YaccPerson {
      * @param name The name of the person.
      * @param emailAddress The e-mail address of the person.
      */
-    public YaccPerson(String name, String emailAddress) {
+    public YaccPerson(@Nonnull String name, @Nonnull String emailAddress) {
         this.name = name;
         this.emailAddress = emailAddress;
     }
@@ -20,6 +22,7 @@ public class YaccPerson {
      *
      * @return Name of person.
      */
+    @Nonnull
     public String getName() {
         return name;
     }
@@ -29,6 +32,7 @@ public class YaccPerson {
      *
      * @return E-mail of person.
      */
+    @Nonnull
     public String getEmailAddress() {
         return emailAddress;
     }

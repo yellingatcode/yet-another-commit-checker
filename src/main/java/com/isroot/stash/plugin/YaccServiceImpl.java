@@ -8,16 +8,16 @@ import com.atlassian.stash.scm.git.GitRefPattern;
 import com.atlassian.stash.setting.Settings;
 import com.atlassian.stash.user.StashAuthenticationContext;
 import com.atlassian.stash.user.StashUser;
+import com.atlassian.stash.user.UserType;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import com.google.common.collect.Lists;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
+import javax.annotation.Nonnull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Sean Ford
@@ -71,8 +71,20 @@ public class YaccServiceImpl implements YaccService
 
         List<String> errors = Lists.newArrayList();
 
-        errors.addAll(checkCommitterEmail(settings, changeset));
-        errors.addAll(checkCommitterName(settings, changeset));
+        StashUser stashUser = stashAuthenticationContext.getCurrentUser();
+
+        if (stashUser == null) {
+            // This should never happen
+            log.warn("Unauthenticated user is committing - skipping committer validate checks");
+        } else {
+            // Only validate 'normal' users - service users like
+            // the ssh access keys use the key comment as the 'name' and don't have emails
+            // Neither of these are useful to validate, so just skip them
+            if (stashUser.getType() == UserType.NORMAL) {
+                errors.addAll(checkCommitterEmail(settings, changeset, stashUser));
+                errors.addAll(checkCommitterName(settings, changeset, stashUser));
+            }
+        }
 
         if(checkMessages && !isCommitExcluded(settings, changeset))
         {
@@ -260,14 +272,22 @@ public class YaccServiceImpl implements YaccService
         return errors;
     }
 
-    private List<String> checkCommitterEmail(Settings settings, YaccChangeset changeset)
-    {
-        StashUser stashUser = stashAuthenticationContext.getCurrentUser();
+    private List<String> checkCommitterEmail(@Nonnull Settings settings, @Nonnull YaccChangeset changeset, @Nonnull StashUser stashUser)
+    {   
         final boolean requireMatchingAuthorEmail = settings.getBoolean("requireMatchingAuthorEmail", false);
 
         List<String> errors = Lists.newArrayList();
+        
+        // while the email address is not marked as @Nullable, its not @Notnull either
+        // For service users it can be null, and while those have already been
+        // excluded, add a sanity check anyway
+        
+        if (stashUser.getEmailAddress() == null) {
+            log.warn("stash user has null email address - skipping email validation");
+            return errors;
+        }
 
-        log.debug("requireMatchingAuthorEmail={} authorName={} stashName={}", requireMatchingAuthorEmail, changeset.getCommitter().getEmailAddress(),
+        log.debug("requireMatchingAuthorEmail={} authorEmail={} stashEmail={}", requireMatchingAuthorEmail, changeset.getCommitter().getEmailAddress(),
                 stashUser.getEmailAddress());
 
         if (requireMatchingAuthorEmail && !changeset.getCommitter().getEmailAddress().toLowerCase().equals(stashUser.getEmailAddress().toLowerCase()))
@@ -279,9 +299,8 @@ public class YaccServiceImpl implements YaccService
         return errors;
     }
 
-    private List<String> checkCommitterName(Settings settings, YaccChangeset changeset)
+    private List<String> checkCommitterName(@Nonnull Settings settings, @Nonnull YaccChangeset changeset, @Nonnull StashUser stashUser)
     {
-        StashUser stashUser = stashAuthenticationContext.getCurrentUser();
         final boolean requireMatchingAuthorName = settings.getBoolean("requireMatchingAuthorName", false);
 
         List<String> errors = Lists.newArrayList();
