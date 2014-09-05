@@ -83,6 +83,16 @@
 		{param value: $config['excludeByRegex'] /}
 		{param descriptionText: 'Exclude commits if commit message matches this regex.' /}
 		{param errorTexts: $errors ? $errors['excludeByRegex'] : null /}
-	{/call}
+   {/call}
+
+   {call aui.form.checkboxField}
+    {param legendContent: 'Exclude Service User Commits' /}
+      {param fields: [[
+        'id' : 'excludeServiceUserCommits',
+        'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
+        'isChecked' : $config['excludeServiceUserCommits']
+      ]] /}
+    {param descriptionText: 'Exclude commits from service users with access keys (e.g. CI Server) from commit requirements.' /}
+  {/call}
 
 {/template}
