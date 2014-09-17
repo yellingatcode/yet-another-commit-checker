@@ -434,6 +434,23 @@ public class YaccServiceImplTest
         verifyNoMoreInteractions(jiraService);
     }
 
+    @Test
+    public void testCheckRefChange_excludeServiceUserCommitsWithInvalidCommitMessage()
+    {
+        when(settings.getString("commitMessageRegex")).thenReturn("[a-z ]+");
+        when(settings.getBoolean("excludeServiceUserCommits")).thenReturn(true);
+
+        when(stashUser.getType()).thenReturn(UserType.SERVICE);
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getMessage()).thenReturn("123 does not match regex because it contains numbers");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).isEmpty();
+        verify(settings).getBoolean("excludeServiceUserCommits");
+    }
+
     private YaccChangeset mockChangeset()
     {
         YaccChangeset changeset = mock(YaccChangeset.class, RETURNS_DEEP_STUBS);

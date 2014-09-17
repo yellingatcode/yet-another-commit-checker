@@ -110,6 +110,11 @@ public class YaccServiceImpl implements YaccService
             return true;
         }
 
+        // Exclude by Service User setting
+        StashUser stashUser = stashAuthenticationContext.getCurrentUser();
+        if (settings.getBoolean("excludeServiceUserCommits") && stashUser.getType() == UserType.SERVICE)
+            return true;
+
         // Exclude by Regex setting
         String excludeRegex = settings.getString("excludeByRegex");
 
