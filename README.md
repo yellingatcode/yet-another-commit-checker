@@ -100,6 +100,11 @@ If present, commits will be excluded from all requirements except matching commi
 
 *Example:* `^Revert \"|#skipchecks`
 
+####Exclude Service User Commits
+
+If enabled, commits from service users (ie, using [SSH Access Keys](https://confluence.atlassian.com/display/STASH/SSH+access+keys+for+system+use))
+will be excluded from commit requirements.
+
 ## Troubleshooting
 
 #### I am getting a JIRA authentication failed message when attempting to push my code or when trying to configure an issue JQL matcher.

@@ -16,24 +16,23 @@ import com.isroot.stash.plugin.JiraService;
 import com.isroot.stash.plugin.YaccChangeset;
 import com.isroot.stash.plugin.YaccService;
 import com.isroot.stash.plugin.YaccServiceImpl;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import java.net.URI;
 import java.util.List;
 import java.util.Set;
-import static org.fest.assertions.api.Assertions.assertThat;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import org.junit.Before;
-import org.junit.Test;
 import static org.mockito.Matchers.any;
-import org.mockito.Mock;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import org.mockito.MockitoAnnotations;
 
 /**
  * @author Sean Ford
@@ -438,7 +437,7 @@ public class YaccServiceImplTest
     public void testCheckRefChange_excludeServiceUserCommitsWithInvalidCommitMessage()
     {
         when(settings.getString("commitMessageRegex")).thenReturn("[a-z ]+");
-        when(settings.getBoolean("excludeServiceUserCommits")).thenReturn(true);
+        when(settings.getBoolean("excludeServiceUserCommits", false)).thenReturn(true);
 
         when(stashUser.getType()).thenReturn(UserType.SERVICE);
 
@@ -448,7 +447,7 @@ public class YaccServiceImplTest
 
         List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isEmpty();
-        verify(settings).getBoolean("excludeServiceUserCommits");
+        verify(settings).getBoolean("excludeServiceUserCommits", false);
     }
 
     private YaccChangeset mockChangeset()

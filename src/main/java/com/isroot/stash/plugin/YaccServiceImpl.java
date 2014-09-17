@@ -9,15 +9,17 @@ import com.atlassian.stash.setting.Settings;
 import com.atlassian.stash.user.StashAuthenticationContext;
 import com.atlassian.stash.user.StashUser;
 import com.atlassian.stash.user.UserType;
-import static com.google.common.base.Strings.isNullOrEmpty;
 import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * @author Sean Ford
@@ -112,8 +114,10 @@ public class YaccServiceImpl implements YaccService
 
         // Exclude by Service User setting
         StashUser stashUser = stashAuthenticationContext.getCurrentUser();
-        if (settings.getBoolean("excludeServiceUserCommits") && stashUser.getType() == UserType.SERVICE)
+        if (settings.getBoolean("excludeServiceUserCommits", false) && stashUser.getType() == UserType.SERVICE)
+        {
             return true;
+        }
 
         // Exclude by Regex setting
         String excludeRegex = settings.getString("excludeByRegex");
