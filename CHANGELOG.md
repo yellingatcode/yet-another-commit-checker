@@ -1,5 +1,13 @@
 # YACC Changelog
 
+### 1.4
+
+Better Stash access key support!
+
+* Author name and email checks will be automatically skipped for Stash access key users. Thanks [@bbaetz](https://github.com/bbaetz)!
+* New Feature: `Exclude Service User Commits` option to easily skip all commit checks for access key / service users. Thanks [@christiangalsterer](https://github.com/christiangalsterer)!
+* Internal code changes: cleaned up pom.xml dependencies, set minimum supported Stash version to 2.12. Thanks [@bbaetz](https://github.com/bbaetz)!
+
 ### 1.3
 
 * New Feature: `Exclude By Regex' option to exclude commits from regex and JIRA checks if message matches regex
