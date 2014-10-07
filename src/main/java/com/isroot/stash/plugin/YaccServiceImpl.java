@@ -317,12 +317,41 @@ public class YaccServiceImpl implements YaccService
         log.debug("requireMatchingAuthorName={} authorName={} stashName={}", requireMatchingAuthorName, changeset.getCommitter().getName(),
                 stashUser.getDisplayName());
 
-        if (requireMatchingAuthorName && !changeset.getCommitter().getName().toLowerCase().equals(stashUser.getDisplayName().toLowerCase()))
+        String name = removeGitCrud(stashUser.getDisplayName());
+
+        if (requireMatchingAuthorName && !changeset.getCommitter().getName().equalsIgnoreCase(name))
         {
-            errors.add(String.format("expected committer name '%s' but found '%s'", stashUser.getDisplayName(),
+            errors.add(String.format("expected committer name '%s' but found '%s'", name,
                     changeset.getCommitter().getName()));
         }
 
         return errors;
+    }
+
+    /**
+     * Remove special characters and "crud" from name. This works around a git issue where it
+     * allows these characters in user.name but will strip them out when doing a commit. Leaving
+     * these characters breaks YACC name matching because Stash will provide the Stash user's name
+     * with these characters, however, they will never appear in the commit so author name will
+     * never match.
+     *
+     * See strbuf_addstr_without_crud() in git's ident.c.
+     * Link: https://github.com/git/git/blob/master/ident.c#L155 (current as of 2014-10-06).
+     */
+    private String removeGitCrud(String name)
+    {
+        if(name != null)
+        {
+            // remove special characters
+            name = name.replaceAll("[<>\n]", "");
+
+            // remove leading crud
+            name = name.replaceAll("^[\\\\.,:;\"']*", "");
+
+            // remove trailing crud
+            name = name.replaceAll("[\\\\.,:;\"']*$", "");
+        }
+
+        return name;
     }
 }

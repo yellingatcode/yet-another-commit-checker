@@ -16,7 +16,6 @@ import com.isroot.stash.plugin.JiraService;
 import com.isroot.stash.plugin.YaccChangeset;
 import com.isroot.stash.plugin.YaccService;
 import com.isroot.stash.plugin.YaccServiceImpl;
-import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -103,6 +102,22 @@ public class YaccServiceImplTest
         YaccChangeset changeset = mockChangeset();
         when(changeset.getCommitter().getName()).thenReturn("John Smith");
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    public void testCheckRefChange_requireMatchingAuthorName_crudIsIgnored() throws Exception
+    {
+        when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
+        when(stashUser.getType()).thenReturn(UserType.NORMAL);
+        when(stashUser.getDisplayName()).thenReturn(".,:;<>\"\\'John< >\nSMITH.,:;<>\"\\'");
+
+        YaccChangeset changeset = mockChangeset();
+        when(changeset.getCommitter().getName()).thenReturn("John Smith");
+        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class)))
+                .thenReturn(Sets.newHashSet(changeset));
 
         List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isEmpty();
@@ -383,33 +398,7 @@ public class YaccServiceImplTest
         verify(settings).getBoolean("excludeMergeCommits", false);
     }
 
-
     @Test
-    public void testCheckRefChange_tag_checksUserName_withCrud()
-    {
-
-        when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
-        when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);
-        when(stashUser.getType()).thenReturn(UserType.NORMAL);
-        String name = "Smith, John P.";
-        when(stashUser.getDisplayName()).thenReturn(org.apache.commons.lang.StringUtils.stripEnd(name, ".,:<>\"\\\'"));
-        when(stashUser.getEmailAddress()).thenReturn("jsmith@example.com");
-
-        YaccChangeset changeset = mockChangeset_withCrud();
-        when(changeset.getCommitter().getName()).thenReturn("Smith, John P");
-        when(changeset.getCommitter().getEmailAddress()).thenReturn("jsmith@example.com");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
-
-        List<String> errors = yaccService.checkRefChange(null, settings, mockTagChange());
-        assertThat(errors).isEmpty();
-    }
-
-    @Test
-    public void checkCrudRemover() {
-        assert(StringUtils.stripEnd("Hello,.", ".,").equals("Hello"));
-    }
-
-        @Test
     public void testCheckRefChange_tag_checksUser()
     {
         when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
@@ -479,25 +468,13 @@ public class YaccServiceImplTest
         verify(settings).getBoolean("excludeServiceUserCommits", false);
     }
 
-
-    private YaccChangeset mockChangeset_withCrud()
-    {
-        YaccChangeset changeset = mock(YaccChangeset.class, RETURNS_DEEP_STUBS);
-        when(changeset.getCommitter().getName()).thenReturn("Smith, John C");
-        when(changeset.getCommitter().getEmailAddress()).thenReturn("jsmith@example.com");
-        when(changeset.getId()).thenReturn("deadbeef");
-        when(changeset.getParentCount()).thenReturn(1);
-        return changeset;
-    }
-
-
     private YaccChangeset mockChangeset()
     {
         YaccChangeset changeset = mock(YaccChangeset.class, RETURNS_DEEP_STUBS);
         when(changeset.getCommitter().getName()).thenReturn("John Smith");
         when(changeset.getCommitter().getEmailAddress()).thenReturn("jsmith@example.com");
-		when(changeset.getId()).thenReturn("deadbeef");
-		when(changeset.getParentCount()).thenReturn(1);
+        when(changeset.getId()).thenReturn("deadbeef");
+        when(changeset.getParentCount()).thenReturn(1);
         return changeset;
     }
 
