@@ -1,5 +1,7 @@
 package com.isroot.stash.plugin;
 
+import org.apache.commons.lang.StringUtils;
+
 import javax.annotation.Nonnull;
 
 /**
@@ -24,7 +26,7 @@ public class YaccPerson {
      */
     @Nonnull
     public String getName() {
-        return name;
+        return removeGitCRUD(name);
     }
 
     /**
@@ -43,4 +45,9 @@ public class YaccPerson {
     /** E-mail address of person */
     private final String emailAddress;
 
+
+    /** Removes "Illegal Terminating" characters from Git UserNames.  See the GIT Function  static int crud(unsigned char c)*/
+    private String removeGitCRUD(@Nonnull String name) {
+        return StringUtils.stripEnd(name, ".,:<>\"\\\'");
+    }
 }
