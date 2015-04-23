@@ -54,6 +54,10 @@ will require commit message to be in the form of:
 
     PROJ-123: added new feature xyz
 
+#####Multi-line Commit Messages
+
+Multi-line commit messages can be matched by including newlines into the regex (like `(.|\n)*`), or by enabling Pattern.DOTALL using the `(?s)` embedded flag expression. 
+
 ####Require Valid JIRA Issue(s)
 
 If enabled, commit messages must contain valid JIRA issue ids. JIRA issue ids are defined as any item that matches
