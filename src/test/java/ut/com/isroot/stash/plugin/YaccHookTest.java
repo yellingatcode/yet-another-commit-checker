@@ -107,7 +107,7 @@ public class YaccHookTest
 
         yaccHook.onReceive(repositoryHookContext, Lists.newArrayList(mock(RefChange.class)), hookResponse);
 
-        assertThat(errorMessage.toString()).isEqualTo("Custom Header\n\nerror1\n");
+        assertThat(errorMessage.toString()).isEqualTo("Custom Header\n\nerror1\n\n");
     }
 
     @Test
