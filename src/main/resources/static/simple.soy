@@ -75,6 +75,26 @@
     {param errorTexts: $errors ? $errors['branchNameRegex'] : null /}
   {/call}
 
+  <h3>Error Message</h3>
+
+  {call aui.form.textareaField}
+    {param id: 'errorMessageHeader' /}
+    {param labelContent: 'Header' /}
+    {param value: $config['errorMessageHeader'] /}
+    {param descriptionText: 'If present, the default error message header will be replaced by this text.' /}
+    {param errorTexts: $errors ? $errors['errorMessageHeader'] : null /}
+    {param rows: '4' /}
+  {/call}
+
+  {call aui.form.textareaField}
+    {param id: 'errorMessageFooter' /}
+    {param labelContent: 'Footer' /}
+    {param value: $config['errorMessageFooter'] /}
+    {param descriptionText: 'If present, this text will be included at the end of the YACC error message. For example, you could include a link to your company\'s commit style guide for further clarification on commit requirements.' /}
+    {param errorTexts: $errors ? $errors['errorMessageFooter'] : null /}
+    {param rows: '4' /}
+  {/call}
+
   <h3>Exclude Commits</h3>
 
   {call aui.form.checkboxField}

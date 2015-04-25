@@ -3,6 +3,7 @@
 ### 1.5 (upcoming)
 
 * New setting 'Branch Name Regex' to enforce branch naming conventions when pushing.
+* Push rejected message header and footer is now customizable.
 
 ### 1.4
 
