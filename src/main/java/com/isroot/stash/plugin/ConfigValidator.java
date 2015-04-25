@@ -36,6 +36,7 @@ public class ConfigValidator implements RepositorySettingsValidator
     {
         validationRegex(settings, errors, "commitMessageRegex");
         validationRegex(settings, errors, "excludeByRegex");
+        validationRegex(settings, errors, "branchNameRegex");
 
         if(settings.getBoolean("requireJiraIssue", false))
         {

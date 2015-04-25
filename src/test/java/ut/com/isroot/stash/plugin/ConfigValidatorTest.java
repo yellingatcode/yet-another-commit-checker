@@ -27,7 +27,6 @@ public class ConfigValidatorTest
     @Mock private SettingsValidationErrors settingsValidationErrors;
     @Mock private Repository repository;
 
-
     private ConfigValidator configValidator;
 
     @Before
@@ -152,6 +151,28 @@ public class ConfigValidatorTest
 
         verify(settings).getString("commitMessageRegex");
         verify(settingsValidationErrors).addFieldError("commitMessageRegex", "Invalid Regex: Unmatched closing ')'\n" +
+                ")");
+    }
+
+    @Test
+    public void testValidate_branchNameRegex_goodRegex()
+    {
+        when(settings.getString("branchNameRegex")).thenReturn("feature/[A-Z]+-\\d+-[A-Z-]*");
+
+        configValidator.validate(settings, settingsValidationErrors, repository);
+
+        verify(settings).getString("branchNameRegex");
+        verifyZeroInteractions(settingsValidationErrors);
+    }
+    @Test
+    public void testValidate_branchNameRegex_badRegex()
+    {
+        when(settings.getString("branchNameRegex")).thenReturn(")");
+
+        configValidator.validate(settings, settingsValidationErrors, repository);
+
+        verify(settings).getString("branchNameRegex");
+        verify(settingsValidationErrors).addFieldError("branchNameRegex", "Invalid Regex: Unmatched closing ')'\n" +
                 ")");
     }
 

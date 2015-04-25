@@ -10,6 +10,7 @@ import com.atlassian.stash.user.StashAuthenticationContext;
 import com.atlassian.stash.user.StashUser;
 import com.atlassian.stash.user.UserType;
 import com.google.common.collect.Lists;
+import com.isroot.stash.plugin.checks.BranchNameCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +52,8 @@ public class YaccServiceImpl implements YaccService
                 refChange.getToHash(), refChange.getType().toString());
 
         List<String> errors = Lists.newArrayList();
+
+        errors.addAll(new BranchNameCheck(settings, refChange.getRefId()).check());
 
         Set<YaccChangeset> changesets = changesetsService.getNewChangesets(repository, refChange);
 

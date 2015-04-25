@@ -65,6 +65,16 @@
 		{param errorTexts: $errors ? $errors['issueJqlMatcher'] : null /}
 	{/call}
 
+	<h3>Branch Requirements</h3>
+
+  {call aui.form.textField}
+    {param id: 'branchNameRegex' /}
+    {param labelContent: 'Branch Name Regex' /}
+    {param value: $config['branchNameRegex'] /}
+    {param descriptionText: 'If present, pushes to branches that don\'t match this regex will be blocked.' /}
+    {param errorTexts: $errors ? $errors['branchNameRegex'] : null /}
+  {/call}
+
   <h3>Exclude Commits</h3>
 
   {call aui.form.checkboxField}

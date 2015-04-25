@@ -449,8 +449,6 @@ public class YaccServiceImplTest
         verifyNoMoreInteractions(jiraService);
     }
 
-
-
     @Test
     public void testCheckRefChange_excludeServiceUserCommitsWithInvalidCommitMessage()
     {
@@ -466,6 +464,20 @@ public class YaccServiceImplTest
         List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isEmpty();
         verify(settings).getBoolean("excludeServiceUserCommits", false);
+    }
+
+    @Test
+    public void testCheckRefChange_branchNameCheckApplied()
+    {
+        when(settings.getString("branchNameRegex")).thenReturn("foo");
+
+        RefChange refChange = mockRefChange();
+
+        List<String> errors = yaccService.checkRefChange(null, settings, refChange);
+
+        assertThat(errors)
+                .containsExactly("refs/heads/master: Invalid branch name. 'master' does not match regex 'foo'");
+
     }
 
     private YaccChangeset mockChangeset()

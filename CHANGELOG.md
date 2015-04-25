@@ -1,5 +1,9 @@
 # YACC Changelog
 
+### 1.5 (upcoming)
+
+* New setting 'Branch Name Regex' to enforce branch naming conventions when pushing.
+
 ### 1.4
 
 Better Stash access key support!
