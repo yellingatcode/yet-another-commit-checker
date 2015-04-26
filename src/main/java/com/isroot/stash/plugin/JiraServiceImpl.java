@@ -27,23 +27,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Sean Ford
  * @since 2013-10-20
  */
-public class JiraServiceImpl implements JiraService
-{
+public class JiraServiceImpl implements JiraService {
     private static final Logger log = LoggerFactory.getLogger(JiraServiceImpl.class);
 
     private final ApplicationLinkService applicationLinkService;
 
-    public JiraServiceImpl(ApplicationLinkService applicationLinkService)
-    {
+    public JiraServiceImpl(ApplicationLinkService applicationLinkService) {
         this.applicationLinkService = applicationLinkService;
     }
 
-    private ApplicationLink getJiraApplicationLink()
-    {
+    private ApplicationLink getJiraApplicationLink() {
         ApplicationLink applicationLink = applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class);
 
-        if (applicationLink == null)
-        {
+        if (applicationLink == null) {
             throw new IllegalStateException("Primary JIRA application link does not exist!");
         }
 
@@ -51,14 +47,12 @@ public class JiraServiceImpl implements JiraService
     }
 
     @Override
-    public boolean doesJiraApplicationLinkExist()
-    {
+    public boolean doesJiraApplicationLinkExist() {
         return applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class) != null;
     }
 
     @Override
-    public boolean doesIssueExist(IssueKey issueKey) throws CredentialsRequiredException, ResponseException
-    {
+    public boolean doesIssueExist(IssueKey issueKey) throws CredentialsRequiredException, ResponseException {
         checkNotNull(issueKey, "issueKey is null");
 
 
@@ -66,44 +60,35 @@ public class JiraServiceImpl implements JiraService
 
         ApplicationLinkRequest req = fac.createRequest(Request.MethodType.GET, "/rest/api/2/issue/"+issueKey.getFullyQualifiedIssueKey());
 
-        return req.execute(new ApplicationLinkResponseHandler<Boolean>()
-        {
+        return req.execute(new ApplicationLinkResponseHandler<Boolean>() {
             @Override
-            public Boolean credentialsRequired(Response response) throws ResponseException
-            {
+            public Boolean credentialsRequired(Response response) throws ResponseException {
                 throw new ResponseException(new CredentialsRequiredException(fac, "Token is invalid"));
             }
 
             @Override
-            public Boolean handle(Response response) throws ResponseException
-            {
+            public Boolean handle(Response response) throws ResponseException {
                 return response.isSuccessful();
             }
         });
     }
 
     @Override
-    public boolean doesProjectExist(String projectKey) throws CredentialsRequiredException, ResponseException
-    {
+    public boolean doesProjectExist(String projectKey) throws CredentialsRequiredException, ResponseException {
         checkNotNull(projectKey, "projectKey is null");
 
         ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.GET, "/rest/api/2/project/" + projectKey);
 
-        try
-        {
+        try {
             String jsonResponse = req.execute();
             JsonObject response = new JsonParser().parse(jsonResponse).getAsJsonObject();
             return (projectKey.equals(response.get("key").getAsString()));
         }
-        catch (ResponseStatusException e)
-        {
-            if (e.getResponse().getStatusCode() == 404)
-            {
+        catch (ResponseStatusException e) {
+            if (e.getResponse().getStatusCode() == 404) {
                 /* Project is unknown */
                 return false;
-            }
-            else
-            {
+            } else {
                 throw new ResponseException("Request failed", e);
             }
         }
@@ -111,8 +96,7 @@ public class JiraServiceImpl implements JiraService
 
     @Override
     public boolean doesIssueMatchJqlQuery(String jqlQuery, IssueKey issueKey) throws CredentialsRequiredException,
-            ResponseException
-    {
+            ResponseException {
         checkNotNull(jqlQuery, "jqlQuery is null");
         checkNotNull(issueKey, "issueKey is null");
 
@@ -130,23 +114,16 @@ public class JiraServiceImpl implements JiraService
     }
 
     @Override
-    public boolean isJqlQueryValid(String jqlQuery) throws CredentialsRequiredException, ResponseException
-    {
-        try
-        {
+    public boolean isJqlQueryValid(String jqlQuery) throws CredentialsRequiredException, ResponseException {
+        try {
             // This will throw an exception if the jql query is invalid.
             executeJqlQuery(jqlQuery);
             return true;
-        }
-        catch(ResponseStatusException e)
-        {
+        } catch(ResponseStatusException e) {
             // if the jql query is invalid, a 400 error is returned
-            if(e.getResponse().getStatusCode() == 400)
-            {
+            if(e.getResponse().getStatusCode() == 400) {
                 return false;
-            }
-            else
-            {
+            } else {
                 // Not a 400 response... just re-throw it to avoid hiding potential problems
                 throw e;
             }
@@ -154,8 +131,7 @@ public class JiraServiceImpl implements JiraService
         }
     }
 
-    private String executeJqlQuery(String jqlQuery) throws CredentialsRequiredException, ResponseException
-    {
+    private String executeJqlQuery(String jqlQuery) throws CredentialsRequiredException, ResponseException {
         checkNotNull(jqlQuery, "jqlQuery is null");
 
         ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory()

@@ -4,6 +4,7 @@
 <module name="Checker">
     <module name="TreeWalker">
         <module name="Indentation"/>
+        <module name="LeftCurly"/>
     </module>
     <module name="FileTabCharacter"/>
 </module>

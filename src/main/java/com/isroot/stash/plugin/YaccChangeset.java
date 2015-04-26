@@ -25,10 +25,8 @@ public class YaccChangeset {
      * which wasn't present when using the Stash API to get the message. This broke the commit message regex, so, this
      * was added to maintain the previous behavior.
      */
-    private String removeTrailingNewLine(String str)
-    {
-        if(str.endsWith("\n"))
-        {
+    private String removeTrailingNewLine(String str) {
+        if(str.endsWith("\n")) {
             str = str.substring(0, str.length() - 1);
         }
 

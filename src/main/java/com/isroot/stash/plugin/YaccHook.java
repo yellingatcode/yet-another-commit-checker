@@ -19,8 +19,7 @@ import java.util.List;
  * @author Sean Ford
  * @since 2013-05-11
  */
-public final class YaccHook implements PreReceiveRepositoryHook
-{
+public final class YaccHook implements PreReceiveRepositoryHook {
     private static final Logger log = LoggerFactory.getLogger(YaccHook.class);
 
     public static final String ERROR_BEARS = "\n" +
@@ -38,22 +37,18 @@ public final class YaccHook implements PreReceiveRepositoryHook
 
     private final YaccService yaccService;
 
-    public YaccHook(YaccService yaccService)
-    {
+    public YaccHook(YaccService yaccService) {
         this.yaccService = yaccService;
     }
 
     @Override
     public boolean onReceive(@Nonnull RepositoryHookContext repositoryHookContext,
-                             @Nonnull Collection<RefChange> refChanges, @Nonnull HookResponse hookResponse)
-    {
+                             @Nonnull Collection<RefChange> refChanges, @Nonnull HookResponse hookResponse) {
         List<String> errors = Lists.newArrayList();
         Settings settings = repositoryHookContext.getSettings();
 
-        for (RefChange rf : refChanges)
-        {
-            if (rf.getType() == RefChangeType.DELETE)
-            {
+        for (RefChange rf : refChanges) {
+            if (rf.getType() == RefChangeType.DELETE) {
                 continue;
             }
 
@@ -61,18 +56,14 @@ public final class YaccHook implements PreReceiveRepositoryHook
                     settings, rf));
         }
 
-        if (errors.isEmpty())
-        {
+        if (errors.isEmpty()) {
             log.debug("push allowed");
 
             return true;
-        }
-        else
-        {
+        } else {
             printHeader(settings, hookResponse.err());
 
-            for (String error : errors)
-            {
+            for (String error : errors) {
                 log.debug("error: {}", error);
 
                 hookResponse.err().println(error);
@@ -88,12 +79,10 @@ public final class YaccHook implements PreReceiveRepositoryHook
         }
     }
 
-    private void printHeader(Settings settings, PrintWriter writer)
-    {
+    private void printHeader(Settings settings, PrintWriter writer) {
         String header = settings.getString("errorMessageHeader");
 
-        if(header == null || header.isEmpty())
-        {
+        if(header == null || header.isEmpty()) {
             // sford: long live the error bears
             header = ERROR_BEARS;
         }
@@ -102,11 +91,9 @@ public final class YaccHook implements PreReceiveRepositoryHook
         writer.println();
     }
 
-    private void printFooter(Settings settings, PrintWriter writer)
-    {
+    private void printFooter(Settings settings, PrintWriter writer) {
         String footer = settings.getString("errorMessageFooter");
-        if(footer != null && !footer.isEmpty())
-        {
+        if(footer != null && !footer.isEmpty()) {
             writer.println(footer);
             writer.println();
         }

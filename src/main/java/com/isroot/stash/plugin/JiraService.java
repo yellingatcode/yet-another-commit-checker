@@ -9,8 +9,7 @@ import com.atlassian.sal.api.net.ResponseException;
  * @author Sean Ford
  * @since 2013-10-26
  */
-public interface JiraService
-{
+public interface JiraService {
     public boolean doesJiraApplicationLinkExist();
     public boolean doesIssueMatchJqlQuery(String jqlQuery, IssueKey issueKey) throws CredentialsRequiredException, ResponseException;
     public boolean doesIssueExist(IssueKey issueKey) throws CredentialsRequiredException, ResponseException;

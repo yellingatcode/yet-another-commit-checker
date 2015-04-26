@@ -11,8 +11,7 @@ import java.util.Set;
  * @author Sean Ford
  * @since 2013-10-26
  */
-public interface ChangesetsService
-{
+public interface ChangesetsService {
     /**
      * Get new {@link YaccChangeset}s not already present in the repository for the given {@link RefChange}.
      */

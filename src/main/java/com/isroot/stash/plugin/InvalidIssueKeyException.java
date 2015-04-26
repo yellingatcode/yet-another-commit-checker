@@ -3,8 +3,7 @@ package com.isroot.stash.plugin;
 /**
  * Thrown when a JIRA issue key can not be parsed.
  */
-public class InvalidIssueKeyException extends Exception
-{
+public class InvalidIssueKeyException extends Exception {
     /**
      * Construct a new invalid issue key exception.
      *

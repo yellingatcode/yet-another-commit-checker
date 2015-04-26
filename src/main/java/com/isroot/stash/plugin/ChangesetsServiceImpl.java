@@ -13,9 +13,6 @@ import com.atlassian.stash.util.PageProvider;
 import com.atlassian.stash.util.PageRequest;
 import com.atlassian.stash.util.PagedIterable;
 import com.google.common.collect.Sets;
-import java.io.File;
-import java.io.IOException;
-import java.util.Set;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -24,17 +21,19 @@ import org.eclipse.jgit.revwalk.RevTag;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Set;
+
 /**
  * @author Sean Ford
  * @since 2013-10-26
  */
-public class ChangesetsServiceImpl implements ChangesetsService
-{
+public class ChangesetsServiceImpl implements ChangesetsService {
     private final CommitService commitService;
     private final ApplicationPropertiesService applicationPropertiesService;
 
-    public ChangesetsServiceImpl(CommitService commitService, ApplicationPropertiesService applicationPropertiesService)
-    {
+    public ChangesetsServiceImpl(CommitService commitService, ApplicationPropertiesService applicationPropertiesService) {
         this.commitService = commitService;
         this.applicationPropertiesService = applicationPropertiesService;
     }
@@ -43,10 +42,8 @@ public class ChangesetsServiceImpl implements ChangesetsService
      * {@inheritDoc}
      */
     @Override
-    public Set<YaccChangeset> getNewChangesets(Repository repository, RefChange refChange)
-    {
-        try
-        {
+    public Set<YaccChangeset> getNewChangesets(Repository repository, RefChange refChange) {
+        try {
             org.eclipse.jgit.lib.Repository jGitRepo = getJGitRepo(repository);
 
             RevWalk walk = new RevWalk(jGitRepo);
@@ -64,17 +61,14 @@ public class ChangesetsServiceImpl implements ChangesetsService
              */
             Set<YaccChangeset> changesets = Sets.newHashSet();
 
-            if (refChange.getRefId().startsWith(GitRefPattern.TAGS.getPath()))
-            {
-                if (refChange.getType() == RefChangeType.DELETE)
-                {
+            if (refChange.getRefId().startsWith(GitRefPattern.TAGS.getPath())) {
+                if (refChange.getType() == RefChangeType.DELETE) {
                     // Deletes don't leave anything to check
                     return changesets;
                 }
 
                 RevObject obj = walk.parseAny(ObjectId.fromString(refChange.getToHash()));
-                if (!(obj instanceof RevTag))
-                {
+                if (!(obj instanceof RevTag)) {
                     // Just a lightweight tag - nothing to check
                     return changesets;
                 }
@@ -87,26 +81,21 @@ public class ChangesetsServiceImpl implements ChangesetsService
                 final YaccChangeset yaccChangeset = new YaccChangeset(refChange.getToHash(), committer, message, 1);
 
                 changesets.add(yaccChangeset);
-            }
-            else
-            {
+            } else {
                 final ChangesetsBetweenRequest request = new ChangesetsBetweenRequest.Builder(repository)
                         .exclude(getBranches(repository))
                         .include(refChange.getToHash())
                         .build();
 
                 // Make sure to get all of the changes
-                Iterable<Changeset> changes = new PagedIterable<Changeset>(new PageProvider<Changeset>()
-                {
+                Iterable<Changeset> changes = new PagedIterable<Changeset>(new PageProvider<Changeset>() {
                     @Override
-                    public Page<Changeset> get(PageRequest pr)
-                    {
+                    public Page<Changeset> get(PageRequest pr) {
                         return commitService.getChangesetsBetween(request, pr);
                     }
                 }, 100);
 
-                for (Changeset changeset : changes)
-                {
+                for (Changeset changeset : changes) {
                     final RevCommit commit = walk.parseCommit(ObjectId.fromString(changeset.getId()));
 
                     /* Note that we use committer, instead of author -- for most commits, these will be identical. Where
@@ -126,33 +115,25 @@ public class ChangesetsServiceImpl implements ChangesetsService
             }
 
             return changesets;
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Set<String> getBranches(Repository repository)
-    {
-        try
-        {
+    private Set<String> getBranches(Repository repository) {
+        try {
             org.eclipse.jgit.lib.Repository jGitRepo = getJGitRepo(repository);
 
             Set<String> refHeads = Sets.newHashSet();
 
-            for (String ref : jGitRepo.getAllRefs().keySet())
-            {
-                if (ref.startsWith("refs/heads/"))
-                {
+            for (String ref : jGitRepo.getAllRefs().keySet()) {
+                if (ref.startsWith("refs/heads/")) {
                     refHeads.add(ref);
                 }
             }
 
             return refHeads;
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

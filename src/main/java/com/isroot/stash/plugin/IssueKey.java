@@ -9,18 +9,16 @@ import java.util.regex.Pattern;
 /**
  * A JIRA issue key.
  */
-public class IssueKey
-{
+public class IssueKey {
     /**
      * Parse any issue keys (i.e., strings that match the standard issue key format) found within the given input.
      *
      * @param input The input string to be parsed for issue keys.
      */
-    static public List<IssueKey> parseIssueKeys (String input) {
+    static public List<IssueKey> parseIssueKeys(String input) {
         List<IssueKey> issueKeys = Lists.newArrayList();
         Matcher matcher = ISSUE_PATTERN.matcher(input);
-        while (matcher.find())
-        {
+        while (matcher.find()) {
             issueKeys.add(new IssueKey(getMatchedProjectKey(matcher), getMatchedIssueId(matcher)));
         }
 
@@ -72,6 +70,7 @@ public class IssueKey
 
     /**
      * Return the fully qualified issue key (eg, "projectKey-issueId").
+     *
      * @return Fully qualified JIRA issue key.
      */
     public String getFullyQualifiedIssueKey() {
@@ -85,20 +84,19 @@ public class IssueKey
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass())
-        {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
         IssueKey issueKey = (IssueKey) o;
 
-        if (!issueId.equals(issueKey.issueId))
-        {
+        if (!issueId.equals(issueKey.issueId)) {
             return false;
         }
-        if (!projectKey.equals(issueKey.projectKey))
-        {
+        if (!projectKey.equals(issueKey.projectKey)) {
             return false;
         }
 
