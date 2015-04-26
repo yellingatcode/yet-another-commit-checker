@@ -10,11 +10,9 @@ import static org.fest.assertions.api.Assertions.assertThat;
  * @author Sean Ford
  * @since 2014-05-01
  */
-public class YaccChangesetTest
-{
+public class YaccChangesetTest {
     @Test
-    public void testConstructor_trailingNewLineInCommitMessageIsRemoved()
-    {
+    public void testConstructor_trailingNewLineInCommitMessageIsRemoved() {
         YaccChangeset yaccChangeset = new YaccChangeset("id", new YaccPerson("Name", "email@address.com"),
                 "contains trailing newline\n", 0);
 

@@ -14,27 +14,23 @@ import static org.mockito.Mockito.when;
  * @author Sean Ford
  * @since 2015-04-25
  */
-public class BranchNameCheckTest
-{
+public class BranchNameCheckTest {
     @Test
-    public void testCheck_noErrorIfSettingIsNull()
-    {
+    public void testCheck_noErrorIfSettingIsNull() {
         List<String> errors = new BranchNameCheck(getSettings(null), "ref/heads/foo").check();
 
         assertThat(errors).isEmpty();
     }
 
     @Test
-    public void testCheck_noErrorIfSettingIsEmpty()
-    {
+    public void testCheck_noErrorIfSettingIsEmpty() {
         List<String> errors = new BranchNameCheck(getSettings(""), "ref/heads/foo").check();
 
         assertThat(errors).isEmpty();
     }
 
     @Test
-    public void testCheck_errorIfBranchNameDoesNotMatchRegex()
-    {
+    public void testCheck_errorIfBranchNameDoesNotMatchRegex() {
         List<String> errors = new BranchNameCheck(getSettings("foo"), "refs/heads/bar").check();
 
         assertThat(errors)
@@ -42,23 +38,20 @@ public class BranchNameCheckTest
     }
 
     @Test
-    public void testCheck_noErrorIfBranchNameMatchesRegex()
-    {
+    public void testCheck_noErrorIfBranchNameMatchesRegex() {
         List<String> errors = new BranchNameCheck(getSettings(".*"), "refs/heads/foo").check();
 
         assertThat(errors).isEmpty();
     }
 
     @Test
-    public void testCheck_nonBranchRefIdsAreIgnored()
-    {
+    public void testCheck_nonBranchRefIdsAreIgnored() {
         List<String> errors = new BranchNameCheck(getSettings("foo"), "refs/tags/bar").check();
 
         assertThat(errors).isEmpty();
     }
 
-    private Settings getSettings(String branchNameRegex)
-    {
+    private Settings getSettings(String branchNameRegex) {
         Settings settings = mock(Settings.class);
 
         when(settings.getString("branchNameRegex")).thenReturn(branchNameRegex);

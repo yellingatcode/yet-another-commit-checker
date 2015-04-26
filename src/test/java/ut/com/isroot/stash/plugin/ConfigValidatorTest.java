@@ -20,8 +20,7 @@ import static org.mockito.Mockito.when;
  * @author Sean Ford
  * @since 2014-01-13
  */
-public class ConfigValidatorTest
-{
+public class ConfigValidatorTest {
     @Mock private JiraService jiraService;
     @Mock private Settings settings;
     @Mock private SettingsValidationErrors settingsValidationErrors;
@@ -30,16 +29,14 @@ public class ConfigValidatorTest
     private ConfigValidator configValidator;
 
     @Before
-    public void setup()
-    {
+    public void setup() {
         MockitoAnnotations.initMocks(this);
 
         configValidator = new ConfigValidator(jiraService);
     }
 
     @Test
-    public void testValidate_errorIfRequireJiraIssueIsOnAndNoAppLink()
-    {
+    public void testValidate_errorIfRequireJiraIssueIsOnAndNoAppLink() {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(false);
 
@@ -49,8 +46,7 @@ public class ConfigValidatorTest
     }
 
     @Test
-    public void testValidate_authenticationErrorWhenValidatingQueryReturnsError() throws Exception
-    {
+    public void testValidate_authenticationErrorWhenValidatingQueryReturnsError() throws Exception {
         when(settings.getString("issueJqlMatcher")).thenReturn("assignee is not empty");
         when(jiraService.isJqlQueryValid(anyString())).thenThrow(CredentialsRequiredException.class);
 
@@ -62,8 +58,7 @@ public class ConfigValidatorTest
     }
 
     @Test
-    public void testValidate_invalidJqlQueryAddsValidationError() throws Exception
-    {
+    public void testValidate_invalidJqlQueryAddsValidationError() throws Exception {
         when(settings.getString("issueJqlMatcher")).thenReturn("this jql query is invalid");
         when(jiraService.isJqlQueryValid(anyString())).thenReturn(false);
 
@@ -75,8 +70,7 @@ public class ConfigValidatorTest
     }
 
     @Test
-    public void testValidate_validJqlQueryIsAccepted() throws Exception
-    {
+    public void testValidate_validJqlQueryIsAccepted() throws Exception {
         when(settings.getString("issueJqlMatcher")).thenReturn("assignee is not empty");
         when(jiraService.isJqlQueryValid(anyString())).thenReturn(true);
 
@@ -88,8 +82,7 @@ public class ConfigValidatorTest
     }
 
     @Test
-    public void testValidate_excludeByRegex_emptyStringAllowed()
-    {
+    public void testValidate_excludeByRegex_emptyStringAllowed() {
         when(settings.getString("excludeByRegex")).thenReturn("");
 
         configValidator.validate(settings, settingsValidationErrors, repository);
@@ -99,8 +92,7 @@ public class ConfigValidatorTest
     }
 
     @Test
-    public void testValidate_excludeByRegex_goodRegex()
-    {
+    public void testValidate_excludeByRegex_goodRegex() {
         when(settings.getString("excludeByRegex")).thenReturn("^Revert \"|#skipchecks");
 
         configValidator.validate(settings, settingsValidationErrors, repository);
@@ -109,8 +101,7 @@ public class ConfigValidatorTest
         verifyZeroInteractions(settingsValidationErrors);
     }
     @Test
-    public void testValidate_excludeByRegex_badRegex()
-    {
+    public void testValidate_excludeByRegex_badRegex() {
         when(settings.getString("excludeByRegex")).thenReturn("^(");
 
         configValidator.validate(settings, settingsValidationErrors, repository);
@@ -122,8 +113,7 @@ public class ConfigValidatorTest
     }
 
     @Test
-    public void testValidate_commitMessageRegex_emptyStringAllowed()
-    {
+    public void testValidate_commitMessageRegex_emptyStringAllowed() {
         when(settings.getString("commitMessageRegex")).thenReturn("");
 
         configValidator.validate(settings, settingsValidationErrors, repository);
@@ -133,8 +123,7 @@ public class ConfigValidatorTest
     }
 
     @Test
-    public void testValidate_commitMessageRegex_goodRegex()
-    {
+    public void testValidate_commitMessageRegex_goodRegex() {
         when(settings.getString("commitMessageRegex")).thenReturn(".{32,}");
 
         configValidator.validate(settings, settingsValidationErrors, repository);
@@ -143,8 +132,7 @@ public class ConfigValidatorTest
         verifyZeroInteractions(settingsValidationErrors);
     }
     @Test
-    public void testValidate_commitMessageRegex_badRegex()
-    {
+    public void testValidate_commitMessageRegex_badRegex() {
         when(settings.getString("commitMessageRegex")).thenReturn(")");
 
         configValidator.validate(settings, settingsValidationErrors, repository);
@@ -155,8 +143,7 @@ public class ConfigValidatorTest
     }
 
     @Test
-    public void testValidate_branchNameRegex_goodRegex()
-    {
+    public void testValidate_branchNameRegex_goodRegex() {
         when(settings.getString("branchNameRegex")).thenReturn("feature/[A-Z]+-\\d+-[A-Z-]*");
 
         configValidator.validate(settings, settingsValidationErrors, repository);
@@ -164,9 +151,9 @@ public class ConfigValidatorTest
         verify(settings).getString("branchNameRegex");
         verifyZeroInteractions(settingsValidationErrors);
     }
+
     @Test
-    public void testValidate_branchNameRegex_badRegex()
-    {
+    public void testValidate_branchNameRegex_badRegex() {
         when(settings.getString("branchNameRegex")).thenReturn(")");
 
         configValidator.validate(settings, settingsValidationErrors, repository);
@@ -175,5 +162,4 @@ public class ConfigValidatorTest
         verify(settingsValidationErrors).addFieldError("branchNameRegex", "Invalid Regex: Unmatched closing ')'\n" +
                 ")");
     }
-
 }

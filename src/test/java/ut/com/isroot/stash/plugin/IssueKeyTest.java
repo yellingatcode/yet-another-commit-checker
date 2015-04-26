@@ -12,8 +12,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-public class IssueKeyTest
-{
+public class IssueKeyTest {
     @Test
     public void testParseIssueKeys() {
         final List<IssueKey> issueKeys = IssueKey.parseIssueKeys("Issue: ABC-123, CBA-321, UNDER_SCORE-123;");

@@ -26,8 +26,7 @@ import static org.mockito.Mockito.when;
  * @author Sean Ford
  * @since 2014-01-15
  */
-public class JiraServiceImplTest
-{
+public class JiraServiceImplTest {
     @Mock
     private ApplicationLinkRequest applicationLinkRequest;
 
@@ -37,32 +36,28 @@ public class JiraServiceImplTest
     private JiraService jiraService;
 
     @Before
-    public void setup() throws Exception
-    {
+    public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         jiraService = new JiraServiceImpl(applicationLinkService);
     }
 
     @Test
-    public void testDoesJiraApplicationLinkExist_returnsFalseIfLinkDoesNotExist() throws Exception
-    {
+    public void testDoesJiraApplicationLinkExist_returnsFalseIfLinkDoesNotExist() throws Exception {
         when(applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class)).thenReturn(null);
 
         assertThat(jiraService.doesJiraApplicationLinkExist()).isFalse();
     }
 
     @Test
-    public void testDoesJiraApplicationLinkExist_returnsTrueIfLinkExists() throws Exception
-    {
+    public void testDoesJiraApplicationLinkExist_returnsTrueIfLinkExists() throws Exception {
         when(applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class)).thenReturn(mock(ApplicationLink.class));
 
         assertThat(jiraService.doesJiraApplicationLinkExist()).isTrue();
     }
 
     @Test
-    public void testDoesIssueMatchJqlQuery_finalJqlQueryContainsBothIssueKeyAndUserQuery() throws Exception
-    {
+    public void testDoesIssueMatchJqlQuery_finalJqlQueryContainsBothIssueKeyAndUserQuery() throws Exception {
         jiraService = setupJqlTest("{\"issues\": []}");
 
         jiraService.doesIssueMatchJqlQuery("project = TEST", new IssueKey("TEST", "123"));
@@ -71,8 +66,7 @@ public class JiraServiceImplTest
     }
 
     @Test
-    public void testDoesIssueMatchJqlQuery_httpRequestDetails() throws Exception
-    {
+    public void testDoesIssueMatchJqlQuery_httpRequestDetails() throws Exception {
         jiraService = setupJqlTest("{\"issues\": []}");
 
         jiraService.doesIssueMatchJqlQuery("project = TEST", new IssueKey("TEST", "123"));
@@ -83,8 +77,7 @@ public class JiraServiceImplTest
     }
 
     @Test
-    public void testDoesIssueMatchJqlQuery_returnsFalseIfNoIssuesMatchJql() throws Exception
-    {
+    public void testDoesIssueMatchJqlQuery_returnsFalseIfNoIssuesMatchJql() throws Exception {
         jiraService = setupJqlTest("{\"issues\": []}");
 
         assertThat(jiraService.doesIssueMatchJqlQuery("project = TEST", new IssueKey("TEST", "123")))
@@ -92,8 +85,7 @@ public class JiraServiceImplTest
     }
 
     @Test
-    public void testDoesIssueMatchJqlQuery_returnsTrueIfIssuesMatchJql() throws Exception
-    {
+    public void testDoesIssueMatchJqlQuery_returnsTrueIfIssuesMatchJql() throws Exception {
         jiraService = setupJqlTest("{\"issues\": [{}]}");
 
         assertThat(jiraService.doesIssueMatchJqlQuery("project = TEST", new IssueKey("TEST", "123")))
@@ -101,14 +93,12 @@ public class JiraServiceImplTest
     }
 
     @Test
-    public void testIsJqlIssueValid_returnsTrueIfValid() throws Exception
-    {
+    public void testIsJqlIssueValid_returnsTrueIfValid() throws Exception {
         assertThat(jiraService.isJqlQueryValid("assignee is not empty")).isTrue();
     }
 
     @Test
-    public void testIsJqlQueryValid_returnsFalseIfNotValid() throws Exception
-    {
+    public void testIsJqlQueryValid_returnsFalseIfNotValid() throws Exception {
         jiraService = setupJqlTest(null);
 
         ResponseStatusException ex = mock(ResponseStatusException.class, RETURNS_DEEP_STUBS);
@@ -119,27 +109,22 @@ public class JiraServiceImplTest
     }
 
     @Test
-    public void testIsJqlQueryValid_unknownExceptionsAreRethrown() throws Exception
-    {
+    public void testIsJqlQueryValid_unknownExceptionsAreRethrown() throws Exception {
         jiraService = setupJqlTest(null);
 
         ResponseStatusException ex = mock(ResponseStatusException.class, RETURNS_DEEP_STUBS);
         when(ex.getResponse().getStatusCode()).thenReturn(500);
         when(applicationLinkRequest.execute()).thenThrow(ex);
 
-        try
-        {
+        try {
             jiraService.isJqlQueryValid("jql query");
             Assert.fail();
-        }
-        catch(ResponseStatusException expected)
-        {
+        } catch(ResponseStatusException expected) {
             assertThat(expected).isSameAs(ex);
         }
     }
 
-    private JiraService setupJqlTest(String jsonResponse) throws Exception
-    {
+    private JiraService setupJqlTest(String jsonResponse) throws Exception {
         when(applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class)
                 .createAuthenticatedRequestFactory().createRequest(Request.MethodType.POST, "/rest/api/2/search"))
                 .thenReturn(applicationLinkRequest);

@@ -38,8 +38,7 @@ import static org.mockito.Mockito.when;
  * @author Sean Ford
  * @since 2013-10-26
  */
-public class YaccServiceImplTest
-{
+public class YaccServiceImplTest {
     @Mock private StashAuthenticationContext stashAuthenticationContext;
     @Mock private ChangesetsService changesetsService;
     @Mock private JiraService jiraService;
@@ -51,8 +50,7 @@ public class YaccServiceImplTest
     private YaccService yaccService;
 
     @Before
-    public void setup()
-    {
+    public void setup() {
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel","DEBUG");
 
         MockitoAnnotations.initMocks(this);
@@ -60,11 +58,10 @@ public class YaccServiceImplTest
         yaccService = new YaccServiceImpl(stashAuthenticationContext, changesetsService, jiraService);
 
         when(stashAuthenticationContext.getCurrentUser()).thenReturn(stashUser);
-	}
+    }
 
     @Test
-    public void testCheckRefChange_requireMatchingAuthorName_rejectOnMismatch() throws Exception
-    {
+    public void testCheckRefChange_requireMatchingAuthorName_rejectOnMismatch() throws Exception {
         when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
         when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getDisplayName()).thenReturn("John Smith");
@@ -74,12 +71,11 @@ public class YaccServiceImplTest
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
         List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-       	assertThat(errors).contains("refs/heads/master: deadbeef: expected committer name 'John Smith' but found 'Incorrect Name'");
+        assertThat(errors).contains("refs/heads/master: deadbeef: expected committer name 'John Smith' but found 'Incorrect Name'");
     }
 
     @Test
-    public void testCheckRefChange_requireMatchingAuthorName_allowOnMatch() throws Exception
-    {
+    public void testCheckRefChange_requireMatchingAuthorName_allowOnMatch() throws Exception {
         when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
         when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getDisplayName()).thenReturn("John Smith");
@@ -88,13 +84,12 @@ public class YaccServiceImplTest
         when(changeset.getCommitter().getName()).thenReturn("John Smith");
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
-		List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-		assertThat(errors).isEmpty();
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).isEmpty();
     }
 
     @Test
-    public void testCheckRefChange_requireMatchingAuthorName_notCaseSensitive() throws Exception
-    {
+    public void testCheckRefChange_requireMatchingAuthorName_notCaseSensitive() throws Exception {
         when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
         when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getDisplayName()).thenReturn("John SMITH");
@@ -108,8 +103,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_requireMatchingAuthorName_crudIsIgnored() throws Exception
-    {
+    public void testCheckRefChange_requireMatchingAuthorName_crudIsIgnored() throws Exception {
         when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
         when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getDisplayName()).thenReturn(".,:;<>\"\\'John< >\nSMITH.,:;<>\"\\'");
@@ -124,8 +118,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_requireMatchingAuthorEmail_rejectOnMismatch() throws Exception
-    {
+    public void testCheckRefChange_requireMatchingAuthorEmail_rejectOnMismatch() throws Exception {
         when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);
         when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getEmailAddress()).thenReturn("correct@email.com");
@@ -134,13 +127,12 @@ public class YaccServiceImplTest
         when(changeset.getCommitter().getEmailAddress()).thenReturn("wrong@email.com");
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
-		List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-		assertThat(errors).contains("refs/heads/master: deadbeef: expected committer email 'correct@email.com' but found 'wrong@email.com'");
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).contains("refs/heads/master: deadbeef: expected committer email 'correct@email.com' but found 'wrong@email.com'");
     }
 
     @Test
-    public void testCheckRefChange_requireMatchingAuthorEmail_allowOnMatch() throws Exception
-    {
+    public void testCheckRefChange_requireMatchingAuthorEmail_allowOnMatch() throws Exception {
         when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);
         when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getEmailAddress()).thenReturn("correct@email.com");
@@ -149,13 +141,12 @@ public class YaccServiceImplTest
         when(changeset.getCommitter().getEmailAddress()).thenReturn("correct@email.com");
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
-		List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-		assertThat(errors).isEmpty();
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).isEmpty();
     }
 
     @Test
-    public void testCheckRefChange_requireMatchingAuthorEmail_notCaseSensitive() throws Exception
-    {
+    public void testCheckRefChange_requireMatchingAuthorEmail_notCaseSensitive() throws Exception {
         when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);
         when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getEmailAddress()).thenReturn("correct@email.com");
@@ -169,8 +160,7 @@ public class YaccServiceImplTest
     }
     
     @Test
-    public void testCheckRefChange_serviceUser_skipped()
-    {
+    public void testCheckRefChange_serviceUser_skipped() {
         when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
         when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);
         when(stashUser.getType()).thenReturn(UserType.SERVICE);
@@ -186,21 +176,19 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_requireJiraIssue_rejectIfEnabledButNoJiraLinkExists() throws Exception
-    {
+    public void testCheckRefChange_requireJiraIssue_rejectIfEnabledButNoJiraLinkExists() throws Exception {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(false);
 
         Set<YaccChangeset> changesets = Sets.newHashSet(mockChangeset());
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(changesets);
 
-		List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-		assertThat(errors).contains("refs/heads/master: deadbeef: Unable to verify JIRA issue because JIRA Application Link does not exist");
-	}
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).contains("refs/heads/master: deadbeef: Unable to verify JIRA issue because JIRA Application Link does not exist");
+    }
 
     @Test
-    public void testCheckRefChange_requireJiraIssue_rejectIfNoJiraIssuesAreFound() throws Exception
-    {
+    public void testCheckRefChange_requireJiraIssue_rejectIfNoJiraIssuesAreFound() throws Exception {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
 
@@ -208,13 +196,12 @@ public class YaccServiceImplTest
         when(changeset.getMessage()).thenReturn("this commit message has no jira issues. abc-123 is not a valid issue because it is lowercase.");
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
-		List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-		assertThat(errors).contains("refs/heads/master: deadbeef: No JIRA Issue found in commit message.");
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).contains("refs/heads/master: deadbeef: No JIRA Issue found in commit message.");
     }
 
     @Test
-    public void testCheckRefChange_requireJiraIssue_ignoreUnknownJiraProjectKeys() throws Exception
-    {
+    public void testCheckRefChange_requireJiraIssue_ignoreUnknownJiraProjectKeys() throws Exception {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(settings.getBoolean("ignoreUnknownIssueProjectKeys", false)).thenReturn(true);
 
@@ -235,8 +222,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_requireJiraIssue_rejectIfNoJiraIssuesWithAValidProjectAreFound() throws Exception
-    {
+    public void testCheckRefChange_requireJiraIssue_rejectIfNoJiraIssuesWithAValidProjectAreFound() throws Exception {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(settings.getBoolean("ignoreUnknownIssueProjectKeys", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
@@ -251,8 +237,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_requireJiraIssue_allowedIfValidJiraIssueIsFound() throws Exception
-    {
+    public void testCheckRefChange_requireJiraIssue_allowedIfValidJiraIssueIsFound() throws Exception {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
         when(jiraService.doesIssueExist(any(IssueKey.class))).thenReturn(true);
@@ -261,16 +246,14 @@ public class YaccServiceImplTest
         when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id");
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
-
-		List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-		assertThat(errors).isEmpty();
+        List<String> errors = yaccService.checkRefChange(null, settings, mockRefChange());
+        assertThat(errors).isEmpty();
         verify(jiraService).doesJiraApplicationLinkExist();
         verify(jiraService).doesIssueExist(new IssueKey("ABC-123"));
-	}
+    }
 
     @Test
-    public void testCheckRefChange_requireJiraIssue_jiraIssueIdsAreExtractedFromCommitMessage() throws Exception
-    {
+    public void testCheckRefChange_requireJiraIssue_jiraIssueIdsAreExtractedFromCommitMessage() throws Exception {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
 
@@ -285,8 +268,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_requireJiraIssue_errorReturnedIfNoJiraAuth() throws Exception
-    {
+    public void testCheckRefChange_requireJiraIssue_errorReturnedIfNoJiraAuth() throws Exception {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
         when(jiraService.doesIssueExist(any(IssueKey.class))).thenThrow(credRequired);
@@ -304,8 +286,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_requireJiraIssue_errorReturnedIfJiraAuthenticationFails() throws Exception
-    {
+    public void testCheckRefChange_requireJiraIssue_errorReturnedIfJiraAuthenticationFails() throws Exception {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
         when(jiraService.doesIssueExist(any(IssueKey.class))).thenThrow(responseException);
@@ -324,8 +305,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_commitMessageRegex_commitMessageMatchesRegex() throws Exception
-    {
+    public void testCheckRefChange_commitMessageRegex_commitMessageMatchesRegex() throws Exception {
         when(settings.getString("commitMessageRegex")).thenReturn("[a-z ]+");
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
 
@@ -338,8 +318,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_commitMessageRegex_rejectIfCommitMessageDoesNotMatchRegex() throws Exception
-    {
+    public void testCheckRefChange_commitMessageRegex_rejectIfCommitMessageDoesNotMatchRegex() throws Exception {
         when(settings.getString("commitMessageRegex")).thenReturn("[a-z ]+");
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
 
@@ -352,8 +331,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_excludeByRegex_commitAllowedIfRegexMatches()
-    {
+    public void testCheckRefChange_excludeByRegex_commitAllowedIfRegexMatches() {
         when(settings.getString("commitMessageRegex")).thenReturn("foo");
         when(settings.getString("excludeByRegex")).thenReturn("#skipcheck");
 
@@ -368,8 +346,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_excludeByRegex_commitNotAllowedIfRegexDoesNotMatch()
-    {
+    public void testCheckRefChange_excludeByRegex_commitNotAllowedIfRegexDoesNotMatch() {
         when(settings.getString("commitMessageRegex")).thenReturn("foo");
         when(settings.getString("excludeByRegex")).thenReturn("#skipcheck");
 
@@ -382,8 +359,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_excludeMergeCommits()
-    {
+    public void testCheckRefChange_excludeMergeCommits() {
         when(settings.getString("commitMessageRegex")).thenReturn("foo");
         when(settings.getBoolean("excludeMergeCommits",false)).thenReturn(true);
 
@@ -399,8 +375,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_tag_checksUser()
-    {
+    public void testCheckRefChange_tag_checksUser() {
         when(settings.getBoolean("requireMatchingAuthorName", false)).thenReturn(true);
         when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);
         when(stashUser.getType()).thenReturn(UserType.NORMAL);
@@ -418,8 +393,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_tag_doesntCheckRegex() throws Exception
-    {
+    public void testCheckRefChange_tag_doesntCheckRegex() throws Exception {
         when(settings.getString("commitMessageRegex")).thenReturn("REGEX");
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
 
@@ -432,8 +406,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_tag_doesntCheckJira() throws Exception
-    {
+    public void testCheckRefChange_tag_doesntCheckJira() throws Exception {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(settings.getBoolean("ignoreUnknownIssueProjectKeys", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
@@ -450,8 +423,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_excludeServiceUserCommitsWithInvalidCommitMessage()
-    {
+    public void testCheckRefChange_excludeServiceUserCommitsWithInvalidCommitMessage() {
         when(settings.getString("commitMessageRegex")).thenReturn("[a-z ]+");
         when(settings.getBoolean("excludeServiceUserCommits", false)).thenReturn(true);
 
@@ -467,8 +439,7 @@ public class YaccServiceImplTest
     }
 
     @Test
-    public void testCheckRefChange_branchNameCheckApplied()
-    {
+    public void testCheckRefChange_branchNameCheckApplied() {
         when(settings.getString("branchNameRegex")).thenReturn("foo");
 
         RefChange refChange = mockRefChange();
@@ -480,8 +451,7 @@ public class YaccServiceImplTest
 
     }
 
-    private YaccChangeset mockChangeset()
-    {
+    private YaccChangeset mockChangeset() {
         YaccChangeset changeset = mock(YaccChangeset.class, RETURNS_DEEP_STUBS);
         when(changeset.getCommitter().getName()).thenReturn("John Smith");
         when(changeset.getCommitter().getEmailAddress()).thenReturn("jsmith@example.com");
@@ -490,8 +460,7 @@ public class YaccServiceImplTest
         return changeset;
     }
 
-    private RefChange mockRefChange()
-    {
+    private RefChange mockRefChange() {
         RefChange refChange = mock(RefChange.class);
         when(refChange.getFromHash()).thenReturn("5773fc438a763e64df8a9c5c32f3b1e83010ada7");
         when(refChange.getToHash()).thenReturn("35d938b060bb361503e021f228e43351f1a71551");
@@ -500,8 +469,7 @@ public class YaccServiceImplTest
         return refChange;
     }
 
-    private RefChange mockTagChange()
-    {
+    private RefChange mockTagChange() {
         RefChange refChange = mock(RefChange.class);
         when(refChange.getFromHash()).thenReturn("0000000000000000000000000000000000000000");
         when(refChange.getToHash()).thenReturn("35d938b060bb361503e021f228e43351f1a71551");
