@@ -138,6 +138,26 @@ repositories, or wish to keep repositories in sync, you can use the
 [Stash REST API](https://developer.atlassian.com/static/rest/stash/3.8.0/stash-rest.html#idp2993072)
 to automate configuring YACC.
 
+#### YACC is rejecting my push complaining that my user name and/or email is wrong but the `Author:` from `git log` is correct!
+
+Or, YACC is still complaining even after I fixed my commit using `git commit --amend --author`.
+
+This is due to the fact that YACC checks the commit's *Committer* information against the Stash user,
+not *Author*. These are normally the same; however, will be different when applying patches on behalf
+of someone else or cherry picking commits.
+
+You can verify the problem by using `git log --pretty=full` to see a commit's Committer information.
+
+If your git settings where misconfigured, you can fix both the Author and Committer for your last
+commit by doing:
+
+    # Fix configuration
+    git config user.name Your Name
+    git config user.email your@email.com
+
+    # Reset both author and committer
+    git commit --amend --reset-author
+
 ## Development
 
 Interested in contributing? [Fork me!](https://github.com/sford/yet-another-commit-checker)
