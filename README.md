@@ -3,7 +3,7 @@
 - [About](#about)
 - [Quick Start](#quick-start)
 - [Configuration](#configuration)
-- [Troubleshooting](#troubleshooting)
+- [FAQ](#faq)
 - [Development](#development)
 
 ## About
@@ -118,7 +118,7 @@ If present, commits will be excluded from all requirements except matching commi
 If enabled, commits from service users (ie, using [SSH Access Keys](https://confluence.atlassian.com/display/STASH/SSH+access+keys+for+system+use))
 will be excluded from commit requirements.
 
-## Troubleshooting
+## FAQ
 
 #### I am getting a JIRA authentication failed message when attempting to push my code or when trying to configure an issue JQL matcher.
 
@@ -130,6 +130,13 @@ the commits for a repository and click on an linked JIRA issue for an existing c
 for an example of this.
 
 There might be a better way to do this, but this what has worked for me :-)
+
+#### How do I not pull my hair out if I need to configure YACC on a lot of repositories?
+
+YACC is designed to be configured on a per-repository basis. If you would like to configure a lot of
+repositories, or wish to keep repositories in sync, you can use the
+[Stash REST API](https://developer.atlassian.com/static/rest/stash/3.8.0/stash-rest.html#idp2993072)
+to automate configuring YACC.
 
 ## Development
 
