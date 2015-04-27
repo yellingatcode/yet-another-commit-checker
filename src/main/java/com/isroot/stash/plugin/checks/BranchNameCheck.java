@@ -2,6 +2,7 @@ package com.isroot.stash.plugin.checks;
 
 import com.atlassian.stash.scm.git.GitRefPattern;
 import com.atlassian.stash.setting.Settings;
+import com.isroot.stash.plugin.errors.YaccError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +26,8 @@ public class BranchNameCheck {
         this.refId = refId;
     }
 
-    public List<String> check() {
-        List<String> errors = new ArrayList<String>();
+    public List<YaccError> check() {
+        List<YaccError> errors = new ArrayList<YaccError>();
         boolean isBranch = refId.startsWith(GitRefPattern.HEADS.getPath());
 
         Pattern branchNamePattern = getPattern();
@@ -39,8 +40,9 @@ public class BranchNameCheck {
                     matcher.matches());
 
             if (!matcher.matches()) {
-                errors.add(String.format("%s: Invalid branch name. '%s' does not match regex '%s'", refId,
-                        branchName, settings.getString("branchNameRegex")));
+                errors.add(new YaccError(YaccError.Type.BRANCH_NAME,
+                        String.format("%s: Invalid branch name. '%s' does not match regex '%s'",
+                                refId, branchName, settings.getString("branchNameRegex"))));
             }
         }
 

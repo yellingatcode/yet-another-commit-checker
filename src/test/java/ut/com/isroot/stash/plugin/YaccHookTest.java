@@ -9,6 +9,8 @@ import com.atlassian.stash.setting.Settings;
 import com.google.common.collect.Lists;
 import com.isroot.stash.plugin.YaccHook;
 import com.isroot.stash.plugin.YaccService;
+import com.isroot.stash.plugin.errors.YaccError;
+import com.isroot.stash.plugin.errors.YaccErrorBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -16,6 +18,8 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -62,7 +66,7 @@ public class YaccHookTest {
     @Test
     public void testOnReceive_pushRejectedIfThereAreErrors() {
         when(yaccService.checkRefChange(any(Repository.class), any(Settings.class), any(RefChange.class)))
-                .thenReturn(Lists.newArrayList("error with commit"));
+                .thenReturn(Lists.newArrayList(new YaccError("error with commit")));
 
         boolean allowed = yaccHook.onReceive(repositoryHookContext, Lists.newArrayList(mock(RefChange.class)), hookResponse);
         assertThat(allowed).isFalse();
@@ -71,47 +75,60 @@ public class YaccHookTest {
     @Test
     public void testOnReceive_errorsArePrintedToHookStdErr() {
         when(yaccService.checkRefChange(any(Repository.class), any(Settings.class), any(RefChange.class)))
-                .thenReturn(Lists.newArrayList("error1", "error2"));
+                .thenReturn(Lists.newArrayList(new YaccError("error1"), new YaccError("error2")));
 
-        yaccHook.onReceive(repositoryHookContext, Lists.newArrayList(mock(RefChange.class)), hookResponse);
+        yaccHook.onReceive(repositoryHookContext, getMockRefChanges(), hookResponse);
 
         assertThat(errorMessage.toString())
-                .isEqualTo(YaccHook.ERROR_BEARS + "\n\nerror1\nerror2\n\n");
+                .isEqualTo(YaccErrorBuilder.ERROR_BEARS + "\n\n" +
+                        "refs/heads/master: error1\n" +
+                        "refs/heads/master: error2\n\n");
     }
 
     @Test
     public void testOnReceive_defaultHeaderDisplayedIfErrorMessageHeaderIsEmpty() {
         when(yaccService.checkRefChange(any(Repository.class), any(Settings.class), any(RefChange.class)))
-                .thenReturn(Lists.newArrayList("error1"));
+                .thenReturn(Lists.newArrayList(new YaccError("error1")));
 
         when(settings.getString("errorMessageHeader")).thenReturn("");
 
-        yaccHook.onReceive(repositoryHookContext, Lists.newArrayList(mock(RefChange.class)), hookResponse);
+        yaccHook.onReceive(repositoryHookContext, getMockRefChanges(), hookResponse);
 
-        assertThat(errorMessage.toString()).startsWith(YaccHook.ERROR_BEARS);
+        assertThat(errorMessage.toString()).startsWith(YaccErrorBuilder.ERROR_BEARS);
     }
 
     @Test
     public void testOnReceive_nonEmptyErrorMessageHeaderReplacesDefaultHeader() {
         when(yaccService.checkRefChange(any(Repository.class), any(Settings.class), any(RefChange.class)))
-                .thenReturn(Lists.newArrayList("error1"));
+                .thenReturn(Lists.newArrayList(new YaccError("error1")));
 
         when(settings.getString("errorMessageHeader")).thenReturn("Custom Header");
 
-        yaccHook.onReceive(repositoryHookContext, Lists.newArrayList(mock(RefChange.class)), hookResponse);
+        yaccHook.onReceive(repositoryHookContext, getMockRefChanges(), hookResponse);
 
-        assertThat(errorMessage.toString()).isEqualTo("Custom Header\n\nerror1\n\n");
+        assertThat(errorMessage.toString()).isEqualTo("Custom Header\n\n" +
+                "refs/heads/master: error1\n\n");
     }
 
     @Test
     public void testOnReceive_errorMessageFooterAddedToEndOfOutput() {
         when(yaccService.checkRefChange(any(Repository.class), any(Settings.class), any(RefChange.class)))
-                .thenReturn(Lists.newArrayList("error1"));
+                .thenReturn(Lists.newArrayList(new YaccError("error1")));
 
         when(settings.getString("errorMessageFooter")).thenReturn("Custom Footer");
 
-        yaccHook.onReceive(repositoryHookContext, Lists.newArrayList(mock(RefChange.class)), hookResponse);
+        yaccHook.onReceive(repositoryHookContext, getMockRefChanges(), hookResponse);
 
         assertThat(errorMessage.toString()).endsWith("\nCustom Footer\n\n");
+    }
+
+    private List<RefChange> getMockRefChanges() {
+        List<RefChange> refChanges = new ArrayList<RefChange>();
+        RefChange refChange = mock(RefChange.class);
+
+        when(refChange.getRefId()).thenReturn("refs/heads/master");
+
+        refChanges.add(refChange);
+        return refChanges;
     }
 }
