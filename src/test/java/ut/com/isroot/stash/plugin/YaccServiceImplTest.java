@@ -454,7 +454,7 @@ public class YaccServiceImplTest {
 
         assertThat(errors)
                 .containsExactly(new YaccError(YaccError.Type.BRANCH_NAME,
-                        "refs/heads/master: Invalid branch name. 'master' does not match regex 'foo'"));
+                        "Invalid branch name. 'master' does not match regex 'foo'"));
 
     }
 

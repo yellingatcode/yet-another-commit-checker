@@ -24,7 +24,7 @@ public class YaccErrorBuilder {
             " `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-' \n" +
             "\n" +
             "\n" +
-            "Push rejected.\n";
+            "Push rejected.";
 
     private final Settings settings;
 
@@ -58,11 +58,11 @@ public class YaccErrorBuilder {
                 sb.append("\n")
                         .append("    ")
                         .append(custom)
-                        .append("\n\n");
+                        .append("\n");
             }
-        }
 
-        sb.append("\n");
+            sb.append("\n");
+        }
 
         return sb.toString();
     }

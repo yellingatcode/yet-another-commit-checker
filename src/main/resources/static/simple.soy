@@ -113,6 +113,15 @@
   {/call}
 
   {call aui.form.textareaField}
+    {param id: 'errorMessage.ISSUE_JQL' /}
+    {param labelContent: 'Issue Jql Matcher Error' /}
+    {param value: $config['errorMessage.ISSUE_JQL'] /}
+    {param errorTexts: $errors ? $errors['errorMessage.ISSUE_JQL'] : null /}
+    {param descriptionText: 'If present, this text will be shown when the Issue Jql Matcher check fails.' /}
+    {param rows: '4' /}
+  {/call}
+
+  {call aui.form.textareaField}
     {param id: 'errorMessage.BRANCH_NAME' /}
     {param labelContent: 'Branch Name Regex Error' /}
     {param value: $config['errorMessage.BRANCH_NAME'] /}

@@ -41,8 +41,8 @@ public class BranchNameCheck {
 
             if (!matcher.matches()) {
                 errors.add(new YaccError(YaccError.Type.BRANCH_NAME,
-                        String.format("%s: Invalid branch name. '%s' does not match regex '%s'",
-                                refId, branchName, settings.getString("branchNameRegex"))));
+                        String.format("Invalid branch name. '%s' does not match regex '%s'",
+                                branchName, settings.getString("branchNameRegex"))));
             }
         }
 

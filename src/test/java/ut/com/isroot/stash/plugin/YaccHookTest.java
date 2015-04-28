@@ -80,9 +80,12 @@ public class YaccHookTest {
         yaccHook.onReceive(repositoryHookContext, getMockRefChanges(), hookResponse);
 
         assertThat(errorMessage.toString())
-                .isEqualTo(YaccErrorBuilder.ERROR_BEARS + "\n\n" +
+                .isEqualTo(YaccErrorBuilder.ERROR_BEARS + "\n" +
+                        "\n" +
                         "refs/heads/master: error1\n" +
-                        "refs/heads/master: error2\n\n");
+                        "\n" +
+                        "refs/heads/master: error2\n" +
+                        "\n");
     }
 
     @Test
@@ -106,7 +109,8 @@ public class YaccHookTest {
 
         yaccHook.onReceive(repositoryHookContext, getMockRefChanges(), hookResponse);
 
-        assertThat(errorMessage.toString()).isEqualTo("Custom Header\n\n" +
+        assertThat(errorMessage.toString()).isEqualTo("Custom Header\n" +
+                "\n" +
                 "refs/heads/master: error1\n\n");
     }
 
