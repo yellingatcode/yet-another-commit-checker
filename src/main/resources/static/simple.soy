@@ -32,7 +32,6 @@
 		{param errorTexts: $errors ? $errors['commitMessageRegex'] : null /}
 	{/call}
 
-
   <h3>JIRA Issue Requirements</h3>
 
 	{call aui.form.checkboxField}
@@ -75,7 +74,7 @@
     {param errorTexts: $errors ? $errors['branchNameRegex'] : null /}
   {/call}
 
-  <h3>Error Message</h3>
+  <h3>Error Message Customization</h3>
 
   {call aui.form.textareaField}
     {param id: 'errorMessageHeader' /}
@@ -83,6 +82,51 @@
     {param value: $config['errorMessageHeader'] /}
     {param descriptionText: 'If present, the default error message header will be replaced by this text.' /}
     {param errorTexts: $errors ? $errors['errorMessageHeader'] : null /}
+    {param rows: '4' /}
+  {/call}
+
+  {call aui.form.textareaField}
+    {param id: 'errorMessage.COMMITTER_EMAIL' /}
+    {param labelContent: 'Committer Email Error' /}
+    {param value: $config['errorMessage.COMMITTER_EMAIL'] /}
+    {param errorTexts: $errors ? $errors['errorMessage.COMMITTER_EMAIL'] : null /}
+    {param descriptionText: 'If present, this text will be shown when the Require Matching Author Email check fails.' /}
+    {param rows: '4' /}
+  {/call}
+
+  {call aui.form.textareaField}
+    {param id: 'errorMessage.COMMITTER_NAME' /}
+    {param labelContent: 'Committer Name Error' /}
+    {param value: $config['errorMessage.COMMITTER_NAME'] /}
+    {param errorTexts: $errors ? $errors['errorMessage.COMMITTER_NAME'] : null /}
+    {param descriptionText: 'If present, this text will be shown when the Require Matching Author Name check fails.' /}
+    {param rows: '4' /}
+  {/call}
+
+  {call aui.form.textareaField}
+    {param id: 'errorMessage.COMMIT_REGEX' /}
+    {param labelContent: 'Commit Regex Error' /}
+    {param value: $config['errorMessage.COMMIT_REGEX'] /}
+    {param errorTexts: $errors ? $errors['errorMessage.COMMIT_REGEX'] : null /}
+    {param descriptionText: 'If present, this text will be shown when the Commit Message Regex check fails.' /}
+    {param rows: '4' /}
+  {/call}
+
+  {call aui.form.textareaField}
+    {param id: 'errorMessage.ISSUE_JQL' /}
+    {param labelContent: 'Issue Jql Matcher Error' /}
+    {param value: $config['errorMessage.ISSUE_JQL'] /}
+    {param errorTexts: $errors ? $errors['errorMessage.ISSUE_JQL'] : null /}
+    {param descriptionText: 'If present, this text will be shown when the Issue Jql Matcher check fails.' /}
+    {param rows: '4' /}
+  {/call}
+
+  {call aui.form.textareaField}
+    {param id: 'errorMessage.BRANCH_NAME' /}
+    {param labelContent: 'Branch Name Regex Error' /}
+    {param value: $config['errorMessage.BRANCH_NAME'] /}
+    {param errorTexts: $errors ? $errors['errorMessage.BRANCH_NAME'] : null /}
+    {param descriptionText: 'If present, this text will be shown when the Branch Name Regex check fails.' /}
     {param rows: '4' /}
   {/call}
 

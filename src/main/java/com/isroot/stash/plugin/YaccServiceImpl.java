@@ -11,6 +11,7 @@ import com.atlassian.stash.user.StashUser;
 import com.atlassian.stash.user.UserType;
 import com.google.common.collect.Lists;
 import com.isroot.stash.plugin.checks.BranchNameCheck;
+import com.isroot.stash.plugin.errors.YaccError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,33 +43,33 @@ public class YaccServiceImpl implements YaccService {
     }
 
     @Override
-    public List<String> checkRefChange(Repository repository, Settings settings, RefChange refChange) {
+    public List<YaccError> checkRefChange(Repository repository, Settings settings, RefChange refChange) {
         boolean isTag = refChange.getRefId().startsWith(GitRefPattern.TAGS.getPath());
 
         log.debug("checking ref change refId={} fromHash={} toHash={} type={}", refChange.getRefId(), refChange.getFromHash(),
                 refChange.getToHash(), refChange.getType().toString());
 
-        List<String> errors = Lists.newArrayList();
+        List<YaccError> errors = Lists.newArrayList();
 
         errors.addAll(new BranchNameCheck(settings, refChange.getRefId()).check());
 
         Set<YaccChangeset> changesets = changesetsService.getNewChangesets(repository, refChange);
 
         for (YaccChangeset changeset : changesets) {
-            for(String e : checkChangeset(settings, changeset, !isTag)) {
-                errors.add(String.format("%s: %s: %s", refChange.getRefId(), changeset.getId(), e));
+            for(YaccError e : checkChangeset(settings, changeset, !isTag)) {
+                errors.add(e.prependText(changeset.getId()));
             }
         }
 
         return errors;
     }
 
-    private List<String> checkChangeset(Settings settings, YaccChangeset changeset, boolean checkMessages) {
+    private List<YaccError> checkChangeset(Settings settings, YaccChangeset changeset, boolean checkMessages) {
         log.debug("checking commit id={} name={} email={} message={}", changeset.getId(),
                 changeset.getCommitter().getName(), changeset.getCommitter().getEmailAddress(),
                 changeset.getMessage());
 
-        List<String> errors = Lists.newArrayList();
+        List<YaccError> errors = Lists.newArrayList();
 
         StashUser stashUser = stashAuthenticationContext.getCurrentUser();
 
@@ -125,15 +126,16 @@ public class YaccServiceImpl implements YaccService {
         return false;
     }
 
-    private List<String> checkCommitMessageRegex(Settings settings, YaccChangeset changeset) {
-        List<String> errors = Lists.newArrayList();
+    private List<YaccError> checkCommitMessageRegex(Settings settings, YaccChangeset changeset) {
+        List<YaccError> errors = Lists.newArrayList();
 
         String regex = settings.getString("commitMessageRegex");
         if(isNullOrEmpty(regex) == false) {
             Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
             Matcher matcher = pattern.matcher(changeset.getMessage());
             if(matcher.matches() == false) {
-                errors.add("commit message doesn't match regex: " + regex);
+                errors.add(new YaccError(YaccError.Type.COMMIT_REGEX,
+                        "commit message doesn't match regex: " + regex));
             }
         }
 
@@ -160,15 +162,15 @@ public class YaccServiceImpl implements YaccService {
         return issueKeys;
     }
 
-    private List<String> checkJiraIssues(Settings settings, YaccChangeset changeset) {
+    private List<YaccError> checkJiraIssues(Settings settings, YaccChangeset changeset) {
         if (!settings.getBoolean("requireJiraIssue", false)) {
             return Lists.newArrayList();
         }
 
-        List<String> errors = Lists.newArrayList();
+        List<YaccError> errors = Lists.newArrayList();
 
         if (!jiraService.doesJiraApplicationLinkExist()) {
-            errors.add(String.format("Unable to verify JIRA issue because JIRA Application Link does not exist"));
+            errors.add(new YaccError(String.format("Unable to verify JIRA issue because JIRA Application Link does not exist")));
             return errors;
         }
 
@@ -188,12 +190,12 @@ public class YaccServiceImpl implements YaccService {
             }
         } catch(CredentialsRequiredException e) {
             log.error("communication error while validating issues", e);
-            errors.add(String.format("Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA."));
-            errors.add(String.format("To authenticate, visit %s in a web browser.", e.getAuthorisationURI().toASCIIString()));
+            errors.add(new YaccError(String.format("Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.")));
+            errors.add(new YaccError(String.format("To authenticate, visit %s in a web browser.", e.getAuthorisationURI().toASCIIString())));
             return errors;
         } catch(ResponseException e) {
             log.error("unexpected exception while trying to validate JIRA issues", e);
-            errors.add(String.format("Unable to validate JIRA issues due to an unexpected exception. Please see stack trace in logs."));
+            errors.add(new YaccError(String.format("Unable to validate JIRA issues due to an unexpected exception. Please see stack trace in logs.")));
             return errors;
         }
 
@@ -202,47 +204,48 @@ public class YaccServiceImpl implements YaccService {
                 errors.addAll(checkJiraIssue(settings, issueKey));
             }
         } else {
-            errors.add(String.format("No JIRA Issue found in commit message."));
+            errors.add(new YaccError(String.format("No JIRA Issue found in commit message.")));
         }
 
         return errors;
     }
 
-    private List<String> checkJiraIssue(Settings settings, IssueKey issueKey) {
-        List<String> errors = Lists.newArrayList();
+    private List<YaccError> checkJiraIssue(Settings settings, IssueKey issueKey) {
+        List<YaccError> errors = Lists.newArrayList();
 
         try {
             if (!jiraService.doesIssueExist(issueKey)) {
-                errors.add(String.format("%s: JIRA Issue does not exist", issueKey.getFullyQualifiedIssueKey()));
+                errors.add(new YaccError(String.format("%s: JIRA Issue does not exist", issueKey.getFullyQualifiedIssueKey())));
             } else {
                 String jqlQuery = settings.getString("issueJqlMatcher");
                 if (jqlQuery != null && !jqlQuery.isEmpty()) {
                     if (!jiraService.doesIssueMatchJqlQuery(jqlQuery, issueKey)) {
-                        errors.add(String.format("%s: JIRA Issue does not match JQL Query: %s", issueKey, jqlQuery));
+                        errors.add(new YaccError(YaccError.Type.ISSUE_JQL,
+                                String.format("%s: JIRA Issue does not match JQL Query: %s", issueKey, jqlQuery)));
                     }
                 }
             }
         } catch(CredentialsRequiredException e) {
-            errors.add(String.format("%s: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.", issueKey.getFullyQualifiedIssueKey()));
-            errors.add(String.format("To authenticate, visit %s in a web browser.", e.getAuthorisationURI().toASCIIString()));
+            errors.add(new YaccError(String.format("%s: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.", issueKey.getFullyQualifiedIssueKey())));
+            errors.add(new YaccError(String.format("To authenticate, visit %s in a web browser.", e.getAuthorisationURI().toASCIIString())));
         } catch(ResponseException e) {
             if (e.getCause() instanceof CredentialsRequiredException) {
                 CredentialsRequiredException cred = (CredentialsRequiredException)e.getCause();
-                errors.add(String.format("%s: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.", issueKey.getFullyQualifiedIssueKey()));
-                errors.add(String.format("To authenticate, visit %s in a web browser.", cred.getAuthorisationURI().toASCIIString()));
+                errors.add(new YaccError(String.format("%s: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.", issueKey.getFullyQualifiedIssueKey())));
+                errors.add(new YaccError(String.format("To authenticate, visit %s in a web browser.", cred.getAuthorisationURI().toASCIIString())));
             } else {
                 log.error("unexpected exception while trying to validate JIRA issue", e);
-                errors.add(String.format("%s: Unable to validate JIRA issue due to an unexpected exception. Please see stack trace in logs.", issueKey.getFullyQualifiedIssueKey()));
+                errors.add(new YaccError(String.format("%s: Unable to validate JIRA issue due to an unexpected exception. Please see stack trace in logs.", issueKey.getFullyQualifiedIssueKey())));
             }
         }
 
         return errors;
     }
 
-    private List<String> checkCommitterEmail(@Nonnull Settings settings, @Nonnull YaccChangeset changeset, @Nonnull StashUser stashUser) {
+    private List<YaccError> checkCommitterEmail(@Nonnull Settings settings, @Nonnull YaccChangeset changeset, @Nonnull StashUser stashUser) {
         final boolean requireMatchingAuthorEmail = settings.getBoolean("requireMatchingAuthorEmail", false);
 
-        List<String> errors = Lists.newArrayList();
+        List<YaccError> errors = Lists.newArrayList();
 
         // while the email address is not marked as @Nullable, its not @Notnull either
         // For service users it can be null, and while those have already been
@@ -257,17 +260,18 @@ public class YaccServiceImpl implements YaccService {
                 stashUser.getEmailAddress());
 
         if (requireMatchingAuthorEmail && !changeset.getCommitter().getEmailAddress().toLowerCase().equals(stashUser.getEmailAddress().toLowerCase())) {
-            errors.add(String.format("expected committer email '%s' but found '%s'", stashUser.getEmailAddress(),
-                    changeset.getCommitter().getEmailAddress()));
+            errors.add(new YaccError(YaccError.Type.COMMITTER_EMAIL,
+                    String.format("expected committer email '%s' but found '%s'", stashUser.getEmailAddress(),
+                    changeset.getCommitter().getEmailAddress())));
         }
 
         return errors;
     }
 
-    private List<String> checkCommitterName(@Nonnull Settings settings, @Nonnull YaccChangeset changeset, @Nonnull StashUser stashUser) {
+    private List<YaccError> checkCommitterName(@Nonnull Settings settings, @Nonnull YaccChangeset changeset, @Nonnull StashUser stashUser) {
         final boolean requireMatchingAuthorName = settings.getBoolean("requireMatchingAuthorName", false);
 
-        List<String> errors = Lists.newArrayList();
+        List<YaccError> errors = Lists.newArrayList();
 
         log.debug("requireMatchingAuthorName={} authorName={} stashName={}", requireMatchingAuthorName, changeset.getCommitter().getName(),
                 stashUser.getDisplayName());
@@ -275,8 +279,9 @@ public class YaccServiceImpl implements YaccService {
         String name = removeGitCrud(stashUser.getDisplayName());
 
         if (requireMatchingAuthorName && !changeset.getCommitter().getName().equalsIgnoreCase(name)) {
-            errors.add(String.format("expected committer name '%s' but found '%s'", name,
-                    changeset.getCommitter().getName()));
+            errors.add(new YaccError(YaccError.Type.COMMITTER_NAME,
+                    String.format("expected committer name '%s' but found '%s'", name,
+                    changeset.getCommitter().getName())));
         }
 
         return errors;

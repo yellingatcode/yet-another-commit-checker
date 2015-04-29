@@ -20,6 +20,8 @@ Features:
 * Issue JQL matcher to validate JIRA issue against. Require issues to be assigned, not closed, in a certain project, etc.
 The possibilities are endless!
 * No extra JIRA configuration is required. Will use existing JIRA Application Link!
+* Validate branch names.
+* Customizable error messages (header, footer, and specific errors).
 * Branch friendly! Only *new* commits are checked. Commits that already exist in the repository will be skipped.
 
 Questions? Comments? Found a bug? See https://github.com/sford/yet-another-commit-checker!
