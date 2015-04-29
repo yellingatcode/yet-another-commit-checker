@@ -5,23 +5,23 @@
  */
 {template .formContents}
 	{call aui.form.checkboxField}
-		{param legendContent: 'Require Matching Author Email' /}
+		{param legendContent: 'Require Matching Committer Email' /}
 		{param fields: [[
 			'id' : 'requireMatchingAuthorEmail',
 			'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
 			'isChecked' : $config['requireMatchingAuthorEmail']
 		]] /}
-		{param descriptionText: 'Require that the commit author\'s email matches the Stash user\'s email.' /}
+		{param descriptionText: 'Require that the commit committer\'s email matches the Stash user\'s email.' /}
 	{/call}
 
 	{call aui.form.checkboxField}
-		{param legendContent: 'Require Matching Author Name' /}
+		{param legendContent: 'Require Matching Committer Name' /}
 		{param fields: [[
 			'id' : 'requireMatchingAuthorName',
 			'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
 			'isChecked' : $config['requireMatchingAuthorName']
 		]] /}
-		{param descriptionText: 'Require that the commit author\'s name matches the Stash user\'s name.' /}
+		{param descriptionText: 'Require that the commit committer\'s name matches the Stash user\'s name.' /}
 	{/call}
 
 	{call aui.form.textField}
@@ -90,7 +90,7 @@
     {param labelContent: 'Committer Email Error' /}
     {param value: $config['errorMessage.COMMITTER_EMAIL'] /}
     {param errorTexts: $errors ? $errors['errorMessage.COMMITTER_EMAIL'] : null /}
-    {param descriptionText: 'If present, this text will be shown when the Require Matching Author Email check fails.' /}
+    {param descriptionText: 'If present, this text will be shown when the Require Matching Committer Email check fails.' /}
     {param rows: '4' /}
   {/call}
 
@@ -99,7 +99,7 @@
     {param labelContent: 'Committer Name Error' /}
     {param value: $config['errorMessage.COMMITTER_NAME'] /}
     {param errorTexts: $errors ? $errors['errorMessage.COMMITTER_NAME'] : null /}
-    {param descriptionText: 'If present, this text will be shown when the Require Matching Author Name check fails.' /}
+    {param descriptionText: 'If present, this text will be shown when the Require Matching Committer Name check fails.' /}
     {param rows: '4' /}
   {/call}
 
