@@ -1,9 +1,10 @@
 # YACC Changelog
 
-### 1.5 (upcoming)
+### 1.5 
 
 * New setting 'Branch Name Regex' to enforce branch naming conventions when pushing.
-* Push rejected message header and footer is now customizable.
+* Error message header and footer is now customizable, existing ASCII art can be removed (or replaced with better ASCII art :-)
+* Additional text can now be added to errors with clarification or to include info on how to fix.
 
 ### 1.4
 
