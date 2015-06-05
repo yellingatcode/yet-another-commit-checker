@@ -30,8 +30,9 @@ Author: [Sean Ford](https://github.com/sford)
 
 ## Quick Start
 
-1. Install YACC plugin into Stash
-2. If you want to require valid JIRA issues, configure a JIRA Application Link in Stash
+1. Download plugin from [Atlassian Marketplace](https://marketplace.atlassian.com/plugins/com.isroot.stash.plugin.yacc) or compile from source
+2. Install YACC plugin into Stash
+3. If you want to require valid JIRA issues, configure a JIRA Application Link in Stash
 4. Configure YACC in the Hook Settings for a repository
 
 ## Configuration
