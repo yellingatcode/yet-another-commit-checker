@@ -1,5 +1,9 @@
 # YACC Changelog
 
+### 1.6
+
+* Compatible with Stash Data Center
+
 ### 1.5 
 
 * New setting 'Branch Name Regex' to enforce branch naming conventions when pushing.
