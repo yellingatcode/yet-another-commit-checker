@@ -1,5 +1,9 @@
 # YACC Changelog
 
+### 1.7
+
+* Fixed error when deleting tag that doesn't exist. Thanks [@bbaetz](https://github.com/bbaetz)!
+
 ### 1.6
 
 * Compatible with Stash Data Center
