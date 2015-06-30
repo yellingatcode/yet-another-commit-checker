@@ -5,6 +5,7 @@ import com.atlassian.stash.hook.repository.PreReceiveRepositoryHook;
 import com.atlassian.stash.hook.repository.RepositoryHookContext;
 import com.atlassian.stash.repository.RefChange;
 import com.atlassian.stash.repository.RefChangeType;
+import com.atlassian.stash.scm.git.common.GitUtils;
 import com.atlassian.stash.setting.Settings;
 import com.google.common.collect.Lists;
 import com.isroot.stash.plugin.errors.YaccError;
@@ -37,6 +38,24 @@ public final class YaccHook implements PreReceiveRepositoryHook {
 
         for (RefChange rf : refChanges) {
             if (rf.getType() == RefChangeType.DELETE) {
+                continue;
+            }
+            // A toRef of 0000000000000000000000000000000000000000 means that
+            // it is a delete
+            // A fromRef of 0000000000000000000000000000000000000000 means that
+            // the ref doesn't currently exist.
+            // Normally, that means that it is an ADD.
+            // However, when deleting a ref that doesn't exist, *both* refs
+            // will be zeros (there's no current ref AND there will be no ref
+            // after the push)
+            // Stash treats this as an ADD (ie the code that assigns the type
+            // checks fromRef being all zeros before checking toRef)
+            // Arguably, since the end result is that the ref won't exist the
+            // "most correct" option is to treat this as a DELETE.
+            // But Stash doesn't do that, so explicitly look for this scenario.
+            // Leaving this causes errors when trying to look up the bogus id
+            // in the respository and failing to match
+            if (rf.getType() == RefChangeType.ADD && rf.getToHash().equals(GitUtils.NULL_SHA1)) {
                 continue;
             }
 
