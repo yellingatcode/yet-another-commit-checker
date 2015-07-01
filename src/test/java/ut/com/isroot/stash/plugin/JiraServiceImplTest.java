@@ -9,7 +9,7 @@ import com.atlassian.sal.api.net.ResponseStatusException;
 import com.isroot.stash.plugin.IssueKey;
 import com.isroot.stash.plugin.JiraService;
 import com.isroot.stash.plugin.JiraServiceImpl;
-import org.junit.Assert;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Answers;
@@ -118,7 +118,7 @@ public class JiraServiceImplTest {
 
         try {
             jiraService.isJqlQueryValid("jql query");
-            Assert.fail();
+            Assertions.failBecauseExceptionWasNotThrown(ResponseStatusException.class);
         } catch(ResponseStatusException expected) {
             assertThat(expected).isSameAs(ex);
         }
