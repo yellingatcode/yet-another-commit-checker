@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -35,7 +35,7 @@ public class BranchNameCheckTest {
         List<YaccError> errors = new BranchNameCheck(getSettings("foo"), "refs/heads/bar").check();
 
         assertThat(errors)
-                .containsExactly(new YaccError(YaccError.Type.BRANCH_NAME,
+                .containsOnly(new YaccError(YaccError.Type.BRANCH_NAME,
                         "Invalid branch name. 'bar' does not match regex 'foo'"));
     }
 

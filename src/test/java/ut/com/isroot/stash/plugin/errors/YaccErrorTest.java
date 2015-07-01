@@ -3,7 +3,7 @@ package ut.com.isroot.stash.plugin.errors;
 import com.isroot.stash.plugin.errors.YaccError;
 import org.junit.Test;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sean Ford

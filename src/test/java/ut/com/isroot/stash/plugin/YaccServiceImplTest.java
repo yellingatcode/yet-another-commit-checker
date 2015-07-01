@@ -26,7 +26,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
@@ -72,7 +72,7 @@ public class YaccServiceImplTest {
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-        assertThat(errors).contains(new YaccError(YaccError.Type.COMMITTER_NAME,
+        assertThat(errors).containsOnly(new YaccError(YaccError.Type.COMMITTER_NAME,
                 "deadbeef: expected committer name 'John Smith' but found 'Incorrect Name'"));
     }
 
@@ -130,7 +130,7 @@ public class YaccServiceImplTest {
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-        assertThat(errors).contains(new YaccError(YaccError.Type.COMMITTER_EMAIL,
+        assertThat(errors).containsOnly(new YaccError(YaccError.Type.COMMITTER_EMAIL,
                 "deadbeef: expected committer email 'correct@email.com' but found 'wrong@email.com'"));
     }
 
@@ -187,7 +187,7 @@ public class YaccServiceImplTest {
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(changesets);
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-        assertThat(errors).contains(new YaccError("deadbeef: Unable to verify JIRA issue because JIRA Application Link does not exist"));
+        assertThat(errors).containsOnly(new YaccError("deadbeef: Unable to verify JIRA issue because JIRA Application Link does not exist"));
     }
 
     @Test
@@ -200,7 +200,7 @@ public class YaccServiceImplTest {
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-        assertThat(errors).contains(new YaccError("deadbeef: No JIRA Issue found in commit message."));
+        assertThat(errors).containsOnly(new YaccError("deadbeef: No JIRA Issue found in commit message."));
     }
 
     @Test
@@ -236,7 +236,7 @@ public class YaccServiceImplTest {
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-        assertThat(errors).contains(new YaccError("deadbeef: No JIRA Issue found in commit message."));
+        assertThat(errors).containsOnly(new YaccError("deadbeef: No JIRA Issue found in commit message."));
     }
 
     @Test
@@ -283,8 +283,8 @@ public class YaccServiceImplTest {
 
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-        assertThat(errors).contains(new YaccError("deadbeef: ABC-123: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA."));
-        assertThat(errors).contains(new YaccError("deadbeef: To authenticate, visit http://localhost/link in a web browser."));
+        assertThat(errors).containsOnly(new YaccError("deadbeef: ABC-123: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA."),
+                                        new YaccError("deadbeef: To authenticate, visit http://localhost/link in a web browser."));
         verify(jiraService).doesIssueExist(new IssueKey("ABC-123"));
     }
 
@@ -302,8 +302,8 @@ public class YaccServiceImplTest {
 
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-        assertThat(errors).contains(new YaccError("deadbeef: ABC-123: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA."));
-        assertThat(errors).contains(new YaccError("deadbeef: To authenticate, visit http://localhost/link in a web browser."));
+        assertThat(errors).containsOnly(new YaccError("deadbeef: ABC-123: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA."),
+                                        new YaccError("deadbeef: To authenticate, visit http://localhost/link in a web browser."));
         verify(jiraService).doesIssueExist(new IssueKey("ABC-123"));
     }
 
@@ -330,7 +330,7 @@ public class YaccServiceImplTest {
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
-        assertThat(errors).contains(new YaccError(YaccError.Type.COMMIT_REGEX,
+        assertThat(errors).containsOnly(new YaccError(YaccError.Type.COMMIT_REGEX,
                 "deadbeef: commit message doesn't match regex: [a-z ]+"));
     }
 
@@ -392,9 +392,9 @@ public class YaccServiceImplTest {
         when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockTagChange());
-        assertThat(errors).contains(new YaccError(YaccError.Type.COMMITTER_NAME,
-                "deadbeef: expected committer name 'John Smith' but found 'Incorrect Name'"));
-        assertThat(errors).contains(new YaccError(YaccError.Type.COMMITTER_EMAIL,
+        assertThat(errors).containsOnly(new YaccError(YaccError.Type.COMMITTER_NAME,
+                "deadbeef: expected committer name 'John Smith' but found 'Incorrect Name'"),
+                                        new YaccError(YaccError.Type.COMMITTER_EMAIL,
                 "deadbeef: expected committer email 'correct@email.com' but found 'wrong@email.com'"));
     }
 
@@ -453,7 +453,7 @@ public class YaccServiceImplTest {
         List<YaccError> errors = yaccService.checkRefChange(null, settings, refChange);
 
         assertThat(errors)
-                .containsExactly(new YaccError(YaccError.Type.BRANCH_NAME,
+                .containsOnly(new YaccError(YaccError.Type.BRANCH_NAME,
                         "Invalid branch name. 'master' does not match regex 'foo'"));
 
     }
