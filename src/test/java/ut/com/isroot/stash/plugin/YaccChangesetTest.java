@@ -3,7 +3,8 @@ package ut.com.isroot.stash.plugin;
 import com.isroot.stash.plugin.YaccChangeset;
 import com.isroot.stash.plugin.YaccPerson;
 import org.junit.Test;
-import static org.fest.assertions.api.Assertions.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
