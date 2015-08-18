@@ -8,7 +8,6 @@ import com.atlassian.stash.hook.repository.RepositoryHookService;
 import com.atlassian.stash.nav.NavBuilder;
 import com.atlassian.stash.setting.Settings;
 import com.atlassian.stash.setting.SettingsBuilder;
-import com.google.common.collect.ImmutableMap;
 import com.isroot.stash.plugin.JiraService;
 import com.isroot.stash.plugin.YaccConfigServlet;
 import java.io.IOException;
