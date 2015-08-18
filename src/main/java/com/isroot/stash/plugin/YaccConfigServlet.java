@@ -1,9 +1,6 @@
 package com.isroot.stash.plugin;
 
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 import com.atlassian.soy.renderer.SoyException;
 import com.atlassian.soy.renderer.SoyTemplateRenderer;
@@ -36,12 +33,10 @@ import com.atlassian.stash.hook.repository.RepositoryHookService;
  */
 public class YaccConfigServlet extends HttpServlet {
 
-    private static final String SETTINGS_MAP = "com.isroot.stash.plugin.yacc.settings";
-    static final String YACC_CONFIG = "com.isroot.stash.plugin.yacc.config";
-
-    private static final long serialVersionUID = 1L;
-    private final RepositoryHookService repositoryHookService;
     private static final Logger log = LoggerFactory.getLogger(YaccConfigServlet.class);
+    static final String SETTINGS_MAP = "com.isroot.stash.plugin.yacc.settings";
+
+    private final RepositoryHookService repositoryHookService;
     final private SoyTemplateRenderer soyTemplateRenderer;
     private final NavBuilder navBuilder;
     private ConfigValidator configValidator;
@@ -69,7 +64,7 @@ public class YaccConfigServlet extends HttpServlet {
 
 
     @SuppressWarnings("unchecked")
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         log.debug("doGet");
         settingsMap = (HashMap<String, Object>) pluginSettings.get(SETTINGS_MAP);
         if (settingsMap == null) {
@@ -80,7 +75,7 @@ public class YaccConfigServlet extends HttpServlet {
         doGetContinue(req, resp);
     }
 
-    private void validateSettings() {
+    public void validateSettings() {
         Settings settings = repositoryHookService.createSettingsBuilder()
                 .addAll(settingsMap)
                 .build();
@@ -122,18 +117,17 @@ public class YaccConfigServlet extends HttpServlet {
 
     }
 
-    void addStringFieldValue(HashMap<String, Object> settingsMap, HttpServletRequest req, String fieldName) {
+    public void addStringFieldValue(Map<String, Object> settingsMap, HttpServletRequest req, String fieldName) {
         String o;
         o = req.getParameter(fieldName);
         if (o != null && !o.isEmpty()) settingsMap.put(fieldName, o);
     }
 
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+    public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         settingsMap.clear();
 
-        // Plugin globalConfig persister supports onlt map of strings
-        while (req.getParameterNames().hasMoreElements()) {
-            String parameterName = (String) req.getParameterNames().nextElement();
+        for (Object key : req.getParameterMap().keySet()) {
+            String parameterName = (String) key;
 
             // Plugin settings persister only supports map of strings
             if (!parameterName.startsWith("errorMessage") && !parameterName.equals("submit")) {
@@ -157,30 +151,11 @@ public class YaccConfigServlet extends HttpServlet {
         }
 
         pluginSettings.put(SETTINGS_MAP, settingsMap);
-        pluginSettings.put(YACC_CONFIG, buildYaccConfig());
 
         String redirectUrl;
         redirectUrl = navBuilder.addons().buildRelative();
         log.debug("redirect: " + redirectUrl);
         resp.sendRedirect(redirectUrl);
-    }
-
-    Settings buildYaccConfig() {
-        HashMap<String, Object> config = new HashMap<String, Object>();
-        for (String fieldName : settingsMap.keySet()) {
-            addFieldValueToPluginConfigMap(settingsMap, config, fieldName);
-        }
-
-        return repositoryHookService.createSettingsBuilder().addAll(config).build();
-    }
-
-    void addFieldValueToPluginConfigMap(HashMap<String, Object> settingsMap, HashMap<String, Object> config, String fieldName) {
-        String value = (String) settingsMap.get(fieldName);
-        if (value != null && (value.equals("on") || value.equals("true"))) { // handle "on" value
-            config.put(fieldName, true);
-        } else if (value != null && !value.isEmpty()) {
-            config.put(fieldName, value);
-        }
     }
 
     private static class SettingsValidationErrorsImpl implements SettingsValidationErrors {
@@ -194,7 +169,7 @@ public class YaccConfigServlet extends HttpServlet {
 
         @Override
         public void addFieldError(String fieldName, String errorMessage) {
-            fieldErrors.put(fieldName, new ArrayList<String>(Arrays.asList(errorMessage)));
+            fieldErrors.put(fieldName, new ArrayList<String>(Collections.singletonList(errorMessage)));
         }
 
         @Override

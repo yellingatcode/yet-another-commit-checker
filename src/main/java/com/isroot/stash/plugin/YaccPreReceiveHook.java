@@ -14,6 +14,8 @@ import com.atlassian.stash.user.Permission;
 import com.atlassian.stash.user.SecurityService;
 import com.atlassian.stash.util.UncheckedOperation;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,12 +65,35 @@ public class YaccPreReceiveHook implements PreReceiveHook {
             // Repository hook not configured
             log.debug("PreReceiveRepositoryHook not configured. Run PreReceiveHook");
             PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
-            Settings storedConfig = (Settings) pluginSettings.get(YaccConfigServlet.YACC_CONFIG);
+
+            Map<String, Object> settingsMap =
+                    (HashMap<String, Object>) pluginSettings.get(YaccConfigServlet.SETTINGS_MAP);
+
+            Settings storedConfig = buildYaccConfig(settingsMap);
+
             if (storedConfig != null) {
                 settings = storedConfig;
             }
         }
 
         return yaccHook.onReceive(new RepositoryHookContext(repository, settings), refChanges, hookResponse);
+    }
+
+    Settings buildYaccConfig(Map<String, Object> settingsMap) {
+        HashMap<String, Object> config = new HashMap<String, Object>();
+        for (String fieldName : settingsMap.keySet()) {
+            addFieldValueToPluginConfigMap(settingsMap, config, fieldName);
+        }
+
+        return repositoryHookService.createSettingsBuilder().addAll(config).build();
+    }
+
+    void addFieldValueToPluginConfigMap(Map<String, Object> settingsMap, HashMap<String, Object> config, String fieldName) {
+        String value = (String) settingsMap.get(fieldName);
+        if (value != null && (value.equals("on") || value.equals("true"))) { // handle "on" value
+            config.put(fieldName, true);
+        } else if (value != null && !value.isEmpty()) {
+            config.put(fieldName, value);
+        }
     }
 }

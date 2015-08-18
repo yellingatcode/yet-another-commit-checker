@@ -22,7 +22,9 @@ import com.isroot.stash.plugin.errors.YaccErrorBuilder;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -30,6 +32,7 @@ import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -52,6 +55,7 @@ public class YaccPreReceiveHookTest {
     @Mock private PluginSettings pluginSettings;
     @Mock private SettingsBuilder settingsBuilder;
     @Mock private Settings settings;
+    private Map<String, Object> settingsMap = new HashMap<String, Object>();
 
     private StringWriter errorMessage;
     private YaccPreReceiveHook yaccPreReceiveHook;
@@ -71,9 +75,10 @@ public class YaccPreReceiveHookTest {
 
         when(repositoryHookService.createSettingsBuilder()).thenReturn(settingsBuilder);
         when(settingsBuilder.build()).thenReturn(settings);
+        when(settingsBuilder.addAll(anyMap())).thenReturn(settingsBuilder);
 
         when(pluginSettingsFactory.createGlobalSettings()).thenReturn(pluginSettings);
-        when(pluginSettings.get(anyString())).thenReturn(settings);
+        when(pluginSettings.get(anyString())).thenReturn(settingsMap);
 
         errorMessage = new StringWriter();
         when(hookResponse.err()).thenReturn(new PrintWriter(errorMessage));
