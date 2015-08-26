@@ -71,7 +71,7 @@ public class YaccConfigServlet extends HttpServlet {
             settingsMap = new HashMap<String, Object>();
         }
 
-        validateSettings();
+        //validateSettings();
         doGetContinue(req, resp);
     }
 
@@ -130,12 +130,16 @@ public class YaccConfigServlet extends HttpServlet {
             String parameterName = (String) key;
 
             // Plugin settings persister only supports map of strings
-            if (!parameterName.startsWith("errorMessage") && !parameterName.equals("submit")) {
+            if (!parameterName.equals("submit")) {
                 addStringFieldValue(settingsMap, req, parameterName);
             }
         }
 
-        validateSettings();
+        try {
+            validateSettings();
+        } catch (Exception e) {
+            //exceptions are dealt with as field errors
+        }
 
         if (fieldErrors.size() > 0) {
             doGetContinue(req, resp);
