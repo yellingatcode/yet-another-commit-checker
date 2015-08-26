@@ -71,7 +71,7 @@ public class YaccConfigServlet extends HttpServlet {
             settingsMap = new HashMap<String, Object>();
         }
 
-        //validateSettings();
+        validateSettings();
         doGetContinue(req, resp);
     }
 
