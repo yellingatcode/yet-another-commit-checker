@@ -197,8 +197,8 @@
     </build>
     <properties>
         <!-- When updating this, remember to update the marketplace version too -->
-        <stash.version>2.12.0</stash.version>
-        <stash.data.version>2.12.0</stash.data.version>
+        <stash.version>3.5.1</stash.version>
+        <stash.data.version>3.5.1</stash.data.version>
         <amps.version>5.1.11</amps.version>
         <plugin.testrunner.version>1.1.4</plugin.testrunner.version>
     </properties>
