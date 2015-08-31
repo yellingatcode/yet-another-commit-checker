@@ -3,6 +3,7 @@
 ### 1.7
 
 * Fixed error when deleting tag that doesn't exist. Thanks [@bbaetz](https://github.com/bbaetz)!
+* New Feature: Global YACC configuration so you don't need to enable YACC per-repository. Thanks [@jimbethancourt](https://github.com/jimbethancourt) and [@uldisa](https://github.com/uldisa)!
 
 ### 1.6
 
