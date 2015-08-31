@@ -53,6 +53,9 @@ public class ConfigValidator implements RepositorySettingsValidator {
             } catch (CredentialsRequiredException ex) {
                 log.error("authentication error while trying to validate jql query", ex);
                 errors.addFieldError("issueJqlMatcher", "Unable to validate JQL query with JIRA. Authentication failure when communicating with JIRA.");
+            } catch (IllegalStateException ex) {
+                log.error(ex.getMessage(), ex);
+                errors.addFieldError("issueJqlMatcher", ex.getMessage());
             }
         }
     }
