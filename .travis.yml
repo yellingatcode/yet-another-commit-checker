@@ -11,7 +11,5 @@ before_install:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
 install:
-  - echo 'Sending stdout here to /dev/null because it is really noisy!'
-  - echo 'It causes build to hit travis.ci 4meg log limit, which fails build.'
-  - atlas-mvn install -DskipTests=true >/dev/null
+  - atlas-mvn -q install -DskipTests=true
 script: atlas-integration-test
