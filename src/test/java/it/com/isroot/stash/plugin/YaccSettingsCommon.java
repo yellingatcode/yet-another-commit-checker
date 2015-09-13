@@ -3,6 +3,7 @@ package it.com.isroot.stash.plugin;
 import com.atlassian.pageobjects.elements.ElementBy;
 import com.atlassian.pageobjects.elements.PageElement;
 import com.atlassian.webdriver.stash.page.StashPage;
+import com.atlassian.webdriver.stash.util.ElementUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,6 +12,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 2015-09-13
  */
 abstract class YaccSettingsCommon extends StashPage {
+    @ElementBy(className = "prevent-double-submit")
+    private PageElement form;
+
     @ElementBy(id = "requireMatchingAuthorEmail")
     private PageElement requireMatchingAuthorEmailCheckbox;
 
@@ -202,5 +206,9 @@ abstract class YaccSettingsCommon extends StashPage {
     public YaccSettingsCommon verifyExcludeByRegex(String value) {
         assertThat(excludeByRegex.getValue()).isEqualTo(value);
         return this;
+    }
+
+    public Iterable<String> getFieldIdsWithErrors() {
+        return ElementUtils.getFieldsWithErrors(form);
     }
 }

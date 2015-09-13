@@ -11,6 +11,8 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Integration test to verify that both the YACC global and repo settings page are in sync and both working.
  *
@@ -36,6 +38,11 @@ public class SettingsTest {
                 .loginAsSysAdmin(YaccGlobalSettingsPage.class);
 
         verifyDefaults(globalSettings);
+
+        setInvalidValues(globalSettings);
+        globalSettings.clickSubmit();
+        verifyValidationErrors(globalSettings);
+
         setValues(globalSettings);
         globalSettings.clickSubmit();
 
@@ -51,6 +58,11 @@ public class SettingsTest {
                 .clickEditYacc();
 
         verifyDefaults(repoSettingsPage);
+
+        setInvalidValues(repoSettingsPage);
+        repoSettingsPage.clickSubmit();
+        verifyValidationErrors(repoSettingsPage);
+
         setValues(repoSettingsPage);
         repoSettingsPage.clickSubmit();
 
@@ -74,6 +86,16 @@ public class SettingsTest {
                 .verifyExcludeMergeCommits(false)
                 .verifyExcludeByRegex("")
                 .verifyExcludeMergeCommits(false);
+    }
+
+    private void setInvalidValues(YaccSettingsCommon yaccSettingsCommon) {
+        yaccSettingsCommon.setCommitMessageRegex("(invalid regex")
+                .setExcludeByRegex("(invalid regex");
+    }
+
+    private void verifyValidationErrors(YaccSettingsCommon yaccSettingsCommon) {
+        assertThat(yaccSettingsCommon.getFieldIdsWithErrors())
+                .containsOnly("commitMessageRegex", "excludeByRegex");
     }
 
     private void setValues(YaccSettingsCommon yaccSettingsCommon) {
