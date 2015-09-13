@@ -8,7 +8,7 @@ before_install:
   - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys B07804338C015B73
   - sudo apt-get update
   - sudo apt-get install atlassian-plugin-sdk
-   - export DISPLAY=:99.0
+  - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
 install: atlas-mvn install -DskipTests=true
 script: atlas-integration-test
