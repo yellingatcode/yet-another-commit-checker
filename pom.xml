@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.isroot.stash.plugin</groupId>
     <artifactId>yacc</artifactId>
@@ -10,7 +11,9 @@
         <url>http://seandford.com</url>
     </organization>
     <name>Yet Another Commit Checker</name>
-    <description>This is the Yet Another Commit Checker plugin for Atlassian Stash. See https://github.com/sford/yet-another-commit-checker for documentation and source code.</description>
+    <description>This is the Yet Another Commit Checker plugin for Atlassian Stash. See
+        https://github.com/sford/yet-another-commit-checker for documentation and source code.
+    </description>
     <packaging>atlassian-plugin</packaging>
     <scm>
         <developerConnection>scm:git:https://github.com/sford/yet-another-commit-checker.git</developerConnection>
@@ -85,6 +88,32 @@
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.atlassian.stash</groupId>
+            <artifactId>stash-page-objects</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.atlassian.stash</groupId>
+            <artifactId>stash-test-util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.atlassian.stash</groupId>
+            <artifactId>stash-func-test-common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.atlassian.soy</groupId>
+            <artifactId>soy-template-renderer-api</artifactId>
+            <version>1.1.7</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Extra deps -->
         <dependency>
@@ -96,6 +125,11 @@
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
             <version>3.0.0.201306101825-r</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>12.0</version>
         </dependency>
 
         <!-- Test dependencies -->
@@ -122,17 +156,6 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.10</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.atlassian.soy</groupId>
-            <artifactId>soy-template-renderer-api</artifactId>
-            <version>1.1.7</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>
