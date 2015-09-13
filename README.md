@@ -13,7 +13,7 @@ configured policies, the push to the repository will be rejected.
 
 Features:
 
-* Fully configurable!
+* Configure globally or per-repository
 * Require commit committer name and email to match Stash user
 * Require commit messages to match regex
 * Require commit message to contain valid JIRA issue ids
@@ -33,9 +33,21 @@ Author: [Sean Ford](https://github.com/sford)
 1. Download plugin from [Atlassian Marketplace](https://marketplace.atlassian.com/plugins/com.isroot.stash.plugin.yacc) or compile from source
 2. Install YACC plugin into Stash
 3. If you want to require valid JIRA issues, configure a JIRA Application Link in Stash
-4. Configure YACC in the Hook Settings for a repository
+4. Configure YACC globally or per-repository
 
 ## Configuration
+
+### How To Configure
+
+YACC can be configured globally or per-repository. 
+
+To configure per-repository settings, go to the [repository's hook configuration page](https://confluence.atlassian.com/stash/using-repository-hooks-321858734.html#Usingrepositoryhooks-Managinghooks).
+
+To configure global settings, click the YACC Configure button in the [Universal Plugin Manager](https://confluence.atlassian.com/display/UPM/Configuring+add-ons).
+
+Global settings will apply to all repositories that don't have YACC enabled per-repository. Once YACC is enabled for a repository, then all global settings will be superseded by the per-repository settings for that particular repository.
+
+### Supported Configuration Settings
 
 ####Require Matching Committer Email
 
