@@ -1,31 +1,26 @@
 package com.isroot.stash.plugin;
 
-import java.util.*;
-
-import com.atlassian.soy.renderer.SoyException;
-import com.atlassian.soy.renderer.SoyTemplateRenderer;
-
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.google.common.collect.ImmutableMap;
-
-import javax.servlet.ServletException;
-
-import java.io.IOException;
-
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
+import com.atlassian.soy.renderer.SoyException;
+import com.atlassian.soy.renderer.SoyTemplateRenderer;
+import com.atlassian.stash.hook.repository.RepositoryHookService;
+import com.atlassian.stash.nav.NavBuilder;
 import com.atlassian.stash.setting.Settings;
 import com.atlassian.stash.setting.SettingsValidationErrors;
-
+import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.atlassian.stash.nav.NavBuilder;
-
-import com.atlassian.stash.hook.repository.RepositoryHookService;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Uldis Ansmits
@@ -34,7 +29,7 @@ import com.atlassian.stash.hook.repository.RepositoryHookService;
 public class YaccConfigServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(YaccConfigServlet.class);
-    static final String SETTINGS_MAP = "com.isroot.stash.plugin.yacc.settings";
+    public static final String SETTINGS_MAP = "com.isroot.stash.plugin.yacc.settings";
 
     private final RepositoryHookService repositoryHookService;
     final private SoyTemplateRenderer soyTemplateRenderer;
@@ -58,8 +53,8 @@ public class YaccConfigServlet extends HttpServlet {
 
         configValidator = new ConfigValidator(jiraService);
 
-        fields = new HashMap<String, String>();
-        fieldErrors = new HashMap<String, Iterable<String>>();
+        fields = new HashMap<>();
+        fieldErrors = new HashMap<>();
     }
 
 
@@ -68,11 +63,11 @@ public class YaccConfigServlet extends HttpServlet {
         log.debug("doGet");
         settingsMap = (HashMap<String, Object>) pluginSettings.get(SETTINGS_MAP);
         if (settingsMap == null) {
-            settingsMap = new HashMap<String, Object>();
+            settingsMap = new HashMap<>();
         }
 
         validateSettings();
-        doGetContinue(req, resp);
+        doGetContinue(resp);
     }
 
     public void validateSettings() {
@@ -82,7 +77,7 @@ public class YaccConfigServlet extends HttpServlet {
         configValidator.validate(settings, new SettingsValidationErrorsImpl(fieldErrors), null);
     }
 
-    protected void doGetContinue(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+    protected void doGetContinue(HttpServletResponse resp) throws IOException, ServletException {
         log.debug("doGetContinue");
         fields.clear();
 
@@ -142,7 +137,7 @@ public class YaccConfigServlet extends HttpServlet {
         }
 
         if (fieldErrors.size() > 0) {
-            doGetContinue(req, resp);
+            doGetContinue(resp);
             return;
         }
 
@@ -173,7 +168,7 @@ public class YaccConfigServlet extends HttpServlet {
 
         @Override
         public void addFieldError(String fieldName, String errorMessage) {
-            fieldErrors.put(fieldName, new ArrayList<String>(Collections.singletonList(errorMessage)));
+            fieldErrors.put(fieldName, new ArrayList<>(Collections.singletonList(errorMessage)));
         }
 
         @Override
