@@ -1,5 +1,9 @@
 # YACC Changelog
 
+### 1.8
+
+* Fixed NullPointerException when pushing and YACC global settings have not been configured
+
 ### 1.7
 
 * Fixed error when deleting tag that doesn't exist. Thanks [@bbaetz](https://github.com/bbaetz)!
