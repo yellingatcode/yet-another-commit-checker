@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class YaccBranchCreationListener {
 
-    private static final Logger log = LoggerFactory.getLogger(YaccPreReceiveHook.class);
+    private static final Logger log = LoggerFactory.getLogger(YaccBranchCreationListener.class);
 
     private final PluginSettingsFactory pluginSettingsFactory;
     private final SecurityService securityService;
