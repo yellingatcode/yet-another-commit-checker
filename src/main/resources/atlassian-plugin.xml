@@ -82,4 +82,7 @@
     <!-- Makes PluginSettingsFactory available to the plugin to allow the global settings to be set. -->
     <component-import key="pluginSettingsFactory" interface="com.atlassian.sal.api.pluginsettings.PluginSettingsFactory" />
 
+    <component key="YaccBranchCreationListener" class="com.isroot.stash.plugin.YaccBranchCreationListener"/>
+
+    <component-import key="i18nService" interface="com.atlassian.stash.i18n.I18nService"/>
 </atlassian-plugin>

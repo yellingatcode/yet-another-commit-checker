@@ -116,8 +116,6 @@ If present, pushes to branches that don't match this regex will be blocked.
 For example, `master|(?:(?:bugfix|hotfix|feature)/[A-Z]+-\d+-.+)` would enforce that pushes
 should be done to branches that follow the Stash Branching Model naming convention.
 
-*Note: This only affects pushes, not branches created through the Stash UI.*
-
 ####Exclude Merge Commits
 
 If enabled, merge commits will be excluded from commit requirements.

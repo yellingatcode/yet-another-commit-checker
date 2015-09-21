@@ -181,6 +181,7 @@
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
             <plugin>
@@ -219,8 +220,8 @@
     </build>
     <properties>
         <!-- When updating this, remember to update the marketplace version too -->
-        <stash.version>3.5.1</stash.version>
-        <stash.data.version>3.5.1</stash.data.version>
+        <stash.version>3.7.0</stash.version>
+        <stash.data.version>3.7.0</stash.data.version>
         <amps.version>5.1.11</amps.version>
         <plugin.testrunner.version>1.1.4</plugin.testrunner.version>
     </properties>

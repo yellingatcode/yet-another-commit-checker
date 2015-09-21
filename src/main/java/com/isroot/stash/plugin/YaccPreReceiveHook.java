@@ -1,6 +1,5 @@
 package com.isroot.stash.plugin;
 
-import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 import com.atlassian.stash.hook.HookResponse;
 import com.atlassian.stash.hook.PreReceiveHook;
@@ -18,8 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Uldis Ansmits
@@ -65,40 +62,9 @@ public class YaccPreReceiveHook implements PreReceiveHook {
             // Repository hook not configured
             log.debug("PreReceiveRepositoryHook not configured. Run PreReceiveHook");
 
-            Settings storedConfig = buildYaccConfig(getSettingsMap());
+            Settings storedConfig = YaccUtils.buildYaccConfig(pluginSettingsFactory, repositoryHookService);
 
             return yaccHook.onReceive(new RepositoryHookContext(repository, storedConfig), refChanges, hookResponse);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> getSettingsMap() {
-        PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
-
-        Map<String, Object> settingsMap = (HashMap<String, Object>)pluginSettings.get(YaccConfigServlet.SETTINGS_MAP);
-
-        if(settingsMap == null) {
-            settingsMap = new HashMap<>();
-        }
-
-        return settingsMap;
-    }
-
-    private Settings buildYaccConfig(Map<String, Object> settingsMap) {
-        HashMap<String, Object> config = new HashMap<>();
-        for (String fieldName : settingsMap.keySet()) {
-            addFieldValueToPluginConfigMap(settingsMap, config, fieldName);
-        }
-
-        return repositoryHookService.createSettingsBuilder().addAll(config).build();
-    }
-
-    private void addFieldValueToPluginConfigMap(Map<String, Object> settingsMap, HashMap<String, Object> config, String fieldName) {
-        String value = (String) settingsMap.get(fieldName);
-        if (value != null && (value.equals("on") || value.equals("true"))) { // handle "on" value
-            config.put(fieldName, true);
-        } else if (value != null && !value.isEmpty()) {
-            config.put(fieldName, value);
         }
     }
 }
