@@ -1,5 +1,9 @@
 # YACC Changelog
 
+### 1.9
+
+* New Feature: Branch Name Regex is now applied to branches created through Stash UI. Thanks [@wadahiro](https://github.com/wadahiro)!
+
 ### 1.8
 
 * Fixed NullPointerException when pushing and YACC global settings have not been configured
