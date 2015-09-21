@@ -1,14 +1,6 @@
 package com.isroot.stash.plugin;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.atlassian.event.api.EventListener;
-import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 import com.atlassian.stash.branch.BranchCreationRequestedEvent;
 import com.atlassian.stash.hook.repository.RepositoryHook;
@@ -21,6 +13,10 @@ import com.atlassian.stash.user.SecurityService;
 import com.atlassian.stash.util.UncheckedOperation;
 import com.isroot.stash.plugin.checks.BranchNameCheck;
 import com.isroot.stash.plugin.errors.YaccError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * @author Hiroyuki Wada
