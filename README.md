@@ -111,7 +111,8 @@ JQL queries.
 
 ####Branch Name Regex
 
-If present, pushes to branches that don't match this regex will be blocked.
+If present, only branches with names that match this regex will be allowed to be created. This
+affects both new branches being pushed and branches created within the Stash UI.
 
 For example, `master|(?:(?:bugfix|hotfix|feature)/[A-Z]+-\d+-.+)` would enforce that pushes
 should be done to branches that follow the Stash Branching Model naming convention.
