@@ -18,6 +18,7 @@ public class YaccGlobalSettingsPage extends YaccSettingsCommon {
 
     public YaccSettingsCommon clickSubmit() {
         submit.click();
+        waitABitForPageLoad();
         return this;
     }
 

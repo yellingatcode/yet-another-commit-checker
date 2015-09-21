@@ -26,6 +26,7 @@ public class YaccRepoSettingsPage extends YaccSettingsCommon {
 
     public YaccRepoSettingsPage clickSubmit() {
         submitButton.click();
+        waitABitForPageLoad();
         return this;
     }
 }
