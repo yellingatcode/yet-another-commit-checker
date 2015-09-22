@@ -216,7 +216,7 @@
     </build>
     <properties>
         <!-- When updating this, remember to update the marketplace version too -->
-        <bitbucket.version>4.0.0-eap3</bitbucket.version>
+        <bitbucket.version>4.0.0-rc12</bitbucket.version>
         <bitbucket.data.version>${bitbucket.version}</bitbucket.data.version>
         <amps.version>6.1.0</amps.version>
         <plugin.testrunner.version>1.2.3</plugin.testrunner.version>
