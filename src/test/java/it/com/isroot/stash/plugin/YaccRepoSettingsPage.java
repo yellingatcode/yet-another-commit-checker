@@ -11,6 +11,9 @@ public class YaccRepoSettingsPage extends YaccSettingsCommon {
     @ElementBy(cssSelector = "tr[data-key=\"com.isroot.stash.plugin.yacc:yaccHook\"] .edit-button")
     private PageElement editYacc;
 
+    @ElementBy(cssSelector = "tr[data-key=\"com.isroot.stash.plugin.yacc:yaccHook\"] .mode-disabled")
+    private PageElement disableYacc;
+
     @ElementBy(className = "button-panel-submit-button")
     private PageElement submitButton;
 
@@ -27,6 +30,11 @@ public class YaccRepoSettingsPage extends YaccSettingsCommon {
     public YaccRepoSettingsPage clickSubmit() {
         submitButton.click();
         waitABitForPageLoad();
+        return this;
+    }
+
+    public YaccRepoSettingsPage clickDisable() {
+        disableYacc.click();
         return this;
     }
 }

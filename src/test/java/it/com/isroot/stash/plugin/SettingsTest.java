@@ -1,12 +1,8 @@
 package it.com.isroot.stash.plugin;
 
 import com.atlassian.pageobjects.TestedProductFactory;
-import com.atlassian.stash.async.AsyncTestUtils;
-import com.atlassian.stash.async.WaitCondition;
-import com.atlassian.webdriver.pageobjects.WebDriverTester;
 import com.atlassian.webdriver.stash.StashTestedProduct;
 import com.atlassian.webdriver.stash.page.StashLoginPage;
-import org.hamcrest.Description;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -24,7 +20,8 @@ public class SettingsTest {
 
     @BeforeClass
     public static void setup() {
-        waitForStashToBoot();
+        YaccTestUtils.waitForStashToBoot(STASH.getTester());
+        YaccTestUtils.resetData(STASH);
     }
 
     @After
@@ -130,21 +127,4 @@ public class SettingsTest {
                 .verifyExcludeMergeCommits(true);
     }
 
-
-    private static void waitForStashToBoot() {
-        AsyncTestUtils.waitFor(new WaitCondition() {
-            @Override
-            public boolean test() throws Exception {
-                WebDriverTester tester = STASH.getTester();
-
-                tester.gotoUrl(System.getProperty("http.stash.url") + "/status");
-                return tester.getDriver().getPageSource().contains("RUNNING");
-            }
-
-            @Override
-            public void describeFailure(Description description) throws Exception {
-
-            }
-        }, 600000, 5000);
-    }
 }
