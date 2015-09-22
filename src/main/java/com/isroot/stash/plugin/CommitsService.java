@@ -1,7 +1,7 @@
 package com.isroot.stash.plugin;
 
-import com.atlassian.stash.repository.RefChange;
-import com.atlassian.stash.repository.Repository;
+import com.atlassian.bitbucket.repository.RefChange;
+import com.atlassian.bitbucket.repository.Repository;
 
 import java.util.Set;
 

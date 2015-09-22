@@ -1,6 +1,6 @@
 package ut.com.isroot.stash.plugin.checks;
 
-import com.atlassian.stash.setting.Settings;
+import com.atlassian.bitbucket.setting.Settings;
 import com.isroot.stash.plugin.checks.BranchNameCheck;
 import com.isroot.stash.plugin.errors.YaccError;
 import org.junit.Test;

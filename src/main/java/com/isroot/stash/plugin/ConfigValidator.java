@@ -1,11 +1,11 @@
 package com.isroot.stash.plugin;
 
 import com.atlassian.applinks.api.CredentialsRequiredException;
+import com.atlassian.bitbucket.repository.Repository;
+import com.atlassian.bitbucket.setting.RepositorySettingsValidator;
+import com.atlassian.bitbucket.setting.Settings;
+import com.atlassian.bitbucket.setting.SettingsValidationErrors;
 import com.atlassian.sal.api.net.ResponseException;
-import com.atlassian.stash.repository.Repository;
-import com.atlassian.stash.setting.RepositorySettingsValidator;
-import com.atlassian.stash.setting.Settings;
-import com.atlassian.stash.setting.SettingsValidationErrors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

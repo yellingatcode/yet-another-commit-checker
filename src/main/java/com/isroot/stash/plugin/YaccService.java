@@ -1,8 +1,8 @@
 package com.isroot.stash.plugin;
 
-import com.atlassian.stash.repository.RefChange;
-import com.atlassian.stash.repository.Repository;
-import com.atlassian.stash.setting.Settings;
+import com.atlassian.bitbucket.repository.RefChange;
+import com.atlassian.bitbucket.repository.Repository;
+import com.atlassian.bitbucket.setting.Settings;
 import com.isroot.stash.plugin.errors.YaccError;
 
 import java.util.List;

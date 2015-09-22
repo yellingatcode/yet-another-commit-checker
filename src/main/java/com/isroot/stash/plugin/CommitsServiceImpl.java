@@ -1,17 +1,13 @@
 package com.isroot.stash.plugin;
 
-import com.atlassian.stash.commit.Commit;
-import com.atlassian.stash.commit.CommitService;
-import com.atlassian.stash.commit.CommitsBetweenRequest;
-import com.atlassian.stash.repository.RefChange;
-import com.atlassian.stash.repository.RefChangeType;
-import com.atlassian.stash.repository.Repository;
+import com.atlassian.bitbucket.commit.Commit;
+import com.atlassian.bitbucket.commit.CommitService;
+import com.atlassian.bitbucket.commit.CommitsBetweenRequest;
+import com.atlassian.bitbucket.repository.RefChange;
+import com.atlassian.bitbucket.repository.RefChangeType;
+import com.atlassian.bitbucket.repository.Repository;
+import com.atlassian.bitbucket.server.ApplicationPropertiesService;
 import com.atlassian.stash.scm.git.GitRefPattern;
-import com.atlassian.stash.server.ApplicationPropertiesService;
-import com.atlassian.stash.util.Page;
-import com.atlassian.stash.util.PageProvider;
-import com.atlassian.stash.util.PageRequest;
-import com.atlassian.stash.util.PagedIterable;
 import com.google.common.collect.Sets;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -86,14 +82,15 @@ public class CommitsServiceImpl implements CommitsService {
                         .exclude(getBranches(repository))
                         .include(refChange.getToHash())
                         .build();
-
-                // Make sure to get all of the changes
-                Iterable<Commit> commits = new PagedIterable<>(new PageProvider<Commit>() {
-                    @Override
-                    public Page<Commit> get(PageRequest pr) {
-                        return commitService.getCommitsBetween(request, pr);
-                    }
-                }, 100);
+// sford FIXME
+//                // Make sure to get all of the changes
+//                Iterable<Commit> commits = new PagedIterable<>(new PageProvider<Commit>() {
+//                    @Override
+//                    public Page<Commit> get(PageRequest pr) {
+//                        return commitService.getCommitsBetween(request, pr);
+//                    }
+//                }, 100);
+                Iterable<Commit> commits = null;
 
                 for (Commit commit : commits) {
                     final RevCommit revCommit = walk.parseCommit(ObjectId.fromString(commit.getId()));

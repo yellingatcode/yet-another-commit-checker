@@ -1,7 +1,7 @@
 package com.isroot.stash.plugin.checks;
 
+import com.atlassian.bitbucket.setting.Settings;
 import com.atlassian.stash.scm.git.GitRefPattern;
-import com.atlassian.stash.setting.Settings;
 import com.isroot.stash.plugin.errors.YaccError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

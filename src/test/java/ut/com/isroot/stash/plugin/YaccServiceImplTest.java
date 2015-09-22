@@ -1,21 +1,16 @@
 package ut.com.isroot.stash.plugin;
 
 import com.atlassian.applinks.api.CredentialsRequiredException;
+import com.atlassian.bitbucket.auth.AuthenticationContext;
+import com.atlassian.bitbucket.repository.RefChange;
+import com.atlassian.bitbucket.repository.RefChangeType;
+import com.atlassian.bitbucket.repository.Repository;
+import com.atlassian.bitbucket.setting.Settings;
+import com.atlassian.bitbucket.user.ApplicationUser;
+import com.atlassian.bitbucket.user.UserType;
 import com.atlassian.sal.api.net.ResponseException;
-import com.atlassian.stash.repository.RefChange;
-import com.atlassian.stash.repository.RefChangeType;
-import com.atlassian.stash.repository.Repository;
-import com.atlassian.stash.setting.Settings;
-import com.atlassian.stash.user.StashAuthenticationContext;
-import com.atlassian.stash.user.StashUser;
-import com.atlassian.stash.user.UserType;
 import com.google.common.collect.Sets;
-import com.isroot.stash.plugin.CommitsService;
-import com.isroot.stash.plugin.IssueKey;
-import com.isroot.stash.plugin.JiraService;
-import com.isroot.stash.plugin.YaccCommit;
-import com.isroot.stash.plugin.YaccService;
-import com.isroot.stash.plugin.YaccServiceImpl;
+import com.isroot.stash.plugin.*;
 import com.isroot.stash.plugin.errors.YaccError;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,25 +23,20 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Sean Ford
  * @since 2013-10-26
  */
 public class YaccServiceImplTest {
-    @Mock private StashAuthenticationContext stashAuthenticationContext;
+    @Mock private AuthenticationContext stashAuthenticationContext;
     @Mock private CommitsService commitsService;
     @Mock private JiraService jiraService;
     @Mock private ResponseException responseException;
     @Mock private CredentialsRequiredException credRequired;
     @Mock private Settings settings;
-    @Mock private StashUser stashUser;
+    @Mock private ApplicationUser stashUser;
 
     private YaccService yaccService;
 

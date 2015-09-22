@@ -1,12 +1,9 @@
 package it.com.isroot.stash.plugin;
 
 import com.atlassian.pageobjects.TestedProductFactory;
-import com.atlassian.stash.async.AsyncTestUtils;
-import com.atlassian.stash.async.WaitCondition;
+import com.atlassian.webdriver.bitbucket.BitbucketTestedProduct;
+import com.atlassian.webdriver.bitbucket.page.BitbucketLoginPage;
 import com.atlassian.webdriver.pageobjects.WebDriverTester;
-import com.atlassian.webdriver.stash.StashTestedProduct;
-import com.atlassian.webdriver.stash.page.StashLoginPage;
-import org.hamcrest.Description;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -20,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 2015-08-30
  */
 public class SettingsTest {
-    private static final StashTestedProduct STASH = TestedProductFactory.create(StashTestedProduct.class);
+    private static final BitbucketTestedProduct STASH = TestedProductFactory.create(BitbucketTestedProduct.class);
 
     @BeforeClass
     public static void setup() {
@@ -34,7 +31,7 @@ public class SettingsTest {
 
     @Test
     public void testGlobalSettings() {
-        YaccGlobalSettingsPage globalSettings = STASH.visit(StashLoginPage.class)
+        YaccGlobalSettingsPage globalSettings = STASH.visit(BitbucketLoginPage.class)
                 .loginAsSysAdmin(YaccGlobalSettingsPage.class);
 
         verifyDefaults(globalSettings);
@@ -53,7 +50,7 @@ public class SettingsTest {
 
     @Test
     public void testRepositorySettings() {
-        YaccRepoSettingsPage repoSettingsPage = STASH.visit(StashLoginPage.class)
+        YaccRepoSettingsPage repoSettingsPage = STASH.visit(BitbucketLoginPage.class)
                 .loginAsSysAdmin(YaccRepoSettingsPage.class)
                 .clickEditYacc();
 
@@ -132,19 +129,22 @@ public class SettingsTest {
 
 
     private static void waitForStashToBoot() {
-        AsyncTestUtils.waitFor(new WaitCondition() {
-            @Override
-            public boolean test() throws Exception {
-                WebDriverTester tester = STASH.getTester();
+        for(int i=0; i<30; i++) {
+            WebDriverTester tester = STASH.getTester();
 
-                tester.gotoUrl(System.getProperty("http.stash.url") + "/status");
-                return tester.getDriver().getPageSource().contains("RUNNING");
+            tester.gotoUrl(System.getProperty("http.stash.url") + "/status");
+
+            if(tester.getDriver().getPageSource().contains("RUNNING")) {
+                return;
             }
 
-            @Override
-            public void describeFailure(Description description) throws Exception {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
 
             }
-        }, 600000, 5000);
+        }
+
+        throw new RuntimeException("timeout exceeded waiting for bitbucket server to start");
     }
 }

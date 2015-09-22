@@ -1,6 +1,6 @@
 package ut.com.isroot.stash.plugin.errors;
 
-import com.atlassian.stash.setting.Settings;
+import com.atlassian.bitbucket.setting.Settings;
 import com.isroot.stash.plugin.errors.YaccError;
 import com.isroot.stash.plugin.errors.YaccErrorBuilder;
 import org.junit.Before;
@@ -10,9 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Sean Ford

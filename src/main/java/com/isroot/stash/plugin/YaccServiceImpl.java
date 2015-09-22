@@ -1,14 +1,14 @@
 package com.isroot.stash.plugin;
 
 import com.atlassian.applinks.api.CredentialsRequiredException;
+import com.atlassian.bitbucket.auth.AuthenticationContext;
+import com.atlassian.bitbucket.repository.RefChange;
+import com.atlassian.bitbucket.repository.Repository;
+import com.atlassian.bitbucket.setting.Settings;
+import com.atlassian.bitbucket.user.ApplicationUser;
+import com.atlassian.bitbucket.user.UserType;
 import com.atlassian.sal.api.net.ResponseException;
-import com.atlassian.stash.repository.RefChange;
-import com.atlassian.stash.repository.Repository;
 import com.atlassian.stash.scm.git.GitRefPattern;
-import com.atlassian.stash.setting.Settings;
-import com.atlassian.stash.user.StashAuthenticationContext;
-import com.atlassian.stash.user.StashUser;
-import com.atlassian.stash.user.UserType;
 import com.google.common.collect.Lists;
 import com.isroot.stash.plugin.checks.BranchNameCheck;
 import com.isroot.stash.plugin.errors.YaccError;
@@ -31,11 +31,11 @@ public class YaccServiceImpl implements YaccService {
     private static final Logger log = LoggerFactory.getLogger(YaccServiceImpl.class);
 
 
-    private final StashAuthenticationContext stashAuthenticationContext;
+    private final AuthenticationContext stashAuthenticationContext;
     private final CommitsService commitsService;
     private final JiraService jiraService;
 
-    public YaccServiceImpl(StashAuthenticationContext stashAuthenticationContext, CommitsService commitsService,
+    public YaccServiceImpl(AuthenticationContext stashAuthenticationContext, CommitsService commitsService,
                            JiraService jiraService) {
         this.stashAuthenticationContext = stashAuthenticationContext;
         this.commitsService = commitsService;
@@ -71,7 +71,7 @@ public class YaccServiceImpl implements YaccService {
 
         List<YaccError> errors = Lists.newArrayList();
 
-        StashUser stashUser = stashAuthenticationContext.getCurrentUser();
+        ApplicationUser stashUser = stashAuthenticationContext.getCurrentUser();
 
         if (stashUser == null) {
             // This should never happen
@@ -107,7 +107,7 @@ public class YaccServiceImpl implements YaccService {
         }
 
         // Exclude by Service User setting
-        StashUser stashUser = stashAuthenticationContext.getCurrentUser();
+        ApplicationUser stashUser = stashAuthenticationContext.getCurrentUser();
         if (settings.getBoolean("excludeServiceUserCommits", false) && stashUser.getType() == UserType.SERVICE) {
             return true;
         }
@@ -242,7 +242,7 @@ public class YaccServiceImpl implements YaccService {
         return errors;
     }
 
-    private List<YaccError> checkCommitterEmail(@Nonnull Settings settings, @Nonnull YaccCommit commit, @Nonnull StashUser stashUser) {
+    private List<YaccError> checkCommitterEmail(@Nonnull Settings settings, @Nonnull YaccCommit commit, @Nonnull ApplicationUser stashUser) {
         final boolean requireMatchingAuthorEmail = settings.getBoolean("requireMatchingAuthorEmail", false);
 
         List<YaccError> errors = Lists.newArrayList();
@@ -268,7 +268,7 @@ public class YaccServiceImpl implements YaccService {
         return errors;
     }
 
-    private List<YaccError> checkCommitterName(@Nonnull Settings settings, @Nonnull YaccCommit commit, @Nonnull StashUser stashUser) {
+    private List<YaccError> checkCommitterName(@Nonnull Settings settings, @Nonnull YaccCommit commit, @Nonnull ApplicationUser stashUser) {
         final boolean requireMatchingAuthorName = settings.getBoolean("requireMatchingAuthorName", false);
 
         List<YaccError> errors = Lists.newArrayList();

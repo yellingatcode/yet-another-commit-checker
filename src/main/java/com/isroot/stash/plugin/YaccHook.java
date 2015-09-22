@@ -1,12 +1,11 @@
 package com.isroot.stash.plugin;
 
-import com.atlassian.stash.hook.HookResponse;
-import com.atlassian.stash.hook.repository.PreReceiveRepositoryHook;
-import com.atlassian.stash.hook.repository.RepositoryHookContext;
-import com.atlassian.stash.repository.RefChange;
-import com.atlassian.stash.repository.RefChangeType;
-import com.atlassian.stash.scm.git.common.GitUtils;
-import com.atlassian.stash.setting.Settings;
+import com.atlassian.bitbucket.hook.HookResponse;
+import com.atlassian.bitbucket.hook.repository.PreReceiveRepositoryHook;
+import com.atlassian.bitbucket.hook.repository.RepositoryHookContext;
+import com.atlassian.bitbucket.repository.RefChange;
+import com.atlassian.bitbucket.repository.RefChangeType;
+import com.atlassian.bitbucket.setting.Settings;
 import com.google.common.collect.Lists;
 import com.isroot.stash.plugin.errors.YaccError;
 import com.isroot.stash.plugin.errors.YaccErrorBuilder;
@@ -55,7 +54,7 @@ public final class YaccHook implements PreReceiveRepositoryHook {
             // But Stash doesn't do that, so explicitly look for this scenario.
             // Leaving this causes errors when trying to look up the bogus id
             // in the respository and failing to match
-            if (rf.getType() == RefChangeType.ADD && rf.getToHash().equals(GitUtils.NULL_SHA1)) {
+            if (rf.getType() == RefChangeType.ADD && rf.getToHash().equals("0000000000000000000000000000000000000000")) {
                 continue;
             }
 

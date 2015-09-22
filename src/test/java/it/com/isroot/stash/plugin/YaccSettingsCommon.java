@@ -2,8 +2,8 @@ package it.com.isroot.stash.plugin;
 
 import com.atlassian.pageobjects.elements.ElementBy;
 import com.atlassian.pageobjects.elements.PageElement;
-import com.atlassian.webdriver.stash.page.StashPage;
-import com.atlassian.webdriver.stash.util.ElementUtils;
+import com.atlassian.webdriver.bitbucket.page.BitbucketPage;
+import com.atlassian.webdriver.bitbucket.util.ElementUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sean Ford
  * @since 2015-09-13
  */
-abstract class YaccSettingsCommon extends StashPage {
+abstract class YaccSettingsCommon extends BitbucketPage {
     @ElementBy(className = "prevent-double-submit")
     private PageElement form;
 
