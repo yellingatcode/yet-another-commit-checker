@@ -26,6 +26,14 @@ public class YaccRepoSettingsPage extends YaccSettingsCommon {
 
     public YaccRepoSettingsPage clickSubmit() {
         submitButton.click();
+
+        // temp sleep
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+
+        }
+
         return this;
     }
 }

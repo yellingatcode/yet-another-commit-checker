@@ -18,6 +18,14 @@ public class YaccGlobalSettingsPage extends YaccSettingsCommon {
 
     public YaccSettingsCommon clickSubmit() {
         submit.click();
+
+        // temp sleep
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+
+        }
+
         return this;
     }
 
