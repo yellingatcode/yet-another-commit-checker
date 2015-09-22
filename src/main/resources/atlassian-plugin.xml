@@ -55,15 +55,14 @@
         <url-pattern>/yaccHook/*</url-pattern>
     </servlet>
 
-    <stash-resource key="yaccHook-config-serverside">
+    <client-resource key="yaccHook-config-serverside">
         <directory location="/static/">
             <include>/**/simple.soy</include>
             <include>/**/serverside-config.soy</include>
         </directory>
-        <!--<context>plugin.page.stashbot</context>-->
-        <dependency>com.atlassian.stash.stash-web-plugin:server-soy-templates</dependency>
-        <dependency>com.atlassian.stash.stash-web-plugin:global</dependency>
-    </stash-resource>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web:server-soy-templates</dependency>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web:global</dependency>
+    </client-resource>
 
     <component-import key="soyTemplateRenderer" interface="com.atlassian.soy.renderer.SoyTemplateRenderer"/>
 

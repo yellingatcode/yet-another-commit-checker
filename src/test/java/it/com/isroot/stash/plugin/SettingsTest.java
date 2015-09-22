@@ -132,7 +132,7 @@ public class SettingsTest {
         for(int i=0; i<30; i++) {
             WebDriverTester tester = STASH.getTester();
 
-            tester.gotoUrl(System.getProperty("http.stash.url") + "/status");
+            tester.gotoUrl(System.getProperty("http.bitbucket.url") + "/status");
 
             if(tester.getDriver().getPageSource().contains("RUNNING")) {
                 return;
