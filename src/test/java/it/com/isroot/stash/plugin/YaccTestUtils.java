@@ -46,7 +46,7 @@ public class YaccTestUtils {
             public void describeFailure(Description description) throws Exception {
 
             }
-        }, 600000, 5000);
+        }, 60000, 5000);
     }
 
 }
