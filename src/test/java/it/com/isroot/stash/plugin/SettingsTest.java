@@ -4,8 +4,10 @@ import com.atlassian.pageobjects.TestedProductFactory;
 import com.atlassian.webdriver.bitbucket.BitbucketTestedProduct;
 import com.atlassian.webdriver.bitbucket.page.BitbucketLoginPage;
 import com.atlassian.webdriver.pageobjects.WebDriverTester;
+import com.atlassian.webdriver.testing.rule.WebDriverScreenshotRule;
 import org.junit.After;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,9 +21,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SettingsTest {
     private static final BitbucketTestedProduct STASH = TestedProductFactory.create(BitbucketTestedProduct.class);
 
+    @Rule
+    public WebDriverScreenshotRule webDriverScreenshotRule = new WebDriverScreenshotRule();
+
+
     @BeforeClass
     public static void setup() {
-        waitForStashToBoot();
+        YaccTestUtils.waitForStashToBoot(STASH.getTester());
+        YaccTestUtils.resetData(STASH);
     }
 
     @After
@@ -125,26 +132,5 @@ public class SettingsTest {
                 .verifyExcludeMergeCommits(true)
                 .verifyExcludeByRegex(".*")
                 .verifyExcludeMergeCommits(true);
-    }
-
-
-    private static void waitForStashToBoot() {
-        for(int i=0; i<30; i++) {
-            WebDriverTester tester = STASH.getTester();
-
-            tester.gotoUrl(System.getProperty("http.bitbucket.url") + "/status");
-
-            if(tester.getDriver().getPageSource().contains("RUNNING")) {
-                return;
-            }
-
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-
-            }
-        }
-
-        throw new RuntimeException("timeout exceeded waiting for bitbucket server to start");
     }
 }

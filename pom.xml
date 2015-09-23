@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.isroot.stash.plugin</groupId>
     <artifactId>yacc</artifactId>
-    <version>1.8-SNAPSHOT</version>
+    <version>1.9-SNAPSHOT</version>
     <organization>
         <name>Sean Ford</name>
         <url>http://seandford.com</url>
@@ -178,6 +178,7 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <showDeprecation>true</showDeprecation>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
             <plugin>
@@ -193,7 +194,6 @@
                             <encoding>UTF-8</encoding>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>
-                            <!--<linkXRef>false</linkXRef>-->
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
                         </configuration>
                         <goals>

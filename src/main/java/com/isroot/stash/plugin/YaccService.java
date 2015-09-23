@@ -12,6 +12,6 @@ import java.util.List;
  * @since 2014-01-14
  */
 public interface YaccService {
-    public List<YaccError> checkRefChange(Repository repository, Settings settings,
+    List<YaccError> checkRefChange(Repository repository, Settings settings,
             RefChange refChange);
 }

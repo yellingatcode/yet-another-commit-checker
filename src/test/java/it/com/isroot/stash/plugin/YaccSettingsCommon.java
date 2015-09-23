@@ -211,4 +211,49 @@ abstract class YaccSettingsCommon extends BitbucketPage {
     public Iterable<String> getFieldIdsWithErrors() {
         return ElementUtils.getFieldsWithErrors(form);
     }
+
+    public YaccSettingsCommon clearSettings() {
+        if(excludeMergeCommits.isSelected()) {
+            excludeMergeCommits.click();
+        }
+
+        if(excludeServiceUserCommits.isSelected()) {
+            excludeServiceUserCommits.click();
+        }
+
+        if(requireMatchingAuthorEmailCheckbox.isSelected()) {
+            requireMatchingAuthorEmailCheckbox.click();
+        }
+
+        if(requireMatchingAuthorNameCheckbox.isSelected()) {
+            requireMatchingAuthorNameCheckbox.click();
+        }
+
+        setBranchNameRegex("");
+        setExcludeByRegex("");
+        setCommitMessageRegex("");
+        setErrorMessageCommitterEmail("");
+        setErrorMessageBranchName("");
+        setErrorMessageCommitRegex("");
+        setErrorMessageCommitterName("");
+        setErrorMessageFooter("");
+        setErrorMessageHeader("");
+        setErrorMessageIssueJql("");
+
+        return this;
+    }
+
+    /**
+     * Sleep to wait for the page load. There have been some intermittent test failures related to
+     * validation errors where I think we need to wait a bit after submit. Sleep's are hackish but
+     * easy to do at the moment.
+     */
+    void waitABitForPageLoad() {
+        try {
+            Thread.sleep(5000);
+        }
+        catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -70,7 +70,7 @@
     {param id: 'branchNameRegex' /}
     {param labelContent: 'Branch Name Regex' /}
     {param value: $config['branchNameRegex'] /}
-    {param descriptionText: 'If present, pushes to branches that don\'t match this regex will be blocked.' /}
+    {param descriptionText: 'If present, only branches with names that match this regex will be allowed to be created. This affects both new branches being pushed and branches created within the Stash UI.' /}
     {param errorTexts: $errors ? $errors['branchNameRegex'] : null /}
   {/call}
 

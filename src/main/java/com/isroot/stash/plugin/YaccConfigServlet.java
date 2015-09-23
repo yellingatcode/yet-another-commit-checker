@@ -30,7 +30,7 @@ import java.util.Map;
 public class YaccConfigServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(YaccConfigServlet.class);
-    static final String SETTINGS_MAP = "com.isroot.stash.plugin.yacc.settings";
+    public static final String SETTINGS_MAP = "com.isroot.stash.plugin.yacc.settings";
 
     private final RepositoryHookService repositoryHookService;
     final private SoyTemplateRenderer soyTemplateRenderer;
@@ -54,8 +54,8 @@ public class YaccConfigServlet extends HttpServlet {
 
         configValidator = new ConfigValidator(jiraService);
 
-        fields = new HashMap<String, String>();
-        fieldErrors = new HashMap<String, Iterable<String>>();
+        fields = new HashMap<>();
+        fieldErrors = new HashMap<>();
     }
 
 
@@ -64,11 +64,11 @@ public class YaccConfigServlet extends HttpServlet {
         log.debug("doGet");
         settingsMap = (HashMap<String, Object>) pluginSettings.get(SETTINGS_MAP);
         if (settingsMap == null) {
-            settingsMap = new HashMap<String, Object>();
+            settingsMap = new HashMap<>();
         }
 
         validateSettings();
-        doGetContinue(req, resp);
+        doGetContinue(resp);
     }
 
     public void validateSettings() {
@@ -78,7 +78,7 @@ public class YaccConfigServlet extends HttpServlet {
         configValidator.validate(settings, new SettingsValidationErrorsImpl(fieldErrors), null);
     }
 
-    protected void doGetContinue(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+    protected void doGetContinue(HttpServletResponse resp) throws IOException, ServletException {
         log.debug("doGetContinue");
         fields.clear();
 
@@ -138,7 +138,7 @@ public class YaccConfigServlet extends HttpServlet {
         }
 
         if (fieldErrors.size() > 0) {
-            doGetContinue(req, resp);
+            doGetContinue(resp);
             return;
         }
 
@@ -169,7 +169,7 @@ public class YaccConfigServlet extends HttpServlet {
 
         @Override
         public void addFieldError(String fieldName, String errorMessage) {
-            fieldErrors.put(fieldName, new ArrayList<String>(Collections.singletonList(errorMessage)));
+            fieldErrors.put(fieldName, new ArrayList<>(Collections.singletonList(errorMessage)));
         }
 
         @Override
