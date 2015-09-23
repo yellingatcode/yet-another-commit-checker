@@ -8,13 +8,13 @@
 
 ## About
 
-This is an Atlassian Stash plugin that enforces commit message requirements. If a commit violates the
+This is an Atlassian Bitbucket Server plugin that enforces commit message requirements. If a commit violates the
 configured policies, the push to the repository will be rejected.
 
 Features:
 
 * Configure globally or per-repository
-* Require commit committer name and email to match Stash user
+* Require commit committer name and email to match Bitbucket Server user
 * Require commit messages to match regex
 * Require commit message to contain valid JIRA issue ids
 * Issue JQL matcher to validate JIRA issue against. Require issues to be assigned, not closed, in a certain project, etc.
@@ -31,8 +31,8 @@ Author: [Sean Ford](https://github.com/sford)
 ## Quick Start
 
 1. Download plugin from [Atlassian Marketplace](https://marketplace.atlassian.com/plugins/com.isroot.stash.plugin.yacc) or compile from source
-2. Install YACC plugin into Stash
-3. If you want to require valid JIRA issues, configure a JIRA Application Link in Stash
+2. Install YACC plugin into Bitbucket Server
+3. If you want to require valid JIRA issues, configure a JIRA Application Link in Bitbucket Server
 4. Configure YACC globally or per-repository
 
 ## Configuration
@@ -41,7 +41,7 @@ Author: [Sean Ford](https://github.com/sford)
 
 YACC can be configured globally or per-repository. 
 
-To configure per-repository settings, go to the [repository's hook configuration page](https://confluence.atlassian.com/stash/using-repository-hooks-321858734.html#Usingrepositoryhooks-Managinghooks).
+To configure per-repository settings, go to the [repository's hook configuration page](https://confluence.atlassian.com/bitbucketserver/using-repository-hooks-776639836.html#Usingrepositoryhooks-Managinghooks).
 
 To configure global settings, click the YACC Configure button in the [Universal Plugin Manager](https://confluence.atlassian.com/display/UPM/Configuring+add-ons).
 
@@ -51,11 +51,11 @@ Global settings will apply to all repositories that don't have YACC enabled per-
 
 ####Require Matching Committer Email
 
-If enabled, committer email must match the email of the Stash user.
+If enabled, committer email must match the email of the Bitbucket Server user.
 
 ####Require Matching Committer Name
 
-If enabled, committer name must match the name of the Stash user.
+If enabled, committer name must match the name of the Bitbucket Server user.
 
 ####Commit Message Regex
 
@@ -78,7 +78,7 @@ Multi-line commit messages can be matched by including newlines into the regex (
 If enabled, commit messages must contain valid JIRA issue ids. JIRA issue ids are defined as any item that matches
 the regex `[A-Z][A-Z_0-9]+-[0-9]+`.
 
-This check requires JIRA to be first linked with Stash using an Application Link. See https://confluence.atlassian.com/display/STASH/Linking+Stash+with+JIRA.
+This check requires JIRA to be first linked with Bitbucket Server using an [Application Link](https://confluence.atlassian.com/bitbucketserver/linking-bitbucket-server-with-jira-776640408.html).
 
 *Note:* This may result in false positives if commit messages contains strings that look like JIRA issue, for example, "UTF-8". Enable `Ignore Unknown JIRA Project Keys` to tell YACC to ignore items that don't contain a valid JIRA Project key.
 
@@ -112,10 +112,10 @@ JQL queries.
 ####Branch Name Regex
 
 If present, only branches with names that match this regex will be allowed to be created. This
-affects both new branches being pushed and branches created within the Stash UI.
+affects both new branches being pushed and branches created within the Bitbucket Server UI.
 
 For example, `master|(?:(?:bugfix|hotfix|feature)/[A-Z]+-\d+-.+)` would enforce that pushes
-should be done to branches that follow the Stash Branching Model naming convention.
+should be done to branches that follow the Bitbucket Server Branching Model naming convention.
 
 ####Exclude Merge Commits
 
@@ -129,34 +129,27 @@ If present, commits will be excluded from all requirements except matching commi
 
 ####Exclude Service User Commits
 
-If enabled, commits from service users (ie, using [SSH Access Keys](https://confluence.atlassian.com/display/STASH/SSH+access+keys+for+system+use))
+If enabled, commits from service users (ie, using [SSH Access Keys](https://confluence.atlassian.com/bitbucketserver/ssh-access-keys-for-system-use-776639781.html))
 will be excluded from commit requirements.
 
 ## FAQ
 
 #### I am getting a JIRA authentication failed message when attempting to push my code or when trying to configure an issue JQL matcher.
 
-This can occur if Stash is configured to use OAuth to authenticate with JIRA and the currently logged in Stash user has
-not yet gone through the OAuth authorization process to allow Stash access to JIRA.
+This can occur if Bitbucket Server is configured to use OAuth to authenticate with JIRA and the currently logged in Bitbucket Server user has
+not yet gone through the OAuth authorization process to allow Bitbucket Server access to JIRA.
 
-To initialize the OAuth tokens, go into the Stash UI and do something that requires access to JIRA. For example, view
-the commits for a repository and click on an linked JIRA issue for an existing commit. See the [Stash JIRA Integration](https://confluence.atlassian.com/display/STASH/JIRA+integration#JIRAintegration-SeetheJIRAissuesrelatedtocommitsandpullrequests)
+To initialize the OAuth tokens, go into the Bitbucket Server UI and do something that requires access to JIRA. For example, view
+the commits for a repository and click on an linked JIRA issue for an existing commit. See [Bitbucket Server JIRA Integration](https://confluence.atlassian.com/bitbucketserver/jira-integration-776639874.html#JIRAintegration-issues)
 for an example of this.
 
 There might be a better way to do this, but this what has worked for me :-)
-
-#### How do I not pull my hair out if I need to configure YACC on a lot of repositories?
-
-YACC is designed to be configured on a per-repository basis. If you would like to configure a lot of
-repositories, or wish to keep repositories in sync, you can use the
-[Stash REST API](https://developer.atlassian.com/static/rest/stash/3.8.0/stash-rest.html#idp2993072)
-to automate configuring YACC.
 
 #### YACC is rejecting my push complaining that my user name and/or email is wrong but the `Author:` from `git log` is correct!
 
 Or, YACC is still complaining even after I fixed my commit using `git commit --amend --author`.
 
-This is due to the fact that YACC checks the commit's *Committer* information against the Stash user,
+This is due to the fact that YACC checks the commit's *Committer* information against the Bitbucket Server user,
 not *Author*. These are normally the same; however, will be different when applying patches on behalf
 of someone else or cherry picking commits.
 
@@ -180,9 +173,9 @@ Some useful development information:
 
 ### Enable Logging
 
-Enabling YACC logging can be done using the Stash REST API. For example, see the following `curl` command which enables logging in the `atlas-run` development environment:
+Enabling YACC logging can be done using the Bitbucket Server REST API. For example, see the following `curl` command which enables logging in the `atlas-run` development environment:
 
-    curl -u admin -v -X PUT -d "" -H "Content-Type: application/json" http://localhost:7990/stash/rest/api/latest/logs/logger/com.isroot/debug
+    curl -u admin -v -X PUT -d "" -H "Content-Type: application/json" http://localhost:7990/bitbucket/rest/api/latest/logs/logger/com.isroot/debug
 
 ### Atlassian SDK
 
