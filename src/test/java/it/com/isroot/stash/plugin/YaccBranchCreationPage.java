@@ -25,6 +25,7 @@ public class YaccBranchCreationPage extends BranchCreationPage {
         Poller.waitUntilTrue(submit.timed().isEnabled());
         submit.click();
         Poller.waitUntilTrue(errorFlag.timed().isPresent());
+        Poller.waitUntilTrue(errorFlag.timed().hasText("Invalid branch name"));
 
         return this;
     }

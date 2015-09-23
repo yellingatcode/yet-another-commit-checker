@@ -51,7 +51,7 @@ public class BranchNameRegexTest {
         assertThat(branchCreate.getError()).isEqualTo("Invalid branch name. " +
                 "bugfix/invalid-branch-name does not match regex bugfix/[A-Z]+-[0-9]+.*");
 
-        branchCreate.setBranchName("ABC-123-good-name");
+        branchCreate.setBranchName("ABC-123-good-name-" + System.currentTimeMillis());
         branchCreate.createBranch("PROJECT_1", "rep_1");
     }
 
@@ -72,7 +72,7 @@ public class BranchNameRegexTest {
         assertThat(branchCreate.getError()).isEqualTo("Invalid branch name. " +
                 "bugfix/invalid-branch-name does not match regex bugfix/repo-[A-Z]+-[0-9]+.*");
 
-        branchCreate.setBranchName("repo-ABC-123-good-name");
+        branchCreate.setBranchName("repo-ABC-123-good-name-" + System.currentTimeMillis());
         branchCreate.createBranch("PROJECT_1", "rep_1");
     }
 }
