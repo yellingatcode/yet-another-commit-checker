@@ -2,6 +2,7 @@ package it.com.isroot.stash.plugin;
 
 import com.atlassian.pageobjects.elements.ElementBy;
 import com.atlassian.pageobjects.elements.PageElement;
+import com.atlassian.pageobjects.elements.query.Poller;
 import com.atlassian.webdriver.bitbucket.page.BitbucketPage;
 import com.atlassian.webdriver.bitbucket.util.ElementUtils;
 
@@ -213,6 +214,8 @@ abstract class YaccSettingsCommon extends BitbucketPage {
     }
 
     public YaccSettingsCommon clearSettings() {
+        Poller.waitUntilTrue(excludeMergeCommits.timed().isVisible());
+
         if(excludeMergeCommits.isSelected()) {
             excludeMergeCommits.click();
         }
