@@ -39,7 +39,7 @@ public class YaccConfigServlet extends HttpServlet {
     private Map<String, String> fields;
     private Map<String, Iterable<String>> fieldErrors;
     private final PluginSettings pluginSettings;
-    private HashMap<String, Object> settingsMap;
+    private Map<String, Object> settingsMap;
 
     public YaccConfigServlet(SoyTemplateRenderer soyTemplateRenderer,
                              PluginSettingsFactory pluginSettingsFactory,
@@ -62,7 +62,7 @@ public class YaccConfigServlet extends HttpServlet {
     @SuppressWarnings("unchecked")
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         log.debug("doGet");
-        settingsMap = (HashMap<String, Object>) pluginSettings.get(SETTINGS_MAP);
+        settingsMap = (Map<String, Object>) pluginSettings.get(SETTINGS_MAP);
         if (settingsMap == null) {
             settingsMap = new HashMap<>();
         }
@@ -71,14 +71,14 @@ public class YaccConfigServlet extends HttpServlet {
         doGetContinue(resp);
     }
 
-    public void validateSettings() {
+    private void validateSettings() {
         Settings settings = repositoryHookService.createSettingsBuilder()
                 .addAll(settingsMap)
                 .build();
         configValidator.validate(settings, new SettingsValidationErrorsImpl(fieldErrors), null);
     }
 
-    protected void doGetContinue(HttpServletResponse resp) throws IOException, ServletException {
+    private void doGetContinue(HttpServletResponse resp) throws IOException, ServletException {
         log.debug("doGetContinue");
         fields.clear();
 
@@ -96,7 +96,8 @@ public class YaccConfigServlet extends HttpServlet {
 
         resp.setContentType("text/html;charset=UTF-8");
         try {
-            soyTemplateRenderer.render(resp.getWriter(), "com.isroot.stash.plugin.yacc:yaccHook-config-serverside", "com.atlassian.stash.repository.hook.ref.config",
+            soyTemplateRenderer.render(resp.getWriter(), "com.isroot.stash.plugin.yacc:yaccHook-config-serverside",
+                    "com.atlassian.stash.repository.hook.ref.config",
                     ImmutableMap
                             .<String, Object>builder()
                             .put("config", fields)
@@ -113,7 +114,7 @@ public class YaccConfigServlet extends HttpServlet {
 
     }
 
-    public void addStringFieldValue(Map<String, Object> settingsMap, HttpServletRequest req, String fieldName) {
+    private void addStringFieldValue(Map<String, Object> settingsMap, HttpServletRequest req, String fieldName) {
         String o;
         o = req.getParameter(fieldName);
         if (o != null && !o.isEmpty()) settingsMap.put(fieldName, o);
