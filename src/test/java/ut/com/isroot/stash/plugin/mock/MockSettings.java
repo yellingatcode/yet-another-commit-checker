@@ -1,6 +1,6 @@
 package ut.com.isroot.stash.plugin.mock;
 
-import com.atlassian.stash.setting.Settings;
+import com.atlassian.bitbucket.setting.Settings;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 

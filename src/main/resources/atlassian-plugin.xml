@@ -28,8 +28,8 @@
 
 	<component-import key="applicationLinkService" interface="com.atlassian.applinks.api.ApplicationLinkService" />
 
-    <component key="changesetsService" class="com.isroot.stash.plugin.ChangesetsServiceImpl" public="true">
-        <interface>com.isroot.stash.plugin.ChangesetsService</interface>
+    <component key="commitsService" class="com.isroot.stash.plugin.CommitsServiceImpl" public="true">
+        <interface>com.isroot.stash.plugin.CommitsService</interface>
     </component>
 
     <component key="jiraService" class="com.isroot.stash.plugin.JiraServiceImpl" public="true">
@@ -55,15 +55,14 @@
         <url-pattern>/yaccHook/*</url-pattern>
     </servlet>
 
-    <stash-resource key="yaccHook-config-serverside">
+    <client-resource key="yaccHook-config-serverside">
         <directory location="/static/">
             <include>/**/simple.soy</include>
             <include>/**/serverside-config.soy</include>
         </directory>
-        <!--<context>plugin.page.stashbot</context>-->
-        <dependency>com.atlassian.stash.stash-web-plugin:server-soy-templates</dependency>
-        <dependency>com.atlassian.stash.stash-web-plugin:global</dependency>
-    </stash-resource>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web:server-soy-templates</dependency>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web:global</dependency>
+    </client-resource>
 
     <component-import key="soyTemplateRenderer" interface="com.atlassian.soy.renderer.SoyTemplateRenderer"/>
 
@@ -84,5 +83,5 @@
 
     <component key="YaccBranchCreationListener" class="com.isroot.stash.plugin.YaccBranchCreationListener"/>
 
-    <component-import key="i18nService" interface="com.atlassian.stash.i18n.I18nService"/>
+    <component-import key="i18nService" interface="com.atlassian.bitbucket.i18n.I18nService"/>
 </atlassian-plugin>

@@ -8,7 +8,7 @@
 		{param legendContent: 'Require Matching Committer Email' /}
 		{param fields: [[
 			'id' : 'requireMatchingAuthorEmail',
-			'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
+			'labelText': 'Enabled',
 			'isChecked' : $config['requireMatchingAuthorEmail']
 		]] /}
 		{param descriptionText: 'Require that the commit committer\'s email matches the Stash user\'s email.' /}
@@ -18,7 +18,7 @@
 		{param legendContent: 'Require Matching Committer Name' /}
 		{param fields: [[
 			'id' : 'requireMatchingAuthorName',
-			'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
+			'labelText': 'Enabled',
 			'isChecked' : $config['requireMatchingAuthorName']
 		]] /}
 		{param descriptionText: 'Require that the commit committer\'s name matches the Stash user\'s name.' /}
@@ -38,7 +38,7 @@
 		{param legendContent: 'Require Valid JIRA Issue(s)' /}
 		{param fields: [[
 			'id' : 'requireJiraIssue',
-			'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
+			'labelText': 'Enabled',
 			'isChecked' : $config['requireJiraIssue']
 		]] /}
 		{param descriptionText: 'Require that the commit message contains valid JIRA issue(s). Note, by default, all items that match [A-Z][A-Z_0-9]+-[0-9]+ will be treated as JIRA issues. If a commit message regex is configured and a regex group exists, then only this group will be checked for JIRA issues.' /}
@@ -49,7 +49,7 @@
 		{param legendContent: 'Ignore Unknown JIRA Project Keys' /}
 		{param fields: [[
 			'id' : 'ignoreUnknownIssueProjectKeys',
-			'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
+			'labelText': 'Enabled',
 			'isChecked' : $config['ignoreUnknownIssueProjectKeys']
 		]] /}
 		{param descriptionText: 'If this option is enabled, any issue-like items in the commit message that do not contain a valid JIRA project key (such as "UTF-8") will be ignored.' /}
@@ -145,7 +145,7 @@
     {param legendContent: 'Exclude Merge Commits' /}
       {param fields: [[
         'id' : 'excludeMergeCommits',
-        'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
+        'labelText': 'Enabled',
         'isChecked' : $config['excludeMergeCommits']
       ]] /}
     {param descriptionText: 'Exclude merge commits from commit requirements.' /}
@@ -163,7 +163,7 @@
     {param legendContent: 'Exclude Service User Commits' /}
       {param fields: [[
         'id' : 'excludeServiceUserCommits',
-        'labelText': stash_i18n('stash.web.stash.enable-ci-radio.button.label', 'Enabled'),
+        'labelText': 'Enabled',
         'isChecked' : $config['excludeServiceUserCommits']
       ]] /}
     {param descriptionText: 'Exclude commits from service users with access keys (e.g. CI Server) from commit requirements.' /}

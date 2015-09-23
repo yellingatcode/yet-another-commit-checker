@@ -5,6 +5,7 @@
     <module name="TreeWalker">
         <module name="Indentation"/>
         <module name="LeftCurly"/>
+        <module name="UnusedImports"/>
     </module>
     <module name="FileTabCharacter"/>
 </module>

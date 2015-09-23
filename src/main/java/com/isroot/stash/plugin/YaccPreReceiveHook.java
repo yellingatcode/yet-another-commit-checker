@@ -1,17 +1,17 @@
 package com.isroot.stash.plugin;
 
+import com.atlassian.bitbucket.hook.HookResponse;
+import com.atlassian.bitbucket.hook.PreReceiveHook;
+import com.atlassian.bitbucket.hook.repository.RepositoryHook;
+import com.atlassian.bitbucket.hook.repository.RepositoryHookContext;
+import com.atlassian.bitbucket.hook.repository.RepositoryHookService;
+import com.atlassian.bitbucket.permission.Permission;
+import com.atlassian.bitbucket.repository.RefChange;
+import com.atlassian.bitbucket.repository.Repository;
+import com.atlassian.bitbucket.setting.Settings;
+import com.atlassian.bitbucket.user.SecurityService;
+import com.atlassian.bitbucket.util.UncheckedOperation;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
-import com.atlassian.stash.hook.HookResponse;
-import com.atlassian.stash.hook.PreReceiveHook;
-import com.atlassian.stash.hook.repository.RepositoryHook;
-import com.atlassian.stash.hook.repository.RepositoryHookContext;
-import com.atlassian.stash.hook.repository.RepositoryHookService;
-import com.atlassian.stash.repository.RefChange;
-import com.atlassian.stash.repository.Repository;
-import com.atlassian.stash.setting.Settings;
-import com.atlassian.stash.user.Permission;
-import com.atlassian.stash.user.SecurityService;
-import com.atlassian.stash.util.UncheckedOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

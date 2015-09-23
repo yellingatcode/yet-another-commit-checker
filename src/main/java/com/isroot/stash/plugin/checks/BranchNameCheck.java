@@ -1,7 +1,7 @@
 package com.isroot.stash.plugin.checks;
 
+import com.atlassian.bitbucket.setting.Settings;
 import com.atlassian.stash.scm.git.GitRefPattern;
-import com.atlassian.stash.setting.Settings;
 import com.isroot.stash.plugin.errors.YaccError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ public class BranchNameCheck {
     }
 
     public List<YaccError> check() {
-        List<YaccError> errors = new ArrayList<YaccError>();
+        List<YaccError> errors = new ArrayList<>();
         boolean isBranch = refId.startsWith(GitRefPattern.HEADS.getPath());
 
         Pattern branchNamePattern = getPattern();

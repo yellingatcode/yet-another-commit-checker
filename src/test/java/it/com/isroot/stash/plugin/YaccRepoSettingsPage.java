@@ -2,6 +2,7 @@ package it.com.isroot.stash.plugin;
 
 import com.atlassian.pageobjects.elements.ElementBy;
 import com.atlassian.pageobjects.elements.PageElement;
+import com.atlassian.pageobjects.elements.query.Poller;
 
 /**
  * @author Sean Ford
@@ -34,6 +35,7 @@ public class YaccRepoSettingsPage extends YaccSettingsCommon {
     }
 
     public YaccRepoSettingsPage clickDisable() {
+        Poller.waitUntilTrue(disableYacc.timed().isVisible());
         disableYacc.click();
         return this;
     }

@@ -1,10 +1,12 @@
 package it.com.isroot.stash.plugin;
 
 import com.atlassian.pageobjects.TestedProductFactory;
-import com.atlassian.webdriver.stash.StashTestedProduct;
-import com.atlassian.webdriver.stash.page.StashLoginPage;
+import com.atlassian.webdriver.bitbucket.BitbucketTestedProduct;
+import com.atlassian.webdriver.bitbucket.page.BitbucketLoginPage;
+import com.atlassian.webdriver.testing.rule.WebDriverScreenshotRule;
 import org.junit.After;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +18,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 2015-08-30
  */
 public class SettingsTest {
-    private static final StashTestedProduct STASH = TestedProductFactory.create(StashTestedProduct.class);
+    private static final BitbucketTestedProduct STASH = TestedProductFactory.create(BitbucketTestedProduct.class);
+
+    @Rule
+    public WebDriverScreenshotRule webDriverScreenshotRule = new WebDriverScreenshotRule();
+
 
     @BeforeClass
     public static void setup() {
@@ -31,7 +37,7 @@ public class SettingsTest {
 
     @Test
     public void testGlobalSettings() {
-        YaccGlobalSettingsPage globalSettings = STASH.visit(StashLoginPage.class)
+        YaccGlobalSettingsPage globalSettings = STASH.visit(BitbucketLoginPage.class)
                 .loginAsSysAdmin(YaccGlobalSettingsPage.class);
 
         verifyDefaults(globalSettings);
@@ -50,7 +56,7 @@ public class SettingsTest {
 
     @Test
     public void testRepositorySettings() {
-        YaccRepoSettingsPage repoSettingsPage = STASH.visit(StashLoginPage.class)
+        YaccRepoSettingsPage repoSettingsPage = STASH.visit(BitbucketLoginPage.class)
                 .loginAsSysAdmin(YaccRepoSettingsPage.class)
                 .clickEditYacc();
 
@@ -126,5 +132,4 @@ public class SettingsTest {
                 .verifyExcludeByRegex(".*")
                 .verifyExcludeMergeCommits(true);
     }
-
 }

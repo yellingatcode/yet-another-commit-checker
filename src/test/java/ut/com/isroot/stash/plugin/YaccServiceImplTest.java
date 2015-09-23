@@ -1,21 +1,16 @@
 package ut.com.isroot.stash.plugin;
 
 import com.atlassian.applinks.api.CredentialsRequiredException;
+import com.atlassian.bitbucket.auth.AuthenticationContext;
+import com.atlassian.bitbucket.repository.RefChange;
+import com.atlassian.bitbucket.repository.RefChangeType;
+import com.atlassian.bitbucket.repository.Repository;
+import com.atlassian.bitbucket.setting.Settings;
+import com.atlassian.bitbucket.user.ApplicationUser;
+import com.atlassian.bitbucket.user.UserType;
 import com.atlassian.sal.api.net.ResponseException;
-import com.atlassian.stash.repository.RefChange;
-import com.atlassian.stash.repository.RefChangeType;
-import com.atlassian.stash.repository.Repository;
-import com.atlassian.stash.setting.Settings;
-import com.atlassian.stash.user.StashAuthenticationContext;
-import com.atlassian.stash.user.StashUser;
-import com.atlassian.stash.user.UserType;
 import com.google.common.collect.Sets;
-import com.isroot.stash.plugin.ChangesetsService;
-import com.isroot.stash.plugin.IssueKey;
-import com.isroot.stash.plugin.JiraService;
-import com.isroot.stash.plugin.YaccChangeset;
-import com.isroot.stash.plugin.YaccService;
-import com.isroot.stash.plugin.YaccServiceImpl;
+import com.isroot.stash.plugin.*;
 import com.isroot.stash.plugin.errors.YaccError;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,25 +23,20 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Sean Ford
  * @since 2013-10-26
  */
 public class YaccServiceImplTest {
-    @Mock private StashAuthenticationContext stashAuthenticationContext;
-    @Mock private ChangesetsService changesetsService;
+    @Mock private AuthenticationContext stashAuthenticationContext;
+    @Mock private CommitsService commitsService;
     @Mock private JiraService jiraService;
     @Mock private ResponseException responseException;
     @Mock private CredentialsRequiredException credRequired;
     @Mock private Settings settings;
-    @Mock private StashUser stashUser;
+    @Mock private ApplicationUser stashUser;
 
     private YaccService yaccService;
 
@@ -56,7 +46,7 @@ public class YaccServiceImplTest {
 
         MockitoAnnotations.initMocks(this);
 
-        yaccService = new YaccServiceImpl(stashAuthenticationContext, changesetsService, jiraService);
+        yaccService = new YaccServiceImpl(stashAuthenticationContext, commitsService, jiraService);
 
         when(stashAuthenticationContext.getCurrentUser()).thenReturn(stashUser);
     }
@@ -67,9 +57,9 @@ public class YaccServiceImplTest {
         when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getDisplayName()).thenReturn("John Smith");
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getCommitter().getName()).thenReturn("Incorrect Name");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getCommitter().getName()).thenReturn("Incorrect Name");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).containsOnly(new YaccError(YaccError.Type.COMMITTER_NAME,
@@ -82,9 +72,9 @@ public class YaccServiceImplTest {
         when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getDisplayName()).thenReturn("John Smith");
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getCommitter().getName()).thenReturn("John Smith");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getCommitter().getName()).thenReturn("John Smith");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isEmpty();
@@ -96,9 +86,9 @@ public class YaccServiceImplTest {
         when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getDisplayName()).thenReturn("John SMITH");
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getCommitter().getName()).thenReturn("John Smith");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getCommitter().getName()).thenReturn("John Smith");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isEmpty();
@@ -110,10 +100,10 @@ public class YaccServiceImplTest {
         when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getDisplayName()).thenReturn(".,:;<>\"\\'John< >\nSMITH.,:;<>\"\\'");
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getCommitter().getName()).thenReturn("John Smith");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class)))
-                .thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getCommitter().getName()).thenReturn("John Smith");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class)))
+                .thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isEmpty();
@@ -125,9 +115,9 @@ public class YaccServiceImplTest {
         when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getEmailAddress()).thenReturn("correct@email.com");
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getCommitter().getEmailAddress()).thenReturn("wrong@email.com");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getCommitter().getEmailAddress()).thenReturn("wrong@email.com");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).containsOnly(new YaccError(YaccError.Type.COMMITTER_EMAIL,
@@ -140,9 +130,9 @@ public class YaccServiceImplTest {
         when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getEmailAddress()).thenReturn("correct@email.com");
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getCommitter().getEmailAddress()).thenReturn("correct@email.com");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getCommitter().getEmailAddress()).thenReturn("correct@email.com");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isEmpty();
@@ -154,9 +144,9 @@ public class YaccServiceImplTest {
         when(stashUser.getType()).thenReturn(UserType.NORMAL);
         when(stashUser.getEmailAddress()).thenReturn("correct@email.com");
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getCommitter().getEmailAddress()).thenReturn("CoRrect@EMAIL.com");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getCommitter().getEmailAddress()).thenReturn("CoRrect@EMAIL.com");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isEmpty();
@@ -168,9 +158,9 @@ public class YaccServiceImplTest {
         when(settings.getBoolean("requireMatchingAuthorEmail", false)).thenReturn(true);
         when(stashUser.getType()).thenReturn(UserType.SERVICE);
         
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getCommitter().getEmailAddress()).thenReturn("CoRrect@EMAIL.com");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getCommitter().getEmailAddress()).thenReturn("CoRrect@EMAIL.com");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isEmpty();
@@ -183,8 +173,8 @@ public class YaccServiceImplTest {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(false);
 
-        Set<YaccChangeset> changesets = Sets.newHashSet(mockChangeset());
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(changesets);
+        Set<YaccCommit> commit = Sets.newHashSet(mockCommit());
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(commit);
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).containsOnly(new YaccError("deadbeef: Unable to verify JIRA issue because JIRA Application Link does not exist"));
@@ -195,9 +185,9 @@ public class YaccServiceImplTest {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("this commit message has no jira issues. abc-123 is not a valid issue because it is lowercase.");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getMessage()).thenReturn("this commit message has no jira issues. abc-123 is not a valid issue because it is lowercase.");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).containsOnly(new YaccError("deadbeef: No JIRA Issue found in commit message."));
@@ -213,9 +203,9 @@ public class YaccServiceImplTest {
         when(jiraService.doesProjectExist("ABC")).thenReturn(true);
         when(jiraService.doesProjectExist("UTF")).thenReturn(false);
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id and an invalid issue id of UTF-8");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getMessage()).thenReturn("ABC-123: this commit has valid issue id and an invalid issue id of UTF-8");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
@@ -231,9 +221,9 @@ public class YaccServiceImplTest {
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
         when(jiraService.doesProjectExist("UTF")).thenReturn(false);
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("this commit message has no jira issues. UTF-8 is not a valid issue because it has an invalid project key.");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getMessage()).thenReturn("this commit message has no jira issues. UTF-8 is not a valid issue because it has an invalid project key.");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).containsOnly(new YaccError("deadbeef: No JIRA Issue found in commit message."));
@@ -245,9 +235,9 @@ public class YaccServiceImplTest {
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
         when(jiraService.doesIssueExist(any(IssueKey.class))).thenReturn(true);
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getMessage()).thenReturn("ABC-123: this commit has valid issue id");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isEmpty();
@@ -260,9 +250,9 @@ public class YaccServiceImplTest {
         when(settings.getBoolean("requireJiraIssue", false)).thenReturn(true);
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("these issue ids should be extracted: ABC-123, ABC_D-123, ABC2-123");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getMessage()).thenReturn("these issue ids should be extracted: ABC-123, ABC_D-123, ABC2-123");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         yaccService.checkRefChange(null, settings, mockRefChange());
         verify(jiraService).doesIssueExist(new IssueKey("ABC-123"));
@@ -277,9 +267,9 @@ public class YaccServiceImplTest {
         when(jiraService.doesIssueExist(any(IssueKey.class))).thenThrow(credRequired);
         when(credRequired.getAuthorisationURI()).thenReturn(new URI("http://localhost/link"));
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getMessage()).thenReturn("ABC-123: this commit has valid issue id");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
@@ -296,9 +286,9 @@ public class YaccServiceImplTest {
         when(responseException.getCause()).thenReturn(credRequired);
         when(credRequired.getAuthorisationURI()).thenReturn(new URI("http://localhost/link"));
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("ABC-123: this commit has valid issue id");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getMessage()).thenReturn("ABC-123: this commit has valid issue id");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
@@ -312,9 +302,9 @@ public class YaccServiceImplTest {
         when(settings.getString("commitMessageRegex")).thenReturn("[a-z ]+");
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("matches regex");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getMessage()).thenReturn("matches regex");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isEmpty();
@@ -325,9 +315,9 @@ public class YaccServiceImplTest {
         when(settings.getString("commitMessageRegex")).thenReturn("[a-z ]+");
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("123 does not match regex because it contains numbers");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getMessage()).thenReturn("123 does not match regex because it contains numbers");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).containsOnly(new YaccError(YaccError.Type.COMMIT_REGEX,
@@ -339,9 +329,9 @@ public class YaccServiceImplTest {
         when(settings.getString("commitMessageRegex")).thenReturn("foo");
         when(settings.getString("excludeByRegex")).thenReturn("#skipcheck");
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("this commit will be allowed #skipcheck");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getMessage()).thenReturn("this commit will be allowed #skipcheck");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isEmpty();
@@ -354,9 +344,9 @@ public class YaccServiceImplTest {
         when(settings.getString("commitMessageRegex")).thenReturn("foo");
         when(settings.getString("excludeByRegex")).thenReturn("#skipcheck");
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("this commit will be rejected");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getMessage()).thenReturn("this commit will be rejected");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isNotEmpty();
@@ -367,10 +357,10 @@ public class YaccServiceImplTest {
         when(settings.getString("commitMessageRegex")).thenReturn("foo");
         when(settings.getBoolean("excludeMergeCommits",false)).thenReturn(true);
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("This is a merge commit");
-        when(changeset.getParentCount()).thenReturn(2);
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getMessage()).thenReturn("This is a merge commit");
+        when(commit.getParentCount()).thenReturn(2);
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isEmpty();
@@ -386,10 +376,10 @@ public class YaccServiceImplTest {
         when(stashUser.getDisplayName()).thenReturn("John Smith");
         when(stashUser.getEmailAddress()).thenReturn("correct@email.com");
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getCommitter().getName()).thenReturn("Incorrect Name");
-        when(changeset.getCommitter().getEmailAddress()).thenReturn("wrong@email.com");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getCommitter().getName()).thenReturn("Incorrect Name");
+        when(commit.getCommitter().getEmailAddress()).thenReturn("wrong@email.com");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockTagChange());
         assertThat(errors).containsOnly(new YaccError(YaccError.Type.COMMITTER_NAME,
@@ -403,9 +393,9 @@ public class YaccServiceImplTest {
         when(settings.getString("commitMessageRegex")).thenReturn("REGEX");
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("a message");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getMessage()).thenReturn("a message");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockTagChange());
         assertThat(errors).isEmpty();
@@ -418,9 +408,9 @@ public class YaccServiceImplTest {
         when(jiraService.doesJiraApplicationLinkExist()).thenReturn(true);
         when(jiraService.doesProjectExist("UTF")).thenReturn(false);
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("this commit message has no jira issues. UTF-8 is not a valid issue because it has an invalid project key.");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getMessage()).thenReturn("this commit message has no jira issues. UTF-8 is not a valid issue because it has an invalid project key.");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockTagChange());
         assertThat(errors).isEmpty();
@@ -435,9 +425,9 @@ public class YaccServiceImplTest {
 
         when(stashUser.getType()).thenReturn(UserType.SERVICE);
 
-        YaccChangeset changeset = mockChangeset();
-        when(changeset.getMessage()).thenReturn("123 does not match regex because it contains numbers");
-        when(changesetsService.getNewChangesets(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(changeset));
+        YaccCommit commit = mockCommit();
+        when(commit.getMessage()).thenReturn("123 does not match regex because it contains numbers");
+        when(commitsService.getNewCommits(any(Repository.class), any(RefChange.class))).thenReturn(Sets.newHashSet(commit));
 
         List<YaccError> errors = yaccService.checkRefChange(null, settings, mockRefChange());
         assertThat(errors).isEmpty();
@@ -458,13 +448,13 @@ public class YaccServiceImplTest {
 
     }
 
-    private YaccChangeset mockChangeset() {
-        YaccChangeset changeset = mock(YaccChangeset.class, RETURNS_DEEP_STUBS);
-        when(changeset.getCommitter().getName()).thenReturn("John Smith");
-        when(changeset.getCommitter().getEmailAddress()).thenReturn("jsmith@example.com");
-        when(changeset.getId()).thenReturn("deadbeef");
-        when(changeset.getParentCount()).thenReturn(1);
-        return changeset;
+    private YaccCommit mockCommit() {
+        YaccCommit commit = mock(YaccCommit.class, RETURNS_DEEP_STUBS);
+        when(commit.getCommitter().getName()).thenReturn("John Smith");
+        when(commit.getCommitter().getEmailAddress()).thenReturn("jsmith@example.com");
+        when(commit.getId()).thenReturn("deadbeef");
+        when(commit.getParentCount()).thenReturn(1);
+        return commit;
     }
 
     private RefChange mockRefChange() {

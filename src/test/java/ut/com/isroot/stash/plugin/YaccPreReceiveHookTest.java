@@ -1,19 +1,19 @@
 package ut.com.isroot.stash.plugin;
 
+import com.atlassian.bitbucket.hook.HookResponse;
+import com.atlassian.bitbucket.hook.repository.RepositoryHook;
+import com.atlassian.bitbucket.hook.repository.RepositoryHookService;
+import com.atlassian.bitbucket.permission.Permission;
+import com.atlassian.bitbucket.repository.RefChange;
+import com.atlassian.bitbucket.repository.RefChangeType;
+import com.atlassian.bitbucket.repository.Repository;
+import com.atlassian.bitbucket.setting.Settings;
+import com.atlassian.bitbucket.user.EscalatedSecurityContext;
+import com.atlassian.bitbucket.user.SecurityService;
+import com.atlassian.bitbucket.util.UncheckedOperation;
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 import com.atlassian.sal.testresources.pluginsettings.MockPluginSettingsFactory;
-import com.atlassian.stash.hook.HookResponse;
-import com.atlassian.stash.hook.repository.RepositoryHook;
-import com.atlassian.stash.hook.repository.RepositoryHookService;
-import com.atlassian.stash.repository.RefChange;
-import com.atlassian.stash.repository.RefChangeType;
-import com.atlassian.stash.repository.Repository;
-import com.atlassian.stash.setting.Settings;
-import com.atlassian.stash.user.EscalatedSecurityContext;
-import com.atlassian.stash.user.Permission;
-import com.atlassian.stash.user.SecurityService;
-import com.atlassian.stash.util.UncheckedOperation;
 import com.google.common.collect.Lists;
 import com.isroot.stash.plugin.YaccConfigServlet;
 import com.isroot.stash.plugin.YaccPreReceiveHook;
@@ -40,21 +40,30 @@ import static org.assertj.core.data.MapEntry.entry;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
+
 /**
  * Cloned from YaccHookTest.java and modified to test against the PreReceiveHook interface.
  *
  * @author Jim Bethancourt
  */
 public class YaccPreReceiveHookTest {
-    @Mock private YaccService yaccService;
-    @Mock private HookResponse hookResponse;
-    @Mock private RepositoryHookService repositoryHookService;
-    @Mock private RepositoryHook repositoryHook;
-    @Mock private Repository repository;
-    @Mock private SecurityService securityService;
-    @Mock private EscalatedSecurityContext escalatedSecurityContext;
+    @Mock
+    private YaccService yaccService;
+    @Mock
+    private HookResponse hookResponse;
+    @Mock
+    private RepositoryHookService repositoryHookService;
+    @Mock
+    private RepositoryHook repositoryHook;
+    @Mock
+    private Repository repository;
+    @Mock
+    private SecurityService securityService;
+    @Mock
+    private EscalatedSecurityContext escalatedSecurityContext;
 
-    @Captor private ArgumentCaptor<Settings> settingsCapture;
+    @Captor
+    private ArgumentCaptor<Settings> settingsCapture;
 
     private PluginSettingsFactory pluginSettingsFactory;
 

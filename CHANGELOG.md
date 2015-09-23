@@ -2,6 +2,7 @@
 
 ### 1.9
 
+* Support for Atlassian Bitbucket Server 4.0. Thanks [@bbaetz](https://github.com/bbaetz) for the help!
 * New Feature: Branch Name Regex is now applied to branches created through Stash UI. Thanks [@wadahiro](https://github.com/wadahiro)!
 
 ### 1.8

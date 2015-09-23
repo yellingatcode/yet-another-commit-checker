@@ -1,12 +1,12 @@
 package com.isroot.stash.plugin;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.atlassian.bitbucket.hook.repository.RepositoryHookService;
+import com.atlassian.bitbucket.setting.Settings;
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
-import com.atlassian.stash.hook.repository.RepositoryHookService;
-import com.atlassian.stash.setting.Settings;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Hiroyuki Wada

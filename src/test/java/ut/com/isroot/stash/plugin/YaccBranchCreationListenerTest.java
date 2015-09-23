@@ -1,34 +1,35 @@
 package ut.com.isroot.stash.plugin;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-
-import java.util.HashMap;
-import java.util.Map;
-
+import com.atlassian.bitbucket.event.branch.BranchCreationRequestedEvent;
+import com.atlassian.bitbucket.hook.repository.RepositoryHook;
+import com.atlassian.bitbucket.hook.repository.RepositoryHookDetails;
+import com.atlassian.bitbucket.hook.repository.RepositoryHookService;
+import com.atlassian.bitbucket.i18n.I18nService;
+import com.atlassian.bitbucket.i18n.KeyedMessage;
+import com.atlassian.bitbucket.permission.Permission;
+import com.atlassian.bitbucket.repository.Branch;
+import com.atlassian.bitbucket.repository.Repository;
+import com.atlassian.bitbucket.setting.Settings;
+import com.atlassian.bitbucket.setting.SettingsBuilder;
+import com.atlassian.bitbucket.user.EscalatedSecurityContext;
+import com.atlassian.bitbucket.user.SecurityService;
+import com.atlassian.bitbucket.util.CancelState;
+import com.atlassian.bitbucket.util.UncheckedOperation;
+import com.atlassian.sal.api.pluginsettings.PluginSettings;
+import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
+import com.isroot.stash.plugin.YaccBranchCreationListener;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.atlassian.sal.api.pluginsettings.PluginSettings;
-import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
-import com.atlassian.stash.branch.BranchCreationRequestedEvent;
-import com.atlassian.stash.hook.repository.RepositoryHook;
-import com.atlassian.stash.hook.repository.RepositoryHookDetails;
-import com.atlassian.stash.hook.repository.RepositoryHookService;
-import com.atlassian.stash.i18n.I18nService;
-import com.atlassian.stash.i18n.KeyedMessage;
-import com.atlassian.stash.repository.Branch;
-import com.atlassian.stash.repository.Repository;
-import com.atlassian.stash.setting.Settings;
-import com.atlassian.stash.setting.SettingsBuilder;
-import com.atlassian.stash.user.EscalatedSecurityContext;
-import com.atlassian.stash.user.Permission;
-import com.atlassian.stash.user.SecurityService;
-import com.atlassian.stash.util.CancelState;
-import com.atlassian.stash.util.UncheckedOperation;
-import com.isroot.stash.plugin.YaccBranchCreationListener;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Hiroyuki Wada

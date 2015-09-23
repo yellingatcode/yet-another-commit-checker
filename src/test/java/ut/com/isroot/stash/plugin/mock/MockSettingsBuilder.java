@@ -1,7 +1,7 @@
 package ut.com.isroot.stash.plugin.mock;
 
-import com.atlassian.stash.setting.Settings;
-import com.atlassian.stash.setting.SettingsBuilder;
+import com.atlassian.bitbucket.setting.Settings;
+import com.atlassian.bitbucket.setting.SettingsBuilder;
 import com.google.common.collect.ImmutableMap;
 
 import javax.annotation.Nonnull;

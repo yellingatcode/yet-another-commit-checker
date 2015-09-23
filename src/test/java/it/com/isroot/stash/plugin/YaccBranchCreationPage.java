@@ -3,7 +3,7 @@ package it.com.isroot.stash.plugin;
 import com.atlassian.pageobjects.elements.ElementBy;
 import com.atlassian.pageobjects.elements.PageElement;
 import com.atlassian.pageobjects.elements.query.Poller;
-import com.atlassian.webdriver.stash.page.BranchCreationPage;
+import com.atlassian.webdriver.bitbucket.page.BranchCreationPage;
 
 /**
  * @author Sean Ford
@@ -25,6 +25,7 @@ public class YaccBranchCreationPage extends BranchCreationPage {
         Poller.waitUntilTrue(submit.timed().isEnabled());
         submit.click();
         Poller.waitUntilTrue(errorFlag.timed().isPresent());
+        Poller.waitUntilTrue(errorFlag.timed().hasText("Invalid branch name"));
 
         return this;
     }

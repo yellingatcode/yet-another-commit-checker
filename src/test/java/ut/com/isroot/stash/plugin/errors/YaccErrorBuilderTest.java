@@ -1,6 +1,6 @@
 package ut.com.isroot.stash.plugin.errors;
 
-import com.atlassian.stash.setting.Settings;
+import com.atlassian.bitbucket.setting.Settings;
 import com.isroot.stash.plugin.errors.YaccError;
 import com.isroot.stash.plugin.errors.YaccErrorBuilder;
 import org.junit.Before;
@@ -10,9 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Sean Ford
@@ -59,7 +57,7 @@ public class YaccErrorBuilderTest {
 
     @Test
     public void testGetErrorMessage_commitErrorsAreShown() {
-        List<YaccError> errors = new ArrayList<YaccError>();
+        List<YaccError> errors = new ArrayList<>();
         errors.add(new YaccError("commit error"));
 
         String message = yaccErrorBuilder.getErrorMessage(errors);
@@ -71,7 +69,7 @@ public class YaccErrorBuilderTest {
 
     @Test
     public void testGetErrorMessage_multipleErrors() {
-        List<YaccError> errors = new ArrayList<YaccError>();
+        List<YaccError> errors = new ArrayList<>();
         errors.add(new YaccError("commit error"));
         errors.add(new YaccError("another error"));
 
@@ -88,7 +86,7 @@ public class YaccErrorBuilderTest {
     public void testGetErrorMessage_customFooterIsShownIfPresent() {
         when(settings.getString("errorMessageFooter")).thenReturn("custom footer");
 
-        List<YaccError> errors = new ArrayList<YaccError>();
+        List<YaccError> errors = new ArrayList<>();
         errors.add(new YaccError("commit error"));
 
         String message = yaccErrorBuilder.getErrorMessage(errors);
@@ -104,7 +102,7 @@ public class YaccErrorBuilderTest {
     public void testGetErrorMessage_customErrorsShownIfPresent() {
         when(settings.getString("errorMessage.COMMIT_REGEX")).thenReturn("more info");
 
-        List<YaccError> errors = new ArrayList<YaccError>();
+        List<YaccError> errors = new ArrayList<>();
         errors.add(new YaccError(YaccError.Type.COMMIT_REGEX, "commit error"));
 
         String message = yaccErrorBuilder.getErrorMessage(errors);

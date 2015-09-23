@@ -1,10 +1,10 @@
 package it.com.isroot.stash.plugin;
 
-import com.atlassian.stash.async.AsyncTestUtils;
-import com.atlassian.stash.async.WaitCondition;
+import com.atlassian.bitbucket.async.AsyncTestUtils;
+import com.atlassian.bitbucket.async.WaitCondition;
+import com.atlassian.webdriver.bitbucket.BitbucketTestedProduct;
+import com.atlassian.webdriver.bitbucket.page.BitbucketLoginPage;
 import com.atlassian.webdriver.pageobjects.WebDriverTester;
-import com.atlassian.webdriver.stash.StashTestedProduct;
-import com.atlassian.webdriver.stash.page.StashLoginPage;
 import org.hamcrest.Description;
 
 /**
@@ -18,8 +18,8 @@ public class YaccTestUtils {
      * This is sort of hackish... maybe the Atlassian integration test
      * API has a way to reset all the data?
      */
-    public static void resetData(StashTestedProduct stash) {
-        YaccRepoSettingsPage settingsPage = stash.visit(StashLoginPage.class)
+    public static void resetData(BitbucketTestedProduct stash) {
+        YaccRepoSettingsPage settingsPage = stash.visit(BitbucketLoginPage.class)
                 .loginAsSysAdmin(YaccRepoSettingsPage.class);
 
         settingsPage.clickEditYacc()
@@ -38,7 +38,7 @@ public class YaccTestUtils {
         AsyncTestUtils.waitFor(new WaitCondition() {
             @Override
             public boolean test() throws Exception {
-                tester.gotoUrl(System.getProperty("http.stash.url") + "/status");
+                tester.gotoUrl(System.getProperty("http.bitbucket.url") + "/status");
                 return tester.getDriver().getPageSource().contains("RUNNING");
             }
 
@@ -46,7 +46,7 @@ public class YaccTestUtils {
             public void describeFailure(Description description) throws Exception {
 
             }
-        }, 600000, 5000);
+        }, 60000, 5000);
     }
 
 }

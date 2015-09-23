@@ -1,16 +1,16 @@
 package com.isroot.stash.plugin;
 
+import com.atlassian.bitbucket.event.branch.BranchCreationRequestedEvent;
+import com.atlassian.bitbucket.hook.repository.RepositoryHook;
+import com.atlassian.bitbucket.hook.repository.RepositoryHookService;
+import com.atlassian.bitbucket.i18n.I18nService;
+import com.atlassian.bitbucket.permission.Permission;
+import com.atlassian.bitbucket.repository.Repository;
+import com.atlassian.bitbucket.setting.Settings;
+import com.atlassian.bitbucket.user.SecurityService;
+import com.atlassian.bitbucket.util.UncheckedOperation;
 import com.atlassian.event.api.EventListener;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
-import com.atlassian.stash.branch.BranchCreationRequestedEvent;
-import com.atlassian.stash.hook.repository.RepositoryHook;
-import com.atlassian.stash.hook.repository.RepositoryHookService;
-import com.atlassian.stash.i18n.I18nService;
-import com.atlassian.stash.repository.Repository;
-import com.atlassian.stash.setting.Settings;
-import com.atlassian.stash.user.Permission;
-import com.atlassian.stash.user.SecurityService;
-import com.atlassian.stash.util.UncheckedOperation;
 import com.isroot.stash.plugin.checks.BranchNameCheck;
 import com.isroot.stash.plugin.errors.YaccError;
 import org.slf4j.Logger;
@@ -63,6 +63,7 @@ public class YaccBranchCreationListener {
 
             settings = YaccUtils.buildYaccConfig(pluginSettingsFactory, repositoryHookService);
         }
+
 
         List<YaccError> errors = new BranchNameCheck(settings, event.getBranch().getId()).check();
 
