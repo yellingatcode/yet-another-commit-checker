@@ -3,7 +3,6 @@ package it.com.isroot.stash.plugin;
 import com.atlassian.pageobjects.TestedProductFactory;
 import com.atlassian.webdriver.bitbucket.BitbucketTestedProduct;
 import com.atlassian.webdriver.bitbucket.page.BitbucketLoginPage;
-import com.atlassian.webdriver.pageobjects.WebDriverTester;
 import com.atlassian.webdriver.testing.rule.WebDriverScreenshotRule;
 import org.junit.After;
 import org.junit.BeforeClass;

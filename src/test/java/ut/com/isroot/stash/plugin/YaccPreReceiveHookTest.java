@@ -13,7 +13,6 @@ import com.atlassian.bitbucket.user.SecurityService;
 import com.atlassian.bitbucket.util.UncheckedOperation;
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
-
 import com.atlassian.sal.testresources.pluginsettings.MockPluginSettingsFactory;
 import com.google.common.collect.Lists;
 import com.isroot.stash.plugin.YaccConfigServlet;
@@ -23,8 +22,6 @@ import com.isroot.stash.plugin.errors.YaccError;
 import com.isroot.stash.plugin.errors.YaccErrorBuilder;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -41,8 +38,6 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 
