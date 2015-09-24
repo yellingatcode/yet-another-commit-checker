@@ -7,6 +7,10 @@ import com.atlassian.bitbucket.repository.RefChange;
 import com.atlassian.bitbucket.repository.RefChangeType;
 import com.atlassian.bitbucket.repository.Repository;
 import com.atlassian.bitbucket.server.ApplicationPropertiesService;
+import com.atlassian.bitbucket.util.Page;
+import com.atlassian.bitbucket.util.PageProvider;
+import com.atlassian.bitbucket.util.PageRequest;
+import com.atlassian.bitbucket.util.PagedIterable;
 import com.atlassian.stash.scm.git.GitRefPattern;
 import com.google.common.collect.Sets;
 import org.eclipse.jgit.lib.ObjectId;
@@ -82,15 +86,13 @@ public class CommitsServiceImpl implements CommitsService {
                         .exclude(getBranches(repository))
                         .include(refChange.getToHash())
                         .build();
-// sford FIXME
-//                // Make sure to get all of the changes
-//                Iterable<Commit> commits = new PagedIterable<>(new PageProvider<Commit>() {
-//                    @Override
-//                    public Page<Commit> get(PageRequest pr) {
-//                        return commitService.getCommitsBetween(request, pr);
-//                    }
-//                }, 100);
-                Iterable<Commit> commits = null;
+                // Make sure to get all of the changes
+                Iterable<Commit> commits = new PagedIterable<>(new PageProvider<Commit>() {
+                    @Override
+                    public Page<Commit> get(PageRequest pr) {
+                        return commitService.getCommitsBetween(request, pr);
+                    }
+                }, 100);
 
                 for (Commit commit : commits) {
                     final RevCommit revCommit = walk.parseCommit(ObjectId.fromString(commit.getId()));
