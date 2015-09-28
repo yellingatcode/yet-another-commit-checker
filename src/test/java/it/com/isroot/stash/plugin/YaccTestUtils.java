@@ -37,6 +37,8 @@ public class YaccTestUtils {
         globalSettingsPage.clickSubmit();
 
         stash.getTester().getDriver().manage().deleteAllCookies();
+
+        log.info("done resetting data");
     }
 
     public static void waitForStashToBoot(final WebDriverTester tester) {
