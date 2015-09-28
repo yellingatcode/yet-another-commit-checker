@@ -1,5 +1,9 @@
 # YACC Changelog
 
+### 1.10 (unreleased)
+
+* git notes are now ignored to avoid problems pushing them.
+
 ### 1.9
 
 * Support for Atlassian Bitbucket Server 4.0. Thanks [@bbaetz](https://github.com/bbaetz) for the help!

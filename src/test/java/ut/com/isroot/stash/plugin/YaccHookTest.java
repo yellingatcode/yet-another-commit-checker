@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import ut.com.isroot.stash.plugin.mock.MockRefChange;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -77,7 +78,8 @@ public class YaccHookTest {
         when(yaccService.checkRefChange(any(Repository.class), any(Settings.class), any(RefChange.class)))
                 .thenReturn(Lists.newArrayList(new YaccError("error with commit")));
 
-        boolean allowed = yaccHook.onReceive(repositoryHookContext, Lists.newArrayList(mock(RefChange.class)), hookResponse);
+        boolean allowed = yaccHook.onReceive(repositoryHookContext, Lists.newArrayList(new MockRefChange()),
+                hookResponse);
         assertThat(allowed).isFalse();
     }
 
@@ -135,13 +137,20 @@ public class YaccHookTest {
         assertThat(errorMessage.toString()).endsWith("\nCustom Footer\n\n");
     }
 
+    @Test
+    public void testOnReceive_gitNotesAreIgnored() {
+        when(yaccService.checkRefChange(any(Repository.class), any(Settings.class), any(RefChange.class)))
+                .thenReturn(Lists.newArrayList(new YaccError("error1")));
+
+        List<RefChange> refChanges = Lists.newArrayList(new MockRefChange("refs/notes/commits"));
+        boolean isAllowed = yaccHook.onReceive(repositoryHookContext, refChanges, hookResponse);
+
+        assertThat(isAllowed).isTrue();
+    }
+
     private List<RefChange> getMockRefChanges() {
         List<RefChange> refChanges = new ArrayList<>();
-        RefChange refChange = mock(RefChange.class);
-
-        when(refChange.getRefId()).thenReturn("refs/heads/master");
-
-        refChanges.add(refChange);
+        refChanges.add(new MockRefChange());
         return refChanges;
     }
 }
