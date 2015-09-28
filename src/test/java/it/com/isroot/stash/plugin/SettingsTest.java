@@ -24,7 +24,7 @@ public class SettingsTest {
     @Rule
     public WebDriverScreenshotRule webDriverScreenshotRule = new WebDriverScreenshotRule();
 
-    @Rule private LogTestStartRule logTestStartRule = new LogTestStartRule();
+    @Rule public LogTestStartRule logTestStartRule = new LogTestStartRule();
 
 
     @BeforeClass
