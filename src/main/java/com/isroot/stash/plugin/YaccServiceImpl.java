@@ -46,9 +46,6 @@ public class YaccServiceImpl implements YaccService {
     public List<YaccError> checkRefChange(Repository repository, Settings settings, RefChange refChange) {
         boolean isTag = refChange.getRefId().startsWith(GitRefPattern.TAGS.getPath());
 
-        log.debug("checking ref change refId={} fromHash={} toHash={} type={}", refChange.getRefId(), refChange.getFromHash(),
-                refChange.getToHash(), refChange.getType().toString());
-
         List<YaccError> errors = Lists.newArrayList();
 
         errors.addAll(new BranchNameCheck(settings, refChange.getRefId()).check());

@@ -26,6 +26,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import ut.com.isroot.stash.plugin.mock.MockRefChange;
 import ut.com.isroot.stash.plugin.mock.MockSettingsBuilder;
 
 import java.io.PrintWriter;
@@ -131,7 +132,8 @@ public class YaccPreReceiveHookTest {
         when(yaccService.checkRefChange(any(Repository.class), any(Settings.class), any(RefChange.class)))
                 .thenReturn(Lists.newArrayList(new YaccError("error with commit")));
 
-        boolean allowed = yaccPreReceiveHook.onReceive(repository, Lists.newArrayList(mock(RefChange.class)), hookResponse);
+        boolean allowed = yaccPreReceiveHook.onReceive(repository, Lists.newArrayList(new MockRefChange()),
+                hookResponse);
         assertThat(allowed).isFalse();
     }
 
@@ -216,12 +218,8 @@ public class YaccPreReceiveHookTest {
     }
 
     private List<RefChange> getMockRefChanges() {
-        List<RefChange> refChanges = new ArrayList<RefChange>();
-        RefChange refChange = mock(RefChange.class);
-
-        when(refChange.getRefId()).thenReturn("refs/heads/master");
-
-        refChanges.add(refChange);
+        List<RefChange> refChanges = new ArrayList<>();
+        refChanges.add(new MockRefChange());
         return refChanges;
     }
 

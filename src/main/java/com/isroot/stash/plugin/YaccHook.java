@@ -36,6 +36,9 @@ public final class YaccHook implements PreReceiveRepositoryHook {
         Settings settings = repositoryHookContext.getSettings();
 
         for (RefChange rf : refChanges) {
+            log.debug("checking ref change refId={} fromHash={} toHash={} type={}", rf.getRefId(), rf.getFromHash(),
+                    rf.getToHash(), rf.getType());
+
             if (rf.getType() == RefChangeType.DELETE) {
                 continue;
             }
@@ -58,7 +61,13 @@ public final class YaccHook implements PreReceiveRepositoryHook {
                 continue;
             }
 
-            for(YaccError e : yaccService.checkRefChange(repositoryHookContext.getRepository(),
+            if(rf.getRef().getId().startsWith("refs/notes")) {
+                log.debug("skipping git notes");
+
+                continue;
+            }
+
+            for (YaccError e : yaccService.checkRefChange(repositoryHookContext.getRepository(),
                     settings, rf)) {
                 errors.add(e.prependText(rf.getRefId()));
             }
