@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.isroot.stash.plugin</groupId>
     <artifactId>yacc</artifactId>
-    <version>1.10-SNAPSHOT</version>
+    <version>1.10</version>
     <organization>
         <name>Sean Ford</name>
         <url>http://seandford.com</url>
@@ -17,7 +17,7 @@
     <scm>
         <developerConnection>scm:git:https://github.com/sford/yet-another-commit-checker.git</developerConnection>
         <url>https://github.com/sford/yet-another-commit-checker</url>
-        <tag>HEAD</tag>
+        <tag>yacc-1.10</tag>
     </scm>
     <repositories>
         <repository>
