@@ -1,8 +1,9 @@
 # YACC Changelog
 
-### 1.10 (unreleased)
+### 1.10
 
-* git notes are now ignored to avoid problems pushing them.
+* Bugfix: fix permission error when non-admin users attempt to create branches. Thanks [@wadahiro](https://github.com/wadahiro)! 
+* Bugfix: git notes are now ignored to avoid problems pushing them.
 
 ### 1.9
 
