@@ -29,6 +29,7 @@ public class ConfigValidatorTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        System.setProperty("line.separator", "\n");
 
         configValidator = new ConfigValidator(jiraService);
     }
