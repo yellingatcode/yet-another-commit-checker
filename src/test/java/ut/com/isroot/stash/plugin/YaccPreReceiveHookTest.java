@@ -129,6 +129,7 @@ public class YaccPreReceiveHookTest {
 
     @Test
     public void testOnReceive_pushRejectedIfThereAreErrors() {
+        globalSettingsMap.put("someSetting", "true");
         when(yaccService.checkRefChange(any(Repository.class), any(Settings.class), any(RefChange.class)))
                 .thenReturn(Lists.newArrayList(new YaccError("error with commit")));
 
@@ -139,6 +140,7 @@ public class YaccPreReceiveHookTest {
 
     @Test
     public void testOnReceive_errorsArePrintedToHookStdErr() {
+        globalSettingsMap.put("someSetting", "true");
         when(yaccService.checkRefChange(any(Repository.class), any(Settings.class), any(RefChange.class)))
                 .thenReturn(Lists.newArrayList(new YaccError("error1"), new YaccError("error2")));
 
@@ -158,6 +160,7 @@ public class YaccPreReceiveHookTest {
         when(yaccService.checkRefChange(any(Repository.class), any(Settings.class), any(RefChange.class)))
                 .thenReturn(Lists.newArrayList(new YaccError("error1")));
 
+        globalSettingsMap.put("someSetting", "true");
         globalSettingsMap.put("errorMessageHeader", "");
 
         yaccPreReceiveHook.onReceive(repository, getMockRefChanges(), hookResponse);
@@ -170,6 +173,7 @@ public class YaccPreReceiveHookTest {
         when(yaccService.checkRefChange(any(Repository.class), any(Settings.class), any(RefChange.class)))
                 .thenReturn(Lists.newArrayList(new YaccError("error1")));
 
+        globalSettingsMap.put("someSetting", "true");
         globalSettingsMap.put("errorMessageHeader", "Custom Header");
 
         yaccPreReceiveHook.onReceive(repository, getMockRefChanges(), hookResponse);
@@ -184,6 +188,7 @@ public class YaccPreReceiveHookTest {
         when(yaccService.checkRefChange(any(Repository.class), any(Settings.class), any(RefChange.class)))
                 .thenReturn(Lists.newArrayList(new YaccError("error1")));
 
+        globalSettingsMap.put("someSetting", "true");
         globalSettingsMap.put("errorMessageFooter", "Custom Footer");
 
         yaccPreReceiveHook.onReceive(repository, getMockRefChanges(), hookResponse);
@@ -215,6 +220,17 @@ public class YaccPreReceiveHookTest {
                 .contains(
                         entry("commitMessageRegex", "bar"),
                         entry("requireMatchingAuthorEmail", true));
+    }
+
+    @Test
+    public void testOnReceive_yaccNotRunIfNoChecksAreConfigured() {
+        globalSettingsMap.put("disabledBooleanSetting", "false");
+        globalSettingsMap.put("emptySetting", "");
+        globalSettingsMap.put("errorMessage", "error messages ignored");
+
+        yaccPreReceiveHook.onReceive(repository, getMockRefChanges(), hookResponse);
+
+        verifyZeroInteractions(yaccService);
     }
 
     private List<RefChange> getMockRefChanges() {

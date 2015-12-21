@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Uldis Ansmits
@@ -64,7 +65,47 @@ public class YaccPreReceiveHook implements PreReceiveHook {
 
             Settings storedConfig = YaccUtils.buildYaccConfig(pluginSettingsFactory, repositoryHookService);
 
-            return yaccHook.onReceive(new RepositoryHookContext(repository, storedConfig), refChanges, hookResponse);
+            log.debug("global settings: {}", storedConfig.asMap());
+
+            if(areThereEnabledSettings(storedConfig.asMap())) {
+                return yaccHook.onReceive(new RepositoryHookContext(repository, storedConfig), refChanges, hookResponse);
+            } else {
+                log.debug("no need to run yacc because no global settings configured");
+
+                return true;
+            }
         }
+    }
+
+    /**
+     * Return true if there are enabled settings, else false. This allows us to only run
+     * {@link YaccHook} if there something is enabled. YACC can take a while to run on
+     * large repositories, and we don't want to run it globally unless it is actually
+     * configured to do something.
+     */
+    private boolean areThereEnabledSettings(Map<String, Object> settings) {
+        for(Map.Entry<String, Object> setting : settings.entrySet()) {
+            if(setting.getKey().startsWith("errorMessage")) {
+                continue;
+            }
+
+            if(setting.getValue() == null) {
+                continue;
+            }
+
+            String val = setting.getValue().toString();
+
+            if(val.equals("true")) {
+                return true;
+            }
+
+            // 'false' strings are assumed to be disabled boolean settings, so they are
+            // not considered enabled settings.
+            if(!val.isEmpty() && !val.equalsIgnoreCase("false")) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
