@@ -1,5 +1,9 @@
 # YACC Changelog
 
+###
+
+* Performance: global hook no longer examines pushes if no global settings are enabled
+
 ### 1.10
 
 * Bugfix: fix permission error when non-admin users attempt to create branches. Thanks [@wadahiro](https://github.com/wadahiro)! 
