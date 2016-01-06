@@ -1,6 +1,6 @@
 # YACC Changelog
 
-###
+### 1.11
 
 * Performance: global hook no longer examines pushes if no global settings are enabled
 
