@@ -1,15 +1,14 @@
 package com.isroot.stash.plugin;
 
-import com.atlassian.applinks.api.CredentialsRequiredException;
 import com.atlassian.bitbucket.repository.Repository;
 import com.atlassian.bitbucket.setting.RepositorySettingsValidator;
 import com.atlassian.bitbucket.setting.Settings;
 import com.atlassian.bitbucket.setting.SettingsValidationErrors;
-import com.atlassian.sal.api.net.ResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -43,19 +42,9 @@ public class ConfigValidator implements RepositorySettingsValidator {
 
         String jqlMatcher = settings.getString("issueJqlMatcher");
         if (!isNullOrEmpty(jqlMatcher)) {
-            try {
-                if (!jiraService.isJqlQueryValid(jqlMatcher)) {
-                    errors.addFieldError("issueJqlMatcher", "The JQL query syntax is invalid.");
-                }
-            } catch (ResponseException ex) {
-                log.error("unexpected exception while trying to validate jql query", ex);
-                errors.addFieldError("issueJqlMatcher", "Unable to validate JQL query with JIRA because there was an unexpected exception. Please see Stash logs.");
-            } catch (CredentialsRequiredException ex) {
-                log.error("authentication error while trying to validate jql query", ex);
-                errors.addFieldError("issueJqlMatcher", "Unable to validate JQL query with JIRA. Authentication failure when communicating with JIRA.");
-            } catch (IllegalStateException ex) {
-                log.error(ex.getMessage(), ex);
-                errors.addFieldError("issueJqlMatcher", ex.getMessage());
+            List<String> jqlErrors = jiraService.checkJqlQuery(jqlMatcher);
+            for (String err : jqlErrors) {
+                errors.addFieldError("issueJqlMatcher", err);
             }
         }
     }

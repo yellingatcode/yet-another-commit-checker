@@ -1,7 +1,9 @@
 package com.isroot.stash.plugin;
 
-import com.atlassian.applinks.api.CredentialsRequiredException;
-import com.atlassian.sal.api.net.ResponseException;
+import com.isroot.stash.plugin.jira.JiraLookupsException;
+
+import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Service object to interact with JIRA.
@@ -10,9 +12,9 @@ import com.atlassian.sal.api.net.ResponseException;
  * @since 2013-10-26
  */
 public interface JiraService {
-    public boolean doesJiraApplicationLinkExist();
-    public boolean doesIssueMatchJqlQuery(String jqlQuery, IssueKey issueKey) throws CredentialsRequiredException, ResponseException;
-    public boolean doesIssueExist(IssueKey issueKey) throws CredentialsRequiredException, ResponseException;
-    public boolean doesProjectExist(String projectKey) throws CredentialsRequiredException, ResponseException;
-    public boolean isJqlQueryValid(String jqlQuery) throws CredentialsRequiredException, ResponseException;
+    boolean doesJiraApplicationLinkExist();
+    boolean doesIssueMatchJqlQuery(String jqlQuery, IssueKey issueKey) throws JiraLookupsException;
+    boolean doesIssueExist(IssueKey issueKey) throws JiraLookupsException;
+    boolean doesProjectExist(String projectKey) throws JiraLookupsException;
+    List<String> checkJqlQuery(@Nonnull String jqlQuery);
 }

@@ -3,22 +3,27 @@ package com.isroot.stash.plugin;
 import com.atlassian.applinks.api.ApplicationLink;
 import com.atlassian.applinks.api.ApplicationLinkRequest;
 import com.atlassian.applinks.api.ApplicationLinkRequestFactory;
-import com.atlassian.applinks.api.ApplicationLinkResponseHandler;
 import com.atlassian.applinks.api.ApplicationLinkService;
 import com.atlassian.applinks.api.CredentialsRequiredException;
 import com.atlassian.applinks.api.application.jira.JiraApplicationType;
 import com.atlassian.sal.api.net.Request;
-import com.atlassian.sal.api.net.Response;
 import com.atlassian.sal.api.net.ResponseException;
 import com.atlassian.sal.api.net.ResponseStatusException;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.isroot.stash.plugin.jira.ErrorParsingReturningResponseHandler;
+import com.isroot.stash.plugin.jira.JiraExecutionException;
+import com.isroot.stash.plugin.jira.JiraLookupsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -30,20 +35,35 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class JiraServiceImpl implements JiraService {
     private static final Logger log = LoggerFactory.getLogger(JiraServiceImpl.class);
 
+    private static boolean USE_ONLY_PRIMARY_LINK = false;
+
     private final ApplicationLinkService applicationLinkService;
 
     public JiraServiceImpl(ApplicationLinkService applicationLinkService) {
         this.applicationLinkService = applicationLinkService;
     }
 
-    private ApplicationLink getJiraApplicationLink() {
-        ApplicationLink applicationLink = applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class);
+    private Iterable<ApplicationLink> getJiraApplicationLinks() {
+        List<ApplicationLink> links = new ArrayList<>();
 
-        if (applicationLink == null) {
-            throw new IllegalStateException("Primary JIRA application link does not exist!");
+        if (USE_ONLY_PRIMARY_LINK) {
+            log.debug("using primary JIRA application link");
+            links.add(applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class));
+        }
+        else {
+            log.debug("using all JIRA application links");
+            for (ApplicationLink link : applicationLinkService.getApplicationLinks(JiraApplicationType.class)) {
+                links.add(link);
+            }
         }
 
-        return applicationLink;
+        if (links.isEmpty()) {
+            throw new IllegalStateException("No JIRA application links exist.");
+        }
+
+        log.debug("number of JIRA application links: {}", links.size());
+
+        return links;
     }
 
     @Override
@@ -52,93 +72,207 @@ public class JiraServiceImpl implements JiraService {
     }
 
     @Override
-    public boolean doesIssueExist(IssueKey issueKey) throws CredentialsRequiredException, ResponseException {
+    public boolean doesIssueExist(IssueKey issueKey) throws JiraLookupsException {
         checkNotNull(issueKey, "issueKey is null");
 
+        Map<ApplicationLink, Throwable> errors = new HashMap<>();
 
-        final ApplicationLinkRequestFactory fac = getJiraApplicationLink().createAuthenticatedRequestFactory();
+        for (final ApplicationLink link : getJiraApplicationLinks()) {
+            log.debug("doesIssueExist: checking application link id={} name={} for issue={}",
+                    link.getId(), link.getName(), issueKey);
 
-        ApplicationLinkRequest req = fac.createRequest(Request.MethodType.GET, "/rest/api/2/issue/"+issueKey.getFullyQualifiedIssueKey());
+            try {
+                final ApplicationLinkRequestFactory fac = link.createAuthenticatedRequestFactory();
 
-        return req.execute(new ApplicationLinkResponseHandler<Boolean>() {
-            @Override
-            public Boolean credentialsRequired(Response response) throws ResponseException {
-                throw new ResponseException(new CredentialsRequiredException(fac, "Token is invalid"));
+                ApplicationLinkRequest req = fac.createRequest(Request.MethodType.GET,
+                        "/rest/api/2/issue/" + issueKey.getFullyQualifiedIssueKey()
+                                + "?fields=summary");
+
+                req.executeAndReturn(new ErrorParsingReturningResponseHandler());
+
+                log.debug("issue {} found in JIRA application link {}", issueKey, link.getName());
+
+                // No error, so must exist
+                return true;
             }
+            catch (ResponseStatusException e) {
+                log.debug("doesIssueExist: received response status exception", e);
 
-            @Override
-            public Boolean handle(Response response) throws ResponseException {
-                return response.isSuccessful();
+                if (e.getResponse().getStatusCode() == 404) {
+                    log.debug("doesIssueExist: issue not found in JIRA application link",
+                            issueKey.getProjectKey(), link.getName());
+
+                    continue;
+                }
+
+                log.error("doesIssueExist: status code {} not expected",
+                        e.getResponse().getStatusCode(), e);
+
+                errors.put(link, e);
             }
-        });
+            catch (ResponseException | CredentialsRequiredException e) {
+                log.debug("doesIssueExist: exception caught", e);
+
+                errors.put(link, e);
+            }
+        }
+
+        if (!errors.isEmpty()) {
+            throw new JiraLookupsException(errors);
+        }
+
+        return false;
     }
 
     @Override
-    public boolean doesProjectExist(String projectKey) throws CredentialsRequiredException, ResponseException {
+    public boolean doesProjectExist(String projectKey) throws JiraLookupsException {
         checkNotNull(projectKey, "projectKey is null");
 
-        ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory().createRequest(Request.MethodType.GET, "/rest/api/2/project/" + projectKey);
+        Map<ApplicationLink, Throwable> errors = new HashMap<>();
 
-        try {
-            String jsonResponse = req.execute();
-            JsonObject response = new JsonParser().parse(jsonResponse).getAsJsonObject();
-            return (projectKey.equals(response.get("key").getAsString()));
-        }
-        catch (ResponseStatusException e) {
-            if (e.getResponse().getStatusCode() == 404) {
-                /* Project is unknown */
-                return false;
-            } else {
-                throw new ResponseException("Request failed", e);
+        for (final ApplicationLink link : getJiraApplicationLinks()) {
+            try {
+                ApplicationLinkRequest req = link.createAuthenticatedRequestFactory().createRequest(Request.MethodType.GET, "/rest/api/2/project/" + projectKey);
+                String jsonResponse = req.executeAndReturn(new ErrorParsingReturningResponseHandler());
+                JsonObject response = new JsonParser().parse(jsonResponse).getAsJsonObject();
+
+                if (projectKey.equals(response.get("key").getAsString())) {
+                    return true;
+                }
+            }
+            catch (ResponseStatusException e) {
+                if (e.getResponse().getStatusCode() == 404) {
+                    /* Project is unknown */
+                    continue;
+                }
+
+                errors.put(link, e);
+            }
+            catch (ResponseException | CredentialsRequiredException e) {
+                log.debug("doesProjectExist: exception caught", e);
+
+                errors.put(link, e);
             }
         }
+
+        if (!errors.isEmpty()) {
+            throw new JiraLookupsException(errors);
+        }
+
+        return false;
     }
 
     @Override
-    public boolean doesIssueMatchJqlQuery(String jqlQuery, IssueKey issueKey) throws CredentialsRequiredException,
-            ResponseException {
+    public boolean doesIssueMatchJqlQuery(String jqlQuery, IssueKey issueKey)
+            throws JiraLookupsException {
         checkNotNull(jqlQuery, "jqlQuery is null");
         checkNotNull(issueKey, "issueKey is null");
 
-        // Combine the user's jql query with issueKey=<issueKey> to avoid paging. If a single result is returned,
-        // then the issue key matches the jql query
-        String jqlQueryWithIssueExpression = String.format("issueKey=%s and (%s)", issueKey.getFullyQualifiedIssueKey(),
-                jqlQuery);
+        // Combine the user's jql query with issueKey=<issueKey> to avoid paging. If a single result
+        // is returned, then the issue key matches the jql query
+        String jqlQueryWithIssueExpression = String.format("issueKey=%s and (%s)",
+                issueKey.getFullyQualifiedIssueKey(), jqlQuery);
 
-        String jsonResponse = executeJqlQuery(jqlQueryWithIssueExpression);
+        Map<ApplicationLink, Throwable> errors = new HashMap<>();
+        List<ApplicationLink> notFound = new ArrayList<>();
 
-        JsonObject response = new JsonParser().parse(jsonResponse).getAsJsonObject();
-        JsonArray issues = response.get("issues").getAsJsonArray();
+        for (final ApplicationLink link : getJiraApplicationLinks()) {
+            log.debug("doesIssueMatchJqlQuery: checking application link, id={} name={}",
+                    link.getId(), link.getName());
 
-        return issues.size() == 1;
+            try {
+                String jsonResponse = executeJqlQuery(link, jqlQueryWithIssueExpression);
+
+                JsonObject response = new JsonParser().parse(jsonResponse).getAsJsonObject();
+                JsonArray issues = response.get("issues").getAsJsonArray();
+
+                if (issues.size() > 0) {
+                    return true;
+                }
+                else {
+                    notFound.add(link);
+                }
+            }
+            catch (JiraExecutionException e) {
+                // Older versions of JIRA (<6.0.3) don't support the validateQuery param, so they
+                // throw an error if the JIRA doesn't exist.
+                // If Stash is linked to multiple JIRA versions, one new and one old
+                // then we get an error from the old JIRA and no result from the new one.
+                // This leads to reporting the error to the user, but not the no result,
+                // which is confusing.
+                // To manage that, swallow the errors.
+                // The parsing doesn't have to be too flexible, because newer versions will support
+                // this parameter...
+                List<String> jiraErrors = e.getJiraErrors();
+                if (jiraErrors.size() == 1 && jiraErrors.get(0).contains(issueKey.getFullyQualifiedIssueKey())) {
+                    notFound.add(link);
+                }
+                else {
+                    errors.put(link, e);
+                }
+            }
+            catch (ResponseException | CredentialsRequiredException e) {
+                log.debug("doesIssueMatchJqlQuery: exception caught", e);
+
+                errors.put(link, e);
+            }
+        }
+
+        if (!errors.isEmpty()) {
+            // Add all the JIRAs where the response wasn't matched,
+            // so that the user can see the problem for all the linked JIRAs
+            for (ApplicationLink link : notFound) {
+                errors.put(link, new ResponseException(issueKey.getFullyQualifiedIssueKey() + ": JIRA issue does not match JQL query: " + jqlQuery));
+            }
+
+            throw new JiraLookupsException(errors);
+        }
+
+        return false;
     }
 
     @Override
-    public boolean isJqlQueryValid(String jqlQuery) throws CredentialsRequiredException, ResponseException {
-        try {
-            // This will throw an exception if the jql query is invalid.
-            executeJqlQuery(jqlQuery);
-            return true;
-        } catch(ResponseStatusException e) {
-            // if the jql query is invalid, a 400 error is returned
-            if(e.getResponse().getStatusCode() == 400) {
-                return false;
-            } else {
-                // Not a 400 response... just re-throw it to avoid hiding potential problems
-                throw e;
-            }
-
-        }
-    }
-
-    private String executeJqlQuery(String jqlQuery) throws CredentialsRequiredException, ResponseException {
+    public List<String> checkJqlQuery(@Nonnull String jqlQuery) {
         checkNotNull(jqlQuery, "jqlQuery is null");
 
-        ApplicationLinkRequest req = getJiraApplicationLink().createAuthenticatedRequestFactory()
+        // Note that we still need to iterate over all of the application links here,
+        // because a query using a custom field may not be valid on all instances
+        Map<ApplicationLink, Throwable> errors = new HashMap<>();
+
+        for (final ApplicationLink link : getJiraApplicationLinks()) {
+            log.debug("checkJqlQuery: checking application link, id={} name={}",
+                    link.getId(), link.getName());
+
+            try {
+                // This will throw an exception if the jql query is invalid.
+                executeJqlQuery(link, jqlQuery);
+                return ImmutableList.<String>of();
+            }
+            catch (ResponseException | CredentialsRequiredException e) {
+                log.debug("checkJqlQuery: exception caught", e);
+                errors.put(link, e);
+            }
+        }
+
+        if (!errors.isEmpty()) {
+            // Eww....
+            JiraLookupsException ex = new JiraLookupsException(errors);
+            return ex.getPrintableErrors();
+        }
+
+        return ImmutableList.<String>of();
+    }
+
+    private String executeJqlQuery(ApplicationLink link, String jqlQuery)
+            throws CredentialsRequiredException, ResponseException {
+        checkNotNull(jqlQuery, "jqlQuery is null");
+
+        ApplicationLinkRequest req = link.createAuthenticatedRequestFactory()
                 .createRequest(Request.MethodType.POST, "/rest/api/2/search");
         req.setHeader("Content-Type", "application/json");
 
-        log.debug("using jql: {}", jqlQuery);
+        log.debug("executing JQL query on JIRA application link '{}': {}", link.getName(),
+                jqlQuery);
 
         Map<String, String> request = new HashMap<>();
         request.put("jql", jqlQuery);

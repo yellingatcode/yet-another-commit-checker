@@ -1,6 +1,5 @@
 package ut.com.isroot.stash.plugin;
 
-import com.atlassian.applinks.api.CredentialsRequiredException;
 import com.atlassian.bitbucket.repository.Repository;
 import com.atlassian.bitbucket.setting.Settings;
 import com.atlassian.bitbucket.setting.SettingsValidationErrors;
@@ -11,8 +10,13 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Sean Ford
@@ -45,38 +49,29 @@ public class ConfigValidatorTest {
     }
 
     @Test
-    public void testValidate_authenticationErrorWhenValidatingQueryReturnsError() throws Exception {
-        when(settings.getString("issueJqlMatcher")).thenReturn("assignee is not empty");
-        when(jiraService.isJqlQueryValid(anyString())).thenThrow(CredentialsRequiredException.class);
-
-        configValidator.validate(settings, settingsValidationErrors, repository);
-
-        verify(settings).getString("issueJqlMatcher");
-        verify(jiraService).isJqlQueryValid("assignee is not empty");
-        verify(settingsValidationErrors).addFieldError("issueJqlMatcher", "Unable to validate JQL query with JIRA. Authentication failure when communicating with JIRA.");
-    }
-
-    @Test
-    public void testValidate_invalidJqlQueryAddsValidationError() throws Exception {
+    public void testValidate_jqlQueryErrorsAreAddedToValidationErrors() {
         when(settings.getString("issueJqlMatcher")).thenReturn("this jql query is invalid");
-        when(jiraService.isJqlQueryValid(anyString())).thenReturn(false);
+
+        List<String> errors = new ArrayList<>();
+        errors.add("some error");
+        when(jiraService.checkJqlQuery(anyString())).thenReturn(errors);
 
         configValidator.validate(settings, settingsValidationErrors, repository);
 
         verify(settings).getString("issueJqlMatcher");
-        verify(jiraService).isJqlQueryValid("this jql query is invalid");
-        verify(settingsValidationErrors).addFieldError("issueJqlMatcher", "The JQL query syntax is invalid.");
+        verify(jiraService).checkJqlQuery("this jql query is invalid");
+        verify(settingsValidationErrors).addFieldError("issueJqlMatcher", "some error");
     }
 
     @Test
-    public void testValidate_validJqlQueryIsAccepted() throws Exception {
+    public void testValidate_validJqlQueryIsAccepted() {
         when(settings.getString("issueJqlMatcher")).thenReturn("assignee is not empty");
-        when(jiraService.isJqlQueryValid(anyString())).thenReturn(true);
+        when(jiraService.checkJqlQuery(anyString())).thenReturn(new ArrayList<>());
 
         configValidator.validate(settings, settingsValidationErrors, repository);
 
         verify(settings).getString("issueJqlMatcher");
-        verify(jiraService).isJqlQueryValid("assignee is not empty");
+        verify(jiraService).checkJqlQuery("assignee is not empty");
         verifyZeroInteractions(settingsValidationErrors);
     }
 

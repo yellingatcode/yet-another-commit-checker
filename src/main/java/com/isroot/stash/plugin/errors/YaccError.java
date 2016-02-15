@@ -1,5 +1,7 @@
 package com.isroot.stash.plugin.errors;
 
+import javax.annotation.Nullable;
+
 /**
  * @author Sean Ford
  * @since 2015-04-26
@@ -22,9 +24,9 @@ public class YaccError {
         this.message = message;
     }
 
-    public YaccError(Type type, String message) {
+    public YaccError(Type type, String message, @Nullable Object... args) {
         this.type = type;
-        this.message = message;
+        this.message = String.format(message, args);
     }
 
     /**

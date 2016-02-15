@@ -1,17 +1,16 @@
 package com.isroot.stash.plugin;
 
-import com.atlassian.applinks.api.CredentialsRequiredException;
 import com.atlassian.bitbucket.auth.AuthenticationContext;
 import com.atlassian.bitbucket.repository.RefChange;
 import com.atlassian.bitbucket.repository.Repository;
 import com.atlassian.bitbucket.setting.Settings;
 import com.atlassian.bitbucket.user.ApplicationUser;
 import com.atlassian.bitbucket.user.UserType;
-import com.atlassian.sal.api.net.ResponseException;
 import com.atlassian.stash.scm.git.GitRefPattern;
 import com.google.common.collect.Lists;
 import com.isroot.stash.plugin.checks.BranchNameCheck;
 import com.isroot.stash.plugin.errors.YaccError;
+import com.isroot.stash.plugin.jira.JiraLookupsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -167,41 +166,41 @@ public class YaccServiceImpl implements YaccService {
         List<YaccError> errors = Lists.newArrayList();
 
         if (!jiraService.doesJiraApplicationLinkExist()) {
-            errors.add(new YaccError(String.format("Unable to verify JIRA issue because JIRA Application Link does not exist")));
+            errors.add(new YaccError("Unable to verify JIRA issue because JIRA Application Link does not exist"));
             return errors;
         }
 
         final List<IssueKey> issues;
-        try {
-            final List<IssueKey> extractedKeys = extractJiraIssuesFromCommitMessage(settings, commit);
-            if (settings.getBoolean("ignoreUnknownIssueProjectKeys", false)) {
-                /* Remove issues that contain non-existent project keys */
-                issues = Lists.newArrayList();
-                for (IssueKey issueKey : extractedKeys) {
+        final List<IssueKey> extractedKeys = extractJiraIssuesFromCommitMessage(settings, commit);
+        if (settings.getBoolean("ignoreUnknownIssueProjectKeys", false)) {
+            /* Remove issues that contain non-existent project keys */
+            issues = Lists.newArrayList();
+            for (IssueKey issueKey : extractedKeys) {
+                try {
                     if (jiraService.doesProjectExist(issueKey.getProjectKey())) {
                         issues.add(issueKey);
                     }
                 }
-            } else {
-                issues = extractedKeys;
+                catch (JiraLookupsException e) {
+                    errors.add(new YaccError("Unable to validate JIRA projects"));
+                    errors.add(new YaccError("Some JIRA instances returned errors:"));
+                    for (String error : e.getPrintableErrors()) {
+                        errors.add(new YaccError(error));
+                    }
+                }
             }
-        } catch(CredentialsRequiredException e) {
-            log.error("communication error while validating issues", e);
-            errors.add(new YaccError(String.format("Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.")));
-            errors.add(new YaccError(String.format("To authenticate, visit %s in a web browser.", e.getAuthorisationURI().toASCIIString())));
-            return errors;
-        } catch(ResponseException e) {
-            log.error("unexpected exception while trying to validate JIRA issues", e);
-            errors.add(new YaccError(String.format("Unable to validate JIRA issues due to an unexpected exception. Please see stack trace in logs.")));
-            return errors;
+        }
+        else {
+            issues = extractedKeys;
         }
 
-        if(issues.isEmpty() == false) {
-            for(IssueKey issueKey : issues) {
+        if (issues.isEmpty() == false) {
+            for (IssueKey issueKey : issues) {
                 errors.addAll(checkJiraIssue(settings, issueKey));
             }
-        } else {
-            errors.add(new YaccError(String.format("No JIRA Issue found in commit message.")));
+        }
+        else {
+            errors.add(new YaccError("No JIRA Issue found in commit message."));
         }
 
         return errors;
@@ -212,27 +211,22 @@ public class YaccServiceImpl implements YaccService {
 
         try {
             if (!jiraService.doesIssueExist(issueKey)) {
-                errors.add(new YaccError(String.format("%s: JIRA Issue does not exist", issueKey.getFullyQualifiedIssueKey())));
-            } else {
+                errors.add(new YaccError(YaccError.Type.ISSUE_JQL, "%s: JIRA Issue does not exist",
+                        issueKey.getFullyQualifiedIssueKey()));
+            }
+            else {
                 String jqlQuery = settings.getString("issueJqlMatcher");
                 if (jqlQuery != null && !jqlQuery.isEmpty()) {
                     if (!jiraService.doesIssueMatchJqlQuery(jqlQuery, issueKey)) {
-                        errors.add(new YaccError(YaccError.Type.ISSUE_JQL,
-                                String.format("%s: JIRA Issue does not match JQL Query: %s", issueKey, jqlQuery)));
+                        errors.add(new YaccError(YaccError.Type.ISSUE_JQL, "%s: JIRA Issue does not match JQL Query: %s",
+                                issueKey.getFullyQualifiedIssueKey(), jqlQuery));
                     }
                 }
             }
-        } catch(CredentialsRequiredException e) {
-            errors.add(new YaccError(String.format("%s: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.", issueKey.getFullyQualifiedIssueKey())));
-            errors.add(new YaccError(String.format("To authenticate, visit %s in a web browser.", e.getAuthorisationURI().toASCIIString())));
-        } catch(ResponseException e) {
-            if (e.getCause() instanceof CredentialsRequiredException) {
-                CredentialsRequiredException cred = (CredentialsRequiredException)e.getCause();
-                errors.add(new YaccError(String.format("%s: Unable to validate JIRA issue because there was an authentication failure when communicating with JIRA.", issueKey.getFullyQualifiedIssueKey())));
-                errors.add(new YaccError(String.format("To authenticate, visit %s in a web browser.", cred.getAuthorisationURI().toASCIIString())));
-            } else {
-                log.error("unexpected exception while trying to validate JIRA issue", e);
-                errors.add(new YaccError(String.format("%s: Unable to validate JIRA issue due to an unexpected exception. Please see stack trace in logs.", issueKey.getFullyQualifiedIssueKey())));
+        }
+        catch (JiraLookupsException e) {
+            for (String error : e.getPrintableErrors()) {
+                errors.add(new YaccError(error));
             }
         }
 
