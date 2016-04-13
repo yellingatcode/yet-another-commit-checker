@@ -11,6 +11,7 @@ import com.atlassian.sal.api.net.ResponseException;
  */
 public interface JiraService {
     public boolean doesJiraApplicationLinkExist();
+    public boolean doesJiraApplicationLinkExist(String jiraApplicationLinkName);
     public boolean doesIssueMatchJqlQuery(String jqlQuery, IssueKey issueKey) throws CredentialsRequiredException, ResponseException;
     public boolean doesIssueExist(IssueKey issueKey) throws CredentialsRequiredException, ResponseException;
     public boolean doesProjectExist(String projectKey) throws CredentialsRequiredException, ResponseException;

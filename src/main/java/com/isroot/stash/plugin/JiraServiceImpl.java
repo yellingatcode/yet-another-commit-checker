@@ -1,11 +1,6 @@
 package com.isroot.stash.plugin;
 
-import com.atlassian.applinks.api.ApplicationLink;
-import com.atlassian.applinks.api.ApplicationLinkRequest;
-import com.atlassian.applinks.api.ApplicationLinkRequestFactory;
-import com.atlassian.applinks.api.ApplicationLinkResponseHandler;
-import com.atlassian.applinks.api.ApplicationLinkService;
-import com.atlassian.applinks.api.CredentialsRequiredException;
+import com.atlassian.applinks.api.*;
 import com.atlassian.applinks.api.application.jira.JiraApplicationType;
 import com.atlassian.sal.api.net.Request;
 import com.atlassian.sal.api.net.Response;
@@ -19,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -31,16 +27,27 @@ public class JiraServiceImpl implements JiraService {
     private static final Logger log = LoggerFactory.getLogger(JiraServiceImpl.class);
 
     private final ApplicationLinkService applicationLinkService;
+    private ApplicationId  ApplicationLinkId = null;
 
     public JiraServiceImpl(ApplicationLinkService applicationLinkService) {
         this.applicationLinkService = applicationLinkService;
     }
 
     private ApplicationLink getJiraApplicationLink() {
-        ApplicationLink applicationLink = applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class);
+        ApplicationLink applicationLink = null;
+        if (ApplicationLinkId != null){
+            try {
+                applicationLink = applicationLinkService.getApplicationLink(ApplicationLinkId);
+            } catch (TypeNotInstalledException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+
+            }
+        } else {
+            applicationLink = applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class);
+        }
 
         if (applicationLink == null) {
-            throw new IllegalStateException("Primary JIRA application link does not exist!");
+            throw new IllegalStateException("JIRA application link does not exist!");
         }
 
         return applicationLink;
@@ -49,6 +56,25 @@ public class JiraServiceImpl implements JiraService {
     @Override
     public boolean doesJiraApplicationLinkExist() {
         return applicationLinkService.getPrimaryApplicationLink(JiraApplicationType.class) != null;
+    }
+
+    @Override
+    public boolean doesJiraApplicationLinkExist(String jiraApplicationLinkName) {
+        ApplicationLink appLinkToReturn = null;
+        Iterator<ApplicationLink> itAppLinks = applicationLinkService.getApplicationLinks().iterator();
+        while( itAppLinks.hasNext() ){
+            ApplicationLink appLink= itAppLinks.next();
+            System.out.println(appLink.getName());
+            if (appLink.getName().equals(jiraApplicationLinkName)){
+                try {
+                    appLinkToReturn = applicationLinkService.getApplicationLink(appLink.getId());
+                    ApplicationLinkId = appLinkToReturn.getId();
+                } catch (TypeNotInstalledException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return appLinkToReturn != null;
     }
 
     @Override

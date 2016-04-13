@@ -32,6 +32,16 @@
 		{param errorTexts: $errors ? $errors['commitMessageRegex'] : null /}
 	{/call}
 
+  <h3>Application Link</h3>
+
+  {call aui.form.textField}
+    {param id: 'jiraApplicationLinkName' /}
+    {param labelContent: 'Application Link Name' /}
+    {param value: $config['jiraApplicationLinkName'] /}
+    {param descriptionText: 'Application Link Name that links to JIRA. (If blank it will assume the primary).' /}
+    {param errorTexts: $errors ? $errors['jiraApplicationLinkName'] : null /}
+  {/call}
+
   <h3>JIRA Issue Requirements</h3>
 
 	{call aui.form.checkboxField}
