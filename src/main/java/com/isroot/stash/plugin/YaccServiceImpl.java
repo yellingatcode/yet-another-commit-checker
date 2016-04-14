@@ -44,7 +44,6 @@ public class YaccServiceImpl implements YaccService {
 
     @Override
     public List<YaccError> checkRefChange(Repository repository, Settings settings, RefChange refChange) {
-        System.out.println("checkRefChange()");
         boolean isTag = refChange.getRefId().startsWith(GitRefPattern.TAGS.getPath());
 
         List<YaccError> errors = Lists.newArrayList();
@@ -63,7 +62,6 @@ public class YaccServiceImpl implements YaccService {
     }
 
     private List<YaccError> checkCommit(Settings settings, YaccCommit commit, boolean checkMessages) {
-        System.out.println("checkCommit()");
         log.debug("checking commit id={} name={} email={} message={}", commit.getId(),
                 commit.getCommitter().getName(), commit.getCommitter().getEmailAddress(),
                 commit.getMessage());
@@ -171,7 +169,6 @@ public class YaccServiceImpl implements YaccService {
         String jiraApplicationLinkName = settings.getString("jiraApplicationLinkName");
 
         if (jiraApplicationLinkName != null && !jiraApplicationLinkName.isEmpty()){
-            System.out.println(jiraApplicationLinkName);
             jiraService.doesJiraApplicationLinkExist(jiraApplicationLinkName);
         }
         else if (!jiraService.doesJiraApplicationLinkExist()) {

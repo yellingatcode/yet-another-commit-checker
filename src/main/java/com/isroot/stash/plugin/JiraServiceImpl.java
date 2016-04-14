@@ -64,7 +64,6 @@ public class JiraServiceImpl implements JiraService {
         Iterator<ApplicationLink> itAppLinks = applicationLinkService.getApplicationLinks().iterator();
         while( itAppLinks.hasNext() ){
             ApplicationLink appLink= itAppLinks.next();
-            System.out.println(appLink.getName());
             if (appLink.getName().equals(jiraApplicationLinkName)){
                 try {
                     appLinkToReturn = applicationLinkService.getApplicationLink(appLink.getId());
